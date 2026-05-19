@@ -76,22 +76,12 @@ export default function ProfilePage() {
             onClick={() => router.push("/dashboard")}
             className="bg-zinc-800 hover:bg-zinc-700 transition px-5 py-4 rounded-3xl font-bold"
           >
-            Kembali
+            Dashboard
           </button>
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-[36px] p-6 md:p-8">
           <div className="space-y-6">
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                ID Member
-              </p>
-
-              <p className="text-lg md:text-xl font-bold break-all">
-                {member.id}
-              </p>
-            </div>
-
             <div>
               <p className="text-zinc-500 text-sm mb-2">
                 Nama Lengkap
