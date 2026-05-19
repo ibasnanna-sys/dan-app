@@ -1,56 +1,70 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
-  const [nama, setNama] = useState("")
-  const [nomorHp, setNomorHp] = useState("")
-  const [kota, setKota] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [pesan, setPesan] = useState("")
+  const [loading, setLoading] = useState(false);
 
-  async function handleRegister(
-    e: React.FormEvent
-  ) {
-    e.preventDefault()
+  const [form, setForm] = useState({
+    nama: "",
+    whatsapp: "",
+    kota: "",
+    password: "",
+  });
 
-    setLoading(true)
-    setPesan("")
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
 
-    const kodeReferral =
-      "DAN" + Math.floor(Math.random() * 100000)
+    setLoading(true);
 
-    const { error } = await supabase
-      .from("users")
-      .insert([
-        {
-          full_name: nama,
-          phone: nomorHp,
-          city: kota,
-          referral_code: kodeReferral,
-          status: "inactive",
-        },
-      ])
+    // cek whatsapp sudah ada atau belum
+    const { data: cekUser } = await supabase
+      .from("members")
+      .select("*")
+      .eq("whatsapp", form.whatsapp)
+      .single();
 
-    setLoading(false)
+    if (cekUser) {
+      alert("Nomor WhatsApp sudah terdaftar");
+      setLoading(false);
+      return;
+    }
+
+    // simpan member
+    const { error } = await supabase.from("members").insert([
+      {
+        nama: form.nama,
+        whatsapp: form.whatsapp,
+        kota: form.kota,
+        password: form.password,
+        status: "inactive",
+      },
+    ]);
 
     if (error) {
-      setPesan(error.message)
-    } else {
-      setPesan("Pendaftaran berhasil 🚀")
-
-      setTimeout(() => {
-        window.location.href = "/dashboard"
-      }, 1000)
+      alert("Gagal daftar");
+      console.log(error);
+      setLoading(false);
+      return;
     }
+
+    alert("Pendaftaran berhasil");
+
+    setForm({
+      nama: "",
+      whatsapp: "",
+      kota: "",
+      password: "",
+    });
+
+    setLoading(false);
   }
 
   return (
-    <main className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-md mx-auto pt-16">
-        <h1 className="text-4xl font-bold mb-2">
+    <main className="min-h-screen bg-black text-white px-6 py-10">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-5xl font-bold mb-3">
           DAFTAR MEMBER
         </h1>
 
@@ -60,59 +74,73 @@ export default function RegisterPage() {
 
         <form
           onSubmit={handleRegister}
-          className="space-y-5"
+          className="space-y-6"
         >
           <input
             type="text"
             placeholder="Nama Lengkap"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 outline-none"
+            value={form.nama}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                nama: e.target.value,
+              })
+            }
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
             required
           />
 
           <input
             type="text"
             placeholder="Nomor WhatsApp"
-            value={nomorHp}
-            onChange={(e) => setNomorHp(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 outline-none"
+            value={form.whatsapp}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                whatsapp: e.target.value,
+              })
+            }
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
             required
           />
 
           <input
             type="text"
             placeholder="Kota"
-            value={kota}
-            onChange={(e) => setKota(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 outline-none"
+            value={form.kota}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                kota: e.target.value,
+              })
+            }
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
             required
           />
 
           <input
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 outline-none"
+            value={form.password}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
+            }
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
             required
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 text-black font-bold py-4 rounded-xl"
+            className="w-full bg-green-500 text-black font-bold text-xl py-5 rounded-2xl"
           >
-            {loading ? "Loading..." : "Daftar Sekarang"}
+            {loading ? "Memproses..." : "Daftar Sekarang"}
           </button>
         </form>
-
-        {pesan && (
-          <p className="mt-6 text-center text-sm text-zinc-300">
-            {pesan}
-          </p>
-        )}
       </div>
     </main>
-  )
+  );
 }
