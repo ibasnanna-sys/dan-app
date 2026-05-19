@@ -73,32 +73,43 @@ export default function DashboardPage() {
   const isActive = member.status === "aktif";
   const isFrozen = member.status === "dibekukan";
 
+  const referralLink = `${window.location.origin}/register?ref=${member.referral_code}`;
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-md mx-auto px-5 py-6">
 
         {/* HEADER */}
         <div className="flex items-start justify-between mb-6">
+
           <div>
-            <p className="text-zinc-500 text-sm">Halo,</p>
-            <h1 className="text-4xl font-bold leading-tight">
+            <p className="text-zinc-500 text-sm mb-2">
+              Halo,
+            </p>
+
+            <h1 className="text-5xl font-bold leading-tight break-words">
               {member.name}
             </h1>
           </div>
 
           <button
             onClick={logout}
-            className="bg-red-600 px-5 py-3 rounded-2xl font-bold"
+            className="bg-red-600 px-5 h-14 rounded-2xl text-white font-bold"
           >
             Logout
           </button>
+
         </div>
 
-        {/* STATUS */}
-        <div className="bg-zinc-900 rounded-3xl p-6 mb-4 border border-zinc-800">
-          <p className="text-zinc-500 mb-2">Status Member</p>
+        {/* STATUS CARD */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-[35px] p-6 mb-5">
 
-          <div className="flex items-center gap-3">
+          <p className="text-zinc-500 text-sm mb-3">
+            Status Member
+          </p>
+
+          <div className="flex items-center gap-3 mb-6">
+
             <div
               className={`w-4 h-4 rounded-full ${
                 isActive
@@ -110,7 +121,7 @@ export default function DashboardPage() {
             />
 
             <h2
-              className={`text-3xl font-bold uppercase ${
+              className={`text-4xl font-bold uppercase ${
                 isActive
                   ? "text-green-500"
                   : isFrozen
@@ -120,146 +131,172 @@ export default function DashboardPage() {
             >
               {member.status}
             </h2>
+
           </div>
 
-          <div className="mt-6">
-            <p className="text-zinc-500 mb-2">Referral Code</p>
+          <p className="text-zinc-500 text-sm mb-3">
+            Referral Code
+          </p>
 
-            <h3 className="text-4xl font-bold text-white">
-              {member.referral_code}
-            </h3>
-          </div>
+          <h2 className="text-4xl font-bold break-words">
+            {member.referral_code}
+          </h2>
+
         </div>
 
-        {/* INFO */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* INFO GRID */}
+        <div className="grid grid-cols-2 gap-4 mb-5">
 
-          <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
-            <p className="text-zinc-500 mb-2">Saldo</p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[30px] p-5">
+            <p className="text-zinc-500 text-sm mb-3">
+              Saldo
+            </p>
 
-            <h3 className="text-3xl font-bold text-green-500">
+            <h2 className="text-3xl font-bold text-green-500">
               Rp {member.balance || 0}
-            </h3>
+            </h2>
           </div>
 
-          <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
-            <p className="text-zinc-500 mb-2">Referral</p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[30px] p-5">
+            <p className="text-zinc-500 text-sm mb-3">
+              Referral
+            </p>
 
-            <h3 className="text-3xl font-bold">
+            <h2 className="text-3xl font-bold">
               {member.total_referral || 0}
-            </h3>
+            </h2>
           </div>
+
         </div>
 
-        {/* MEMBER INFO */}
-        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 mb-5">
-          <p className="text-zinc-500 mb-4">Informasi Member</p>
+        {/* COPY BUTTON */}
+        <div className="space-y-3 mb-5">
 
-          <div className="space-y-4">
-            <div>
-              <p className="text-zinc-500 text-sm">Nomor HP</p>
-              <p className="font-bold text-xl">{member.phone}</p>
-            </div>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(referralLink);
 
-            <div>
-              <p className="text-zinc-500 text-sm">Kota</p>
-              <p className="font-bold text-xl">{member.city}</p>
-            </div>
-          </div>
+              alert("Link referral berhasil disalin");
+            }}
+            className="w-full h-14 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-bold text-lg"
+          >
+            Copy Link Referral
+          </button>
+
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(member.referral_code);
+
+              alert("Kode referral berhasil disalin");
+            }}
+            className="w-full h-14 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-bold text-lg"
+          >
+            Copy Kode Referral
+          </button>
+
         </div>
 
-        {/* TOMBOL UTAMA */}
-        <div className="space-y-3 mb-6">
+        {/* LIVE ACTIVITY */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-[35px] p-5 mb-5">
+
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">
+              Aktivitas Member
+            </h2>
+
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+          </div>
+
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+
+            {activities.length === 0 && (
+              <div className="text-zinc-500 text-sm">
+                Belum ada aktivitas
+              </div>
+            )}
+
+            {activities.map((item, index) => (
+              <div
+                key={index}
+                className="bg-black/40 rounded-2xl p-4 border border-zinc-800"
+              >
+                <div className="flex items-center justify-between mb-2">
+
+                  <h3 className="font-bold text-sm">
+                    {item.name}
+                  </h3>
+
+                  <p className="text-zinc-500 text-xs">
+                    {item.city}
+                  </p>
+
+                </div>
+
+                <p className="text-sm text-zinc-300 mb-2">
+                  {item.activity}
+                </p>
+
+                <p className="text-zinc-500 text-xs">
+                  {new Date(item.created_at).toLocaleString("id-ID")}
+                </p>
+              </div>
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* MAIN BUTTON */}
+        <div className="space-y-4">
 
           {!isActive ? (
             <Link
               href="/member/produk"
-              className="h-14 rounded-2xl bg-green-500 text-black font-bold text-lg flex items-center justify-center"
+              className="w-full h-16 rounded-3xl bg-green-500 text-black text-2xl font-bold flex items-center justify-center"
             >
               Aktivasi Member
             </Link>
           ) : (
             <Link
               href="/member/produk"
-              className="h-14 rounded-2xl bg-green-500 text-black font-bold text-lg flex items-center justify-center"
+              className="w-full h-16 rounded-3xl bg-green-500 text-black text-2xl font-bold flex items-center justify-center"
             >
               Belanja Paket
             </Link>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
 
             <Link
               href="/member/transaksi"
-              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
             >
               Transaksi
             </Link>
 
             <Link
               href="/member/profile"
-              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
             >
               Profil
             </Link>
 
             <Link
               href="/member/referral"
-              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
             >
               Referral
             </Link>
 
             <Link
               href="/member/bantuan"
-              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
             >
               Bantuan
             </Link>
 
-            <Link
-              href="/member/withdraw"
-              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800 col-span-2"
-            >
-              Withdraw
-            </Link>
-
-          </div>
-        </div>
-
-        {/* LIVE AKTIVITAS */}
-        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
-
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">
-              Aktivitas Member Hari Ini
-            </h3>
-
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           </div>
 
-          <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-
-            {activities.map((item, index) => (
-              <div
-                key={index}
-                className="bg-black rounded-2xl p-4 border border-zinc-800"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <p className="font-bold">{item.name}</p>
-
-                  <span className="text-xs text-zinc-500">
-                    {item.city}
-                  </span>
-                </div>
-
-                <p className="text-sm text-zinc-300">
-                  {item.activity}
-                </p>
-              </div>
-            ))}
-
-          </div>
         </div>
 
       </div>
