@@ -9,14 +9,11 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
 
   async function handleLogin(
     e: React.FormEvent
@@ -28,7 +25,7 @@ export default function LoginPage() {
 
     try {
 
-      const { data, error } =
+      const { data } =
         await supabase
           .from("members")
           .select("*")
@@ -36,10 +33,7 @@ export default function LoginPage() {
           .eq("password", password)
           .maybeSingle();
 
-      if (
-        error ||
-        !data
-      ) {
+      if (!data) {
 
         alert(
           "Email atau password salah"
@@ -62,7 +56,7 @@ export default function LoginPage() {
         "/member/dashboard"
       );
 
-    } catch (error) {
+    } catch {
 
       alert(
         "Terjadi kesalahan sistem"
@@ -111,46 +105,3 @@ export default function LoginPage() {
               type="password"
               required
               placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value
-                )
-              }
-              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-500 text-black rounded-2xl py-4 font-black text-lg"
-            >
-              {loading
-                ? "Memproses..."
-                : "Login Sekarang"}
-            </button>
-
-          </form>
-
-          <div className="text-center mt-8">
-
-            <p className="text-zinc-400">
-              Belum punya akun?
-            </p>
-
-            <Link
-              href="/register"
-              className="text-green-500 font-bold inline-block mt-2"
-            >
-              Daftar di sini
-            </Link>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </main>
-  );
-}
