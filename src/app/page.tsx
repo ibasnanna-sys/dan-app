@@ -1,119 +1,369 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function HomePage() {
+
+  const [products, setProducts] =
+    useState<any[]>([]);
+
+  const [activities, setActivities] =
+    useState<any[]>([]);
+
+  const [stats, setStats] =
+    useState({
+      members: 0,
+      transactions: 0,
+      bonuses: 0,
+    });
+
+  useEffect(() => {
+    getProducts();
+    getActivities();
+    getStats();
+  }, []);
+
+  async function getProducts() {
+
+    const { data } =
+      await supabase
+        .from("products")
+        .select("*")
+        .eq("status", true)
+        .order("price", {
+          ascending: true,
+        });
+
+    if (data) {
+      setProducts(data);
+    }
+  }
+
+  async function getActivities() {
+
+    const { data } =
+      await supabase
+        .from("activity_logs")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(10);
+
+    if (data) {
+      setActivities(data);
+    }
+  }
+
+  async function getStats() {
+
+    const members =
+      await supabase
+        .from("members")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
+
+    const transactions =
+      await supabase
+        .from("transactions")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
+
+    const bonuses =
+      await supabase
+        .from("bonuses")
+        .select("amount");
+
+    let totalBonus = 0;
+
+    bonuses.data?.forEach((item: any) => {
+      totalBonus += item.amount;
+    });
+
+    setStats({
+      members: members.count || 0,
+      transactions:
+        transactions.count || 0,
+      bonuses: totalBonus,
+    });
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
 
-      <section className="px-5 pt-14 pb-10">
+      <section className="px-5 pt-10 pb-16">
+
         <div className="max-w-md mx-auto">
 
-          <h1 className="text-6xl font-black leading-tight">
-            DAN
-          </h1>
+          <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-[40px] p-8">
 
-          <p className="text-green-500 text-xl mt-2 font-bold">
-            Paket Data & Referral Premium
-          </p>
+            <h1 className="text-5xl font-black leading-tight">
+              DAN
+            </h1>
 
-          <p className="text-zinc-400 mt-5 leading-7">
-            Platform modern untuk pembelian paket data
-            dengan sistem bonus referral 1 level unlimited.
-          </p>
+            <p className="text-zinc-400 mt-4 text-lg leading-relaxed">
+              Platform paket data &
+              referral modern dengan
+              sistem bonus realtime.
+            </p>
 
-          <div className="grid grid-cols-2 gap-4 mt-10">
-            <Link
-              href="/register"
-              className="bg-green-500 text-black font-bold text-center py-4 rounded-3xl"
-            >
-              Daftar
-            </Link>
+            <div className="grid grid-cols-2 gap-4 mt-8">
 
-            <Link
-              href="/login"
-              className="bg-zinc-900 border border-zinc-800 text-center py-4 rounded-3xl"
-            >
-              Login
-            </Link>
+              <Link
+                href="/register"
+                className="bg-green-500 text-black text-center py-4 rounded-2xl font-black"
+              >
+                Daftar
+              </Link>
+
+              <Link
+                href="/login"
+                className="bg-zinc-800 text-white text-center py-4 rounded-2xl font-black"
+              >
+                Login
+              </Link>
+
+            </div>
+
           </div>
+
         </div>
+
+      </section>
+
+      <section className="px-5 pb-10">
+
+        <div className="max-w-md mx-auto">
+
+          <div className="grid grid-cols-3 gap-4">
+
+            <div className="bg-zinc-900 rounded-3xl p-5 text-center">
+
+              <h2 className="text-3xl font-black text-green-500">
+                {stats.members}
+              </h2>
+
+              <p className="text-zinc-400 text-sm mt-2">
+                Member
+              </p>
+
+            </div>
+
+            <div className="bg-zinc-900 rounded-3xl p-5 text-center">
+
+              <h2 className="text-3xl font-black text-green-500">
+                {stats.transactions}
+              </h2>
+
+              <p className="text-zinc-400 text-sm mt-2">
+                Transaksi
+              </p>
+
+            </div>
+
+            <div className="bg-zinc-900 rounded-3xl p-5 text-center">
+
+              <h2 className="text-3xl font-black text-green-500">
+                {stats.bonuses}
+              </h2>
+
+              <p className="text-zinc-400 text-sm mt-2">
+                Bonus
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </section>
 
       <section className="px-5 py-10">
+
         <div className="max-w-md mx-auto">
 
           <h2 className="text-3xl font-black">
-            Produk Populer
+            Produk Paket Data
           </h2>
 
-          <div className="space-y-4 mt-6">
+          <div className="space-y-5 mt-8">
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-xl">
-                    Telkomsel 10GB
-                  </h3>
+            {products.map((item) => (
 
-                  <p className="text-zinc-400 mt-1">
-                    Masa aktif 30 hari
-                  </p>
+              <div
+                key={item.id}
+                className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+              >
+
+                <div className="flex items-start justify-between gap-4">
+
+                  <div>
+
+                    <h3 className="text-2xl font-black">
+                      {item.name}
+                    </h3>
+
+                    <p className="text-zinc-400 mt-2">
+                      {item.provider}
+                    </p>
+
+                  </div>
+
+                  {item.is_activation && (
+                    <div className="bg-green-500 text-black text-xs font-black px-3 py-2 rounded-full">
+                      Aktivasi
+                    </div>
+                  )}
+
                 </div>
 
-                <h3 className="text-green-500 font-black text-2xl">
-                  25K
-                </h3>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-xl">
-                    XL 10GB
-                  </h3>
+                  <div className="bg-black rounded-2xl p-4">
 
-                  <p className="text-zinc-400 mt-1">
-                    Masa aktif 30 hari
-                  </p>
+                    <p className="text-zinc-500 text-sm">
+                      Kuota
+                    </p>
+
+                    <h4 className="text-xl font-black mt-2">
+                      {item.kuota}
+                    </h4>
+
+                  </div>
+
+                  <div className="bg-black rounded-2xl p-4">
+
+                    <p className="text-zinc-500 text-sm">
+                      Masa Aktif
+                    </p>
+
+                    <h4 className="text-xl font-black mt-2">
+                      {item.masa_aktif}
+                    </h4>
+
+                  </div>
+
                 </div>
 
-                <h3 className="text-green-500 font-black text-2xl">
-                  22K
-                </h3>
+                <div className="flex items-center justify-between mt-8">
+
+                  <h3 className="text-3xl font-black text-green-500">
+                    Rp {item.price}
+                  </h3>
+
+                  <Link
+                    href="/login"
+                    className="bg-green-500 text-black px-5 py-3 rounded-2xl font-black"
+                  >
+                    Beli
+                  </Link>
+
+                </div>
+
               </div>
-            </div>
+
+            ))}
 
           </div>
+
         </div>
+
       </section>
 
       <section className="px-5 py-10">
+
         <div className="max-w-md mx-auto">
 
           <h2 className="text-3xl font-black">
-            Cara Kerja
+            Cara Kerja DAN
           </h2>
 
-          <div className="space-y-4 mt-6">
+          <div className="space-y-4 mt-8">
 
-            <div className="bg-zinc-900 rounded-3xl p-5">
-              Daftar Member
-            </div>
+            {[
+              "Daftar akun member",
+              "Aktivasi member",
+              "Belanja paket data",
+              "Dapat bonus referral",
+            ].map((item, index) => (
 
-            <div className="bg-zinc-900 rounded-3xl p-5">
-              Aktivasi Akun
-            </div>
+              <div
+                key={index}
+                className="bg-zinc-900 rounded-3xl p-5 flex items-center gap-5"
+              >
 
-            <div className="bg-zinc-900 rounded-3xl p-5">
-              Belanja Paket Data
-            </div>
+                <div className="bg-green-500 text-black w-12 h-12 rounded-2xl flex items-center justify-center font-black">
+                  {index + 1}
+                </div>
 
-            <div className="bg-zinc-900 rounded-3xl p-5">
-              Dapat Bonus Referral
-            </div>
+                <h3 className="font-bold text-lg">
+                  {item}
+                </h3>
+
+              </div>
+
+            ))}
 
           </div>
+
         </div>
+
+      </section>
+
+      <section className="px-5 py-10 pb-20">
+
+        <div className="max-w-md mx-auto">
+
+          <h2 className="text-3xl font-black">
+            Aktivitas Member
+          </h2>
+
+          <div className="space-y-4 mt-8">
+
+            {activities.map((item) => (
+
+              <div
+                key={item.id}
+                className="bg-zinc-900 rounded-3xl p-5"
+              >
+
+                <div className="flex items-center justify-between">
+
+                  <h3 className="font-black">
+                    {item.member_name}
+                  </h3>
+
+                  <p className="text-zinc-500 text-sm">
+                    {new Date(
+                      item.created_at
+                    ).toLocaleDateString()}
+                  </p>
+
+                </div>
+
+                <p className="text-zinc-400 mt-2">
+                  {item.city}
+                </p>
+
+                <p className="text-green-500 mt-4">
+                  {item.activity}
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
       </section>
 
     </main>
