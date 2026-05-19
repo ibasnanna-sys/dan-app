@@ -1,99 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function DashboardPage() {
+  const [member, setMember] =
+    useState<any>(null);
 
-  const [email, setEmail] =
-    useState("");
+  useEffect(() => {
+    const data =
+      localStorage.getItem("member");
 
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  async function handleLogin() {
-    try {
-      setLoading(true);
-
-      const { data, error } =
-        await supabase
-          .from("members")
-          .select("*")
-          .eq("email", email)
-          .eq("password", password)
-          .single();
-
-      if (error || !data) {
-        alert(
-          "Email atau password salah"
-        );
-        return;
-      }
-
-      localStorage.setItem(
-        "member",
-        JSON.stringify(data)
-      );
-
-      router.push(
-        "/member/dashboard"
-      );
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+    if (data) {
+      setMember(JSON.parse(data));
     }
+  }, []);
+
+  if (!member) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading...
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-5 py-10">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-5xl font-black">
-          LOGIN
-          <br />
-          MEMBER
-        </h1>
+    <main className="min-h-screen bg-black text-white px-5 py-8">
+      <h1 className="text-4xl font-black">
+        Halo,
+        <br />
+        {member.name}
+      </h1>
 
-        <p className="text-zinc-400 mt-4">
-          Masuk ke dashboard DAN.
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mt-8">
+        <p className="text-zinc-400">
+          Status Member
         </p>
 
-        <div className="space-y-4 mt-10">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl px-5 py-4 outline-none"
-          />
+        <h2 className="text-3xl font-black mt-2 text-green-500">
+          {member.status_member}
+        </h2>
+      </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl px-5 py-4 outline-none"
-          />
+      <div className="grid grid-cols-2 gap-4 mt-5">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+          <p className="text-zinc-400 text-sm">
+            Saldo
+          </p>
 
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full bg-green-500 text-black font-bold rounded-3xl py-4"
-          >
-            {loading
-              ? "Memproses..."
-              : "Login Sekarang"}
-          </button>
+          <h2 className="text-2xl font-bold mt-2">
+            Rp {member.balance}
+          </h2>
         </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+          <p className="text-zinc-400 text-sm">
+            Referral
+          </p>
+
+          <h2 className="text-2xl font-bold mt-2">
+            {
+              member.total_referral
+            }
+          </h2>
+        </div>
+      </div>
+
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mt-5">
+        <p className="text-zinc-400">
+          Kode Referral
+        </p>
+
+        <h2 className="text-2xl font-bold mt-2">
+          {
+            member.referral_code
+          }
+        </h2>
       </div>
     </main>
   );
