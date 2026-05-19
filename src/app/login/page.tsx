@@ -12,39 +12,64 @@ const supabase = createClient(
 export default function LoginPage() {
   const router = useRouter();
 
-  const [whatsapp, setWhatsapp] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [nomorWhatsapp, setNomorWhatsapp] =
+    useState("");
 
-  const loginMember = async () => {
-    if (!whatsapp || !password) {
-      alert("Lengkapi data");
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  async function loginMember() {
+    if (
+      !nomorWhatsapp ||
+      !password
+    ) {
+      alert(
+        "Lengkapi data login"
+      );
+
       return;
     }
 
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("members")
-      .select("*")
-      .eq("whatsapp", whatsapp)
-      .eq("password", password)
-      .single();
+    const { data, error } =
+      await supabase
+        .from("members")
+        .select("*")
+        .eq(
+          "phone",
+          nomorWhatsapp
+        )
+        .eq("password", password)
+        .single();
 
     setLoading(false);
 
     if (error || !data) {
-      alert("Login gagal");
+      alert(
+        "Nomor WhatsApp atau password salah"
+      );
+
       return;
     }
 
-    localStorage.setItem("member", JSON.stringify(data));
+    // simpan session login
+    localStorage.setItem(
+      "member",
+      JSON.stringify(data)
+    );
+
+    alert("Login berhasil 🚀");
 
     router.push("/dashboard");
-  };
+  }
 
   return (
     <main className="min-h-screen bg-black text-white px-6 py-10 flex items-center">
+
       <div className="w-full max-w-md mx-auto">
 
         <h1 className="text-6xl font-bold leading-none mb-4">
@@ -62,8 +87,12 @@ export default function LoginPage() {
           <input
             type="text"
             placeholder="Nomor WhatsApp"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
+            value={nomorWhatsapp}
+            onChange={(e) =>
+              setNomorWhatsapp(
+                e.target.value
+              )
+            }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
 
@@ -71,7 +100,11 @@ export default function LoginPage() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
 
@@ -80,11 +113,26 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-green-500 text-black font-bold rounded-3xl py-5 text-2xl"
           >
-            {loading ? "Memproses..." : "Login Sekarang"}
+            {loading
+              ? "Memproses..."
+              : "Login Sekarang"}
+          </button>
+
+          <button
+            onClick={() =>
+              router.push(
+                "/register"
+              )
+            }
+            className="w-full border border-zinc-800 rounded-3xl py-5 text-lg"
+          >
+            Belum punya akun? Daftar
           </button>
 
         </div>
+
       </div>
+
     </main>
   );
 }
