@@ -7,140 +7,103 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    nama: "",
-    whatsapp: "",
-    kota: "",
+    name: "",
+    phone: "",
+    city: "",
     password: "",
+    sponsor: "",
   });
 
-  async function handleRegister(e: React.FormEvent) {
+  async function handleRegister(
+    e: React.FormEvent
+  ) {
     e.preventDefault();
 
     setLoading(true);
 
-    // cek whatsapp sudah ada atau belum
-    const { data: cekUser } = await supabase
-      .from("members")
-      .select("*")
-      .eq("whatsapp", form.whatsapp)
-      .single();
+    const email =
+      `${form.phone}@dan.app`;
 
-    if (cekUser) {
+    // cek member sudah ada
+    const { data: existingUser } =
+      await supabase
+        .from("members")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+    if (existingUser) {
       alert("Nomor WhatsApp sudah terdaftar");
       setLoading(false);
       return;
     }
 
+    // cek sponsor
+    let uplineId = null;
+
+    if (form.sponsor !== "") {
+      const { data: sponsorData } =
+        await supabase
+          .from("members")
+          .select("id")
+          .eq(
+            "referral_code",
+            form.sponsor
+          )
+          .single();
+
+      if (sponsorData) {
+        uplineId = sponsorData.id;
+      }
+    }
+
+    // generate referral
+    const referralCode =
+      "DAN" +
+      Math.floor(
+        100000 + Math.random() * 900000
+      );
+
     // simpan member
-    const { error } = await supabase.from("members").insert([
-      {
-        nama: form.nama,
-        whatsapp: form.whatsapp,
-        kota: form.kota,
-        password: form.password,
-        status: "inactive",
-      },
-    ]);
+    const { error } = await supabase
+      .from("members")
+      .insert([
+        {
+          name: form.name,
+          email: email,
+          phone: form.phone,
+          city: form.city,
+          password: form.password,
+          referral_code: referralCode,
+          upline_id: uplineId,
+          status_member: "inactive",
+          balance: 0,
+          referral_bonus: 0,
+          transaction_bonus: 0,
+          inactive_flag: false,
+        },
+      ]);
+
+    setLoading(false);
 
     if (error) {
-      alert("Gagal daftar");
       console.log(error);
-      setLoading(false);
+
+      alert(
+        "Pendaftaran gagal"
+      );
+
       return;
     }
 
-    alert("Pendaftaran berhasil");
+    alert(
+      "Pendaftaran berhasil 🚀"
+    );
 
-    setForm({
-      nama: "",
-      whatsapp: "",
-      kota: "",
-      password: "",
-    });
-
-    setLoading(false);
+    window.location.href =
+      "/dashboard";
   }
 
   return (
     <main className="min-h-screen bg-black text-white px-6 py-10">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-5xl font-bold mb-3">
-          DAFTAR MEMBER
-        </h1>
-
-        <p className="text-zinc-400 mb-10">
-          Platform paket data & referral modern.
-        </p>
-
-        <form
-          onSubmit={handleRegister}
-          className="space-y-6"
-        >
-          <input
-            type="text"
-            placeholder="Nama Lengkap"
-            value={form.nama}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                nama: e.target.value,
-              })
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
-            required
-          />
-
-          <input
-            type="text"
-            placeholder="Nomor WhatsApp"
-            value={form.whatsapp}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                whatsapp: e.target.value,
-              })
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
-            required
-          />
-
-          <input
-            type="text"
-            placeholder="Kota"
-            value={form.kota}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                kota: e.target.value,
-              })
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
-            required
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                password: e.target.value,
-              })
-            }
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-lg outline-none"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-500 text-black font-bold text-xl py-5 rounded-2xl"
-          >
-            {loading ? "Memproses..." : "Daftar Sekarang"}
-          </button>
-        </form>
-      </div>
-    </main>
-  );
-}
+      <div className="max-w
