@@ -2,28 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [nama, setNama] = useState("");
-  const [nomorWhatsapp, setNomorWhatsapp] =
-    useState("");
-  const [kota, setKota] = useState("");
-  const [password, setPassword] =
-    useState("");
-  const [kodeSponsor, setKodeSponsor] =
-    useState("");
   const [loading, setLoading] =
     useState(false);
 
-  function generateReferralCode() {
+  const [form, setForm] = useState({
+    nama: "",
+    whatsapp: "",
+    kota: "",
+    password: "",
+    sponsor: "",
+  });
+
+  function generateReferral() {
     return (
       "DAN" +
       Math.floor(
@@ -34,10 +29,10 @@ export default function RegisterPage() {
 
   async function registerMember() {
     if (
-      !nama ||
-      !nomorWhatsapp ||
-      !kota ||
-      !password
+      !form.nama ||
+      !form.whatsapp ||
+      !form.kota ||
+      !form.password
     ) {
       alert(
         "Lengkapi semua data"
@@ -47,33 +42,14 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    let uplineId = null;
-
-    // cek sponsor
-    if (kodeSponsor !== "") {
-      const { data: sponsorData } =
-        await supabase
-          .from("members")
-          .select("id")
-          .eq(
-            "referral_code",
-            kodeSponsor
-          )
-          .single();
-
-      if (sponsorData) {
-        uplineId = sponsorData.id;
-      }
-    }
-
-    // cek nomor sudah ada
+    // cek member
     const { data: existingMember } =
       await supabase
         .from("members")
         .select("id")
         .eq(
           "phone",
-          nomorWhatsapp
+          form.whatsapp
         )
         .single();
 
@@ -87,25 +63,48 @@ export default function RegisterPage() {
       return;
     }
 
-    // simpan member
+    // cek sponsor
+    let uplineId = null;
+
+    if (form.sponsor !== "") {
+      const {
+        data: sponsorData,
+      } = await supabase
+        .from("members")
+        .select("id")
+        .eq(
+          "referral_code",
+          form.sponsor
+        )
+        .single();
+
+      if (sponsorData) {
+        uplineId = sponsorData.id;
+      }
+    }
+
+    // insert member
     const { data, error } =
       await supabase
         .from("members")
         .insert([
           {
-            name: nama,
+            name: form.nama,
+
             email:
-              nomorWhatsapp +
+              form.whatsapp +
               "@dan.app",
 
-            phone: nomorWhatsapp,
+            phone:
+              form.whatsapp,
 
-            city: kota,
+            city: form.kota,
 
-            password: password,
+            password:
+              form.password,
 
             referral_code:
-              generateReferralCode(),
+              generateReferral(),
 
             upline_id: uplineId,
 
@@ -144,7 +143,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-10 flex items-center">
+    <main className="min-h-screen bg-black text-white flex items-center px-6 py-10">
 
       <div className="w-full max-w-md mx-auto">
 
@@ -164,9 +163,13 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Nama Lengkap"
-            value={nama}
+            value={form.nama}
             onChange={(e) =>
-              setNama(e.target.value)
+              setForm({
+                ...form,
+                nama:
+                  e.target.value,
+              })
             }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
@@ -174,11 +177,13 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Nomor WhatsApp"
-            value={nomorWhatsapp}
+            value={form.whatsapp}
             onChange={(e) =>
-              setNomorWhatsapp(
-                e.target.value
-              )
+              setForm({
+                ...form,
+                whatsapp:
+                  e.target.value,
+              })
             }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
@@ -186,9 +191,13 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Kota"
-            value={kota}
+            value={form.kota}
             onChange={(e) =>
-              setKota(e.target.value)
+              setForm({
+                ...form,
+                kota:
+                  e.target.value,
+              })
             }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
@@ -196,11 +205,13 @@ export default function RegisterPage() {
           <input
             type="password"
             placeholder="Password"
-            value={password}
+            value={form.password}
             onChange={(e) =>
-              setPassword(
-                e.target.value
-              )
+              setForm({
+                ...form,
+                password:
+                  e.target.value,
+              })
             }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
@@ -208,11 +219,13 @@ export default function RegisterPage() {
           <input
             type="text"
             placeholder="Kode Sponsor (Opsional)"
-            value={kodeSponsor}
+            value={form.sponsor}
             onChange={(e) =>
-              setKodeSponsor(
-                e.target.value
-              )
+              setForm({
+                ...form,
+                sponsor:
+                  e.target.value,
+              })
             }
             className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
           />
@@ -225,6 +238,15 @@ export default function RegisterPage() {
             {loading
               ? "Memproses..."
               : "Daftar Sekarang"}
+          </button>
+
+          <button
+            onClick={() =>
+              router.push("/login")
+            }
+            className="w-full border border-zinc-800 rounded-3xl py-5 text-lg"
+          >
+            Sudah punya akun? Login
           </button>
 
         </div>
