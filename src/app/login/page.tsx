@@ -1,0 +1,90 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  const [whatsapp, setWhatsapp] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const loginMember = async () => {
+    if (!whatsapp || !password) {
+      alert("Lengkapi data");
+      return;
+    }
+
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("members")
+      .select("*")
+      .eq("whatsapp", whatsapp)
+      .eq("password", password)
+      .single();
+
+    setLoading(false);
+
+    if (error || !data) {
+      alert("Login gagal");
+      return;
+    }
+
+    localStorage.setItem("member", JSON.stringify(data));
+
+    router.push("/dashboard");
+  };
+
+  return (
+    <main className="min-h-screen bg-black text-white px-6 py-10 flex items-center">
+      <div className="w-full max-w-md mx-auto">
+
+        <h1 className="text-6xl font-bold leading-none mb-4">
+          LOGIN
+          <br />
+          MEMBER
+        </h1>
+
+        <p className="text-zinc-500 text-lg mb-10">
+          Masuk ke dashboard member DAN.
+        </p>
+
+        <div className="space-y-5">
+
+          <input
+            type="text"
+            placeholder="Nomor WhatsApp"
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
+          />
+
+          <button
+            onClick={loginMember}
+            disabled={loading}
+            className="w-full bg-green-500 text-black font-bold rounded-3xl py-5 text-2xl"
+          >
+            {loading ? "Memproses..." : "Login Sekarang"}
+          </button>
+
+        </div>
+      </div>
+    </main>
+  );
+}
