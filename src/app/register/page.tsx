@@ -60,16 +60,6 @@ export default function RegisterPage() {
           .eq("email", email)
           .maybeSingle();
 
-      if (emailCheck.error) {
-
-        alert(
-          emailCheck.error.message
-        );
-
-        setLoading(false);
-        return;
-      }
-
       if (emailCheck.data) {
 
         alert(
@@ -86,16 +76,6 @@ export default function RegisterPage() {
           .select("id")
           .eq("phone", phone)
           .maybeSingle();
-
-      if (phoneCheck.error) {
-
-        alert(
-          phoneCheck.error.message
-        );
-
-        setLoading(false);
-        return;
-      }
 
       if (phoneCheck.data) {
 
@@ -120,16 +100,6 @@ export default function RegisterPage() {
               referral
             )
             .maybeSingle();
-
-        if (uplineCheck.error) {
-
-          alert(
-            uplineCheck.error.message
-          );
-
-          setLoading(false);
-          return;
-        }
 
         if (uplineCheck.data) {
 
@@ -168,31 +138,23 @@ export default function RegisterPage() {
         );
 
         alert(
-          insertMember.error.message
+          "Registrasi gagal"
         );
 
         setLoading(false);
         return;
       }
 
-      const activityInsert =
-        await supabase
-          .from("activity_logs")
-          .insert([
-            {
-              member_name: name,
-              city: city,
-              activity:
-                "Member baru bergabung",
-            },
-          ]);
-
-      if (activityInsert.error) {
-
-        alert(
-          activityInsert.error.message
-        );
-      }
+      await supabase
+        .from("activity_logs")
+        .insert([
+          {
+            member_name: name,
+            city: city,
+            activity:
+              "Member baru bergabung",
+          },
+        ]);
 
       localStorage.setItem(
         "member",
@@ -209,12 +171,12 @@ export default function RegisterPage() {
         "/member/dashboard"
       );
 
-    } catch (error: any) {
+    } catch (error) {
 
       console.log(error);
 
       alert(
-        JSON.stringify(error)
+        "Terjadi kesalahan sistem"
       );
     }
 
