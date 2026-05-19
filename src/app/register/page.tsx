@@ -4,7 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -33,8 +34,12 @@ export default function RegisterPage() {
         .single();
 
     if (existingUser) {
-      alert("Nomor WhatsApp sudah terdaftar");
+      alert(
+        "Nomor WhatsApp sudah terdaftar"
+      );
+
       setLoading(false);
+
       return;
     }
 
@@ -57,7 +62,7 @@ export default function RegisterPage() {
       }
     }
 
-    // generate referral
+    // generate referral code
     const referralCode =
       "DAN" +
       Math.floor(
@@ -65,24 +70,29 @@ export default function RegisterPage() {
       );
 
     // simpan member
-    const { error } = await supabase
-      .from("members")
-      .insert([
-        {
-          name: form.name,
-          email: email,
-          phone: form.phone,
-          city: form.city,
-          password: form.password,
-          referral_code: referralCode,
-          upline_id: uplineId,
-          status_member: "inactive",
-          balance: 0,
-          referral_bonus: 0,
-          transaction_bonus: 0,
-          inactive_flag: false,
-        },
-      ]);
+    const { data, error } =
+      await supabase
+        .from("members")
+        .insert([
+          {
+            name: form.name,
+            email: email,
+            phone: form.phone,
+            city: form.city,
+            password: form.password,
+            referral_code:
+              referralCode,
+            upline_id: uplineId,
+            status_member:
+              "inactive",
+            balance: 0,
+            referral_bonus: 0,
+            transaction_bonus: 0,
+            inactive_flag: false,
+          },
+        ])
+        .select()
+        .single();
 
     setLoading(false);
 
@@ -96,6 +106,12 @@ export default function RegisterPage() {
       return;
     }
 
+    // simpan session local
+    localStorage.setItem(
+      "dan_member",
+      JSON.stringify(data)
+    );
+
     alert(
       "Pendaftaran berhasil 🚀"
     );
@@ -106,4 +122,31 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-black text-white px-6 py-10">
-      <div className="max-w
+
+      <div className="max-w-md mx-auto">
+
+        <h1 className="text-5xl font-bold mb-3">
+          DAFTAR MEMBER
+        </h1>
+
+        <p className="text-zinc-400 mb-10">
+          Platform paket data &
+          referral modern.
+        </p>
+
+        <form
+          onSubmit={handleRegister}
+          className="space-y-5"
+        >
+
+          <input
+            type="text"
+            placeholder="Nama Lengkap"
+            value={form.name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
+            }
+            className="
