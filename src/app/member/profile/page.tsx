@@ -63,13 +63,13 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-md mx-auto px-5 py-6">
 
-        {/* TITLE */}
+        {/* HEADER */}
         <div className="mb-6">
           <p className="text-zinc-500 text-sm mb-2">
             Profile Member
           </p>
 
-          <h1 className="text-5xl font-bold leading-tight">
+          <h1 className="text-5xl font-bold leading-tight break-words">
             {member.name}
           </h1>
         </div>
@@ -82,8 +82,8 @@ export default function ProfilePage() {
           Dashboard
         </Link>
 
-        {/* CARD */}
-        <div className="bg-zinc-900 rounded-[35px] border border-zinc-800 p-6">
+        {/* PROFILE CARD */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-[35px] p-6">
 
           {/* NAMA */}
           <div className="mb-8">
@@ -107,7 +107,7 @@ export default function ProfilePage() {
             </h2>
           </div>
 
-          {/* PHONE */}
+          {/* HP */}
           <div className="mb-8">
             <p className="text-zinc-500 text-sm mb-3">
               Nomor HP
@@ -135,7 +135,7 @@ export default function ProfilePage() {
               Referral Code
             </p>
 
-            <h2 className="text-4xl font-bold text-green-500">
+            <h2 className="text-4xl font-bold text-green-500 break-words">
               {member.referral_code}
             </h2>
           </div>
