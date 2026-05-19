@@ -2,23 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const [nomorWhatsapp, setNomorWhatsapp] =
+  const [nomorWhatsapp,
+    setNomorWhatsapp] =
     useState("");
 
-  const [password, setPassword] =
+  const [password,
+    setPassword] =
     useState("");
 
-  const [loading, setLoading] =
+  const [loading,
+    setLoading] =
     useState(false);
 
   async function loginMember() {
@@ -43,7 +41,10 @@ export default function LoginPage() {
           "phone",
           nomorWhatsapp
         )
-        .eq("password", password)
+        .eq(
+          "password",
+          password
+        )
         .single();
 
     setLoading(false);
@@ -56,7 +57,6 @@ export default function LoginPage() {
       return;
     }
 
-    // simpan session login
     localStorage.setItem(
       "member",
       JSON.stringify(data)
@@ -68,7 +68,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-10 flex items-center">
+    <main className="min-h-screen bg-black text-white flex items-center px-6 py-10">
 
       <div className="w-full max-w-md mx-auto">
 
@@ -87,7 +87,9 @@ export default function LoginPage() {
           <input
             type="text"
             placeholder="Nomor WhatsApp"
-            value={nomorWhatsapp}
+            value={
+              nomorWhatsapp
+            }
             onChange={(e) =>
               setNomorWhatsapp(
                 e.target.value
@@ -116,17 +118,6 @@ export default function LoginPage() {
             {loading
               ? "Memproses..."
               : "Login Sekarang"}
-          </button>
-
-          <button
-            onClick={() =>
-              router.push(
-                "/register"
-              )
-            }
-            className="w-full border border-zinc-800 rounded-3xl py-5 text-lg"
-          >
-            Belum punya akun? Daftar
           </button>
 
         </div>
