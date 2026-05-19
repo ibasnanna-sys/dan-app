@@ -1,209 +1,266 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Copy,
-  Link2,
-  ShoppingBag,
-  Wallet,
-  Users,
-  User,
-  Headphones,
-  ArrowUpRight,
-  LogOut,
-} from "lucide-react";
 
-export default function DashboardPage() {
-  const member = {
-    name: "Basri",
-    status: "FREE MEMBER",
-    referralCode: "DAN614928",
-    saldo: 0,
-    totalReferral: 0,
-    bonusSponsor: 0,
-    bonusReferral: 0,
-  };
+export default function Home() {
+  const activities = [
+    {
+      name: "Akbar",
+      city: "Surabaya",
+      activity: "Aktivasi Member",
+      time: "2 menit lalu",
+    },
+    {
+      name: "Dewi",
+      city: "Bandung",
+      activity: "Belanja Paket Unlimited",
+      time: "5 menit lalu",
+    },
+    {
+      name: "Rizky",
+      city: "Makassar",
+      activity: "Bonus Referral Masuk",
+      time: "9 menit lalu",
+    },
+    {
+      name: "Fajar",
+      city: "Jakarta",
+      activity: "Withdraw Berhasil",
+      time: "12 menit lalu",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-black text-white px-5 py-6 overflow-hidden">
-      {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none" />
+    <main className="min-h-screen bg-black text-white">
+      <div className="max-w-6xl mx-auto px-5 py-6 md:px-8">
 
-      <div className="relative max-w-md mx-auto">
         {/* HEADER */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between gap-4">
+
           <div>
-            <h1 className="text-5xl font-black tracking-tight">
-              {member.name}
+            <p className="text-zinc-500 text-sm">
+              Halo,
+            </p>
+
+            <h1 className="text-5xl md:text-6xl font-black mt-1 tracking-tight">
+              Basri
             </h1>
 
-            <div className="mt-5 inline-flex items-center gap-3 px-5 py-3 rounded-full border border-yellow-500/20 bg-yellow-500/10 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
-              <div className="w-4 h-4 rounded-full bg-yellow-400" />
+            <div className="flex items-center gap-3 mt-5">
+              <div className="w-4 h-4 rounded-full bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)]"></div>
 
-              <span className="text-yellow-300 font-bold text-lg">
-                {member.status}
+              <span className="text-yellow-400 font-black text-xl">
+                FREE
               </span>
             </div>
           </div>
 
-          <button className="bg-red-600 hover:bg-red-500 transition px-6 py-4 rounded-3xl font-bold shadow-[0_0_30px_rgba(255,0,0,0.35)] flex items-center gap-2">
-            <LogOut size={22} />
+          <button className="bg-red-600 hover:bg-red-700 transition px-5 py-3 rounded-2xl font-bold text-sm">
             Logout
           </button>
+
         </div>
 
-        {/* REFERRAL CARD */}
-        <div className="rounded-[38px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 mb-7 shadow-[0_0_40px_rgba(0,255,100,0.08)]">
-          <p className="text-zinc-500 text-xl mb-5">
-            Referral Code
-          </p>
+        {/* REFERRAL */}
+        <div className="relative overflow-hidden mt-8 rounded-[32px] border border-zinc-800 bg-zinc-900 p-6 md:p-8">
 
-          <h2 className="text-6xl font-black tracking-tight mb-8">
-            {member.referralCode}
-          </h2>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 blur-3xl rounded-full"></div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <button className="h-20 rounded-3xl border border-zinc-700 bg-black hover:border-lime-400 transition flex items-center justify-center gap-3 text-xl font-bold">
-              <Link2 size={24} />
-              Copy Link
-            </button>
+          <div className="relative z-10">
 
-            <button className="h-20 rounded-3xl border border-zinc-700 bg-black hover:border-lime-400 transition flex items-center justify-center gap-3 text-xl font-bold">
-              <Copy size={24} />
-              Copy Kode
-            </button>
+            <p className="text-zinc-500 text-sm">
+              Referral Code
+            </p>
+
+            <h2 className="text-5xl md:text-6xl font-black mt-3 tracking-tight">
+              DAN614928
+            </h2>
+
+            <div className="flex flex-wrap gap-3 mt-7">
+
+              <button className="px-5 py-3 rounded-2xl bg-black border border-zinc-800 hover:border-zinc-600 transition text-sm font-bold">
+                Copy Link
+              </button>
+
+              <button className="px-5 py-3 rounded-2xl bg-black border border-zinc-800 hover:border-zinc-600 transition text-sm font-bold">
+                Copy Kode
+              </button>
+
+            </div>
+
           </div>
+
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-2 gap-5 mb-7">
-          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
-            <p className="text-zinc-500 text-xl">
+        {/* INFO */}
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">
               Saldo Total
             </p>
 
-            <h3 className="text-5xl font-black text-lime-400">
-              Rp {member.saldo}
-            </h3>
+            <h2 className="text-green-400 text-4xl font-black mt-4">
+              Rp 0
+            </h2>
           </div>
 
-          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
-            <p className="text-zinc-500 text-xl">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">
               Total Referral
             </p>
 
-            <h3 className="text-5xl font-black">
-              {member.totalReferral}
-            </h3>
+            <h2 className="text-4xl font-black mt-4">
+              0
+            </h2>
           </div>
 
-          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
-            <p className="text-zinc-500 text-xl">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">
               Bonus Sponsor
             </p>
 
-            <h3 className="text-5xl font-black">
-              Rp {member.bonusSponsor}
-            </h3>
+            <h2 className="text-4xl font-black mt-4">
+              Rp 0
+            </h2>
           </div>
 
-          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
-            <p className="text-zinc-500 text-xl">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">
               Bonus Referral
             </p>
 
-            <h3 className="text-5xl font-black">
-              Rp {member.bonusReferral}
-            </h3>
+            <h2 className="text-4xl font-black mt-4">
+              Rp 0
+            </h2>
           </div>
+
         </div>
-
-        {/* AKTIVASI / BELANJA */}
-        <Link
-          href="/produk"
-          className="mb-7 rounded-[36px] bg-lime-400 text-black p-7 flex items-center justify-between shadow-[0_0_40px_rgba(0,255,100,0.45)]"
-        >
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-3xl bg-white/20 flex items-center justify-center">
-              <ShoppingBag size={38} />
-            </div>
-
-            <div>
-              <h3 className="text-3xl font-black leading-tight">
-                AKTIVASI MEMBER
-              </h3>
-
-              <p className="text-black/70 text-lg mt-1">
-                Klik untuk aktivasi & mulai belanja
-              </p>
-            </div>
-          </div>
-
-          <ArrowUpRight size={40} />
-        </Link>
 
         {/* MENU */}
-        <div className="grid grid-cols-2 gap-5">
-          <Link
-            href="/transaksi"
-            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
-          >
-            <Wallet size={38} className="text-white" />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
 
-            <span className="text-2xl font-bold">
-              Transaksi
-            </span>
+          <Link
+            href="/member/produk"
+            className="bg-green-500 hover:bg-green-400 transition text-black rounded-[28px] p-5 text-center font-black"
+          >
+            Aktivasi Member
           </Link>
 
           <Link
-            href="/referral"
-            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+            href="/member/transaksi"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
           >
-            <Users size={38} className="text-white" />
-
-            <span className="text-2xl font-bold">
-              Referral
-            </span>
+            Transaksi
           </Link>
 
           <Link
-            href="/profil"
-            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+            href="/member/referral"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
           >
-            <User size={38} className="text-white" />
-
-            <span className="text-2xl font-bold">
-              Profil
-            </span>
+            Referral
           </Link>
 
           <Link
-            href="/bantuan"
-            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+            href="/member/profile"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
           >
-            <Headphones size={38} className="text-white" />
-
-            <span className="text-2xl font-bold">
-              Bantuan
-            </span>
+            Profil
           </Link>
+
+          <Link
+            href="/member/bantuan"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Bantuan
+          </Link>
+
+          <Link
+            href="/member/withdraw"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Withdraw
+          </Link>
+
         </div>
 
-        {/* WITHDRAW */}
-        <Link
-          href="/withdraw"
-          className="mt-5 rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-8 flex items-center justify-center gap-4 hover:border-lime-400 transition"
-        >
-          <ArrowUpRight size={34} />
+        {/* LIVE ACTIVITY */}
+        <div className="mt-10">
 
-          <span className="text-3xl font-bold">
-            Withdraw
-          </span>
-        </Link>
+          <div className="flex items-center justify-between mb-5">
 
-        {/* FOOTER SPACE */}
-        <div className="h-10" />
+            <h2 className="text-3xl font-black">
+              Aktivitas Member
+            </h2>
+
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+
+              <span className="text-green-400 text-sm font-bold">
+                LIVE
+              </span>
+            </div>
+
+          </div>
+
+          <div className="relative h-[420px] overflow-hidden rounded-[32px] border border-zinc-800 bg-zinc-950 p-4">
+
+            <div className="animate-scroll space-y-4">
+
+              {[...activities, ...activities].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+                >
+
+                  <div className="flex items-start justify-between">
+
+                    <div>
+                      <h3 className="font-bold text-xl">
+                        {item.name}
+                      </h3>
+
+                      <p className="text-zinc-500 text-sm mt-1">
+                        {item.city}
+                      </p>
+                    </div>
+
+                    <span className="text-zinc-500 text-sm">
+                      {item.time}
+                    </span>
+
+                  </div>
+
+                  <p className="mt-4 text-lg">
+                    {item.activity}
+                  </p>
+
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
+
+      <style jsx>{`
+        .animate-scroll {
+          animation: scrollUp 20s linear infinite;
+        }
+
+        @keyframes scrollUp {
+          0% {
+            transform: translateY(0%);
+          }
+
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+      `}</style>
     </main>
   );
 }
