@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
@@ -12,34 +12,26 @@ export default function RegisterPage() {
   const [loading, setLoading] =
     useState(false);
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    city: "",
-    address: "",
-    password: "",
-    referral: "",
-  });
+  const [name, setName] =
+    useState("");
 
-  useEffect(() => {
+  const [email, setEmail] =
+    useState("");
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+  const [password, setPassword] =
+    useState("");
 
-    const ref =
-      params.get("ref");
+  const [phone, setPhone] =
+    useState("");
 
-    if (ref) {
-      setForm((prev) => ({
-        ...prev,
-        referral: ref,
-      }));
-    }
+  const [city, setCity] =
+    useState("");
 
-  }, []);
+  const [address, setAddress] =
+    useState("");
+
+  const [referral, setReferral] =
+    useState("");
 
   function generateReferralCode() {
 
@@ -65,7 +57,7 @@ export default function RegisterPage() {
         await supabase
           .from("members")
           .select("id")
-          .eq("email", form.email)
+          .eq("email", email)
           .maybeSingle();
 
       if (emailCheck.data) {
@@ -82,7 +74,7 @@ export default function RegisterPage() {
         await supabase
           .from("members")
           .select("id")
-          .eq("phone", form.phone)
+          .eq("phone", phone)
           .maybeSingle();
 
       if (phoneCheck.data) {
@@ -97,54 +89,42 @@ export default function RegisterPage() {
 
       let uplineId = null;
 
-      if (form.referral) {
+      if (referral) {
 
-        const { data: upline } =
+        const uplineCheck =
           await supabase
             .from("members")
-            .select("*")
+            .select("id")
             .eq(
               "referral_code",
-              form.referral
+              referral
             )
             .maybeSingle();
 
-        if (upline) {
+        if (uplineCheck.data) {
 
-          uplineId = upline.id;
-
-          await supabase
-            .from("members")
-            .update({
-              total_referral:
-                (upline.total_referral || 0) + 1,
-            })
-            .eq("id", upline.id);
+          uplineId =
+            uplineCheck.data.id;
         }
       }
-
-      const referralCode =
-        generateReferralCode();
 
       const insertMember =
         await supabase
           .from("members")
           .insert([
             {
-              name: form.name,
-              email: form.email,
-              phone: form.phone,
-              city: form.city,
-              address: form.address,
-              password: form.password,
+              name: name,
+              email: email,
+              password: password,
+              phone: phone,
+              city: city,
+              address: address,
               referral_code:
-                referralCode,
+                generateReferralCode(),
               upline_id: uplineId,
               status_member: "free",
               balance: 0,
-              total_bonus_sponsor: 0,
-              total_bonus_referral: 0,
-              total_referral: 0,
+              role: "member",
               inactive_flag: false,
             },
           ])
@@ -169,9 +149,8 @@ export default function RegisterPage() {
         .from("activity_logs")
         .insert([
           {
-            member_name:
-              form.name,
-            city: form.city,
+            member_name: name,
+            city: city,
             activity:
               "Member baru bergabung",
           },
@@ -192,9 +171,9 @@ export default function RegisterPage() {
         "/member/dashboard"
       );
 
-    } catch (err) {
+    } catch (error) {
 
-      console.log(err);
+      console.log(error);
 
       alert(
         "Terjadi kesalahan sistem"
@@ -212,7 +191,7 @@ export default function RegisterPage() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-[40px] p-8">
 
           <h1 className="text-5xl font-black leading-tight">
-            DAFTAR
+            REGISTER
             <br />
             MEMBER
           </h1>
@@ -231,12 +210,11 @@ export default function RegisterPage() {
               type="text"
               required
               placeholder="Nama Lengkap"
-              value={form.name}
+              value={name}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  name: e.target.value,
-                })
+                setName(
+                  e.target.value
+                )
               }
               className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
@@ -245,12 +223,24 @@ export default function RegisterPage() {
               type="email"
               required
               placeholder="Email"
-              value={form.email}
+              value={email}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  email: e.target.value,
-                })
+                setEmail(
+                  e.target.value
+                )
+              }
+              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+            />
+
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
               }
               className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
@@ -259,12 +249,11 @@ export default function RegisterPage() {
               type="text"
               required
               placeholder="Nomor HP"
-              value={form.phone}
+              value={phone}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  phone: e.target.value,
-                })
+                setPhone(
+                  e.target.value
+                )
               }
               className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
@@ -273,12 +262,11 @@ export default function RegisterPage() {
               type="text"
               required
               placeholder="Kota"
-              value={form.city}
+              value={city}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  city: e.target.value,
-                })
+                setCity(
+                  e.target.value
+                )
               }
               className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
@@ -286,42 +274,23 @@ export default function RegisterPage() {
             <textarea
               required
               placeholder="Alamat Lengkap"
-              value={form.address}
+              value={address}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  address:
-                    e.target.value,
-                })
+                setAddress(
+                  e.target.value
+                )
               }
               className="w-full h-28 bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
 
             <input
-              type="password"
-              required
-              placeholder="Password"
-              value={form.password}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  password:
-                    e.target.value,
-                })
-              }
-              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
-            />
-
-            <input
               type="text"
               placeholder="Kode Referral"
-              value={form.referral}
+              value={referral}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  referral:
-                    e.target.value,
-                })
+                setReferral(
+                  e.target.value
+                )
               }
               className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
