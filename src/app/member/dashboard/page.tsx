@@ -1,357 +1,251 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const activities = [
+  {
+    name: "Andi",
+    city: "Makassar",
+    action: "Aktivasi Member",
+    time: "2 menit lalu",
+  },
+  {
+    name: "Rina",
+    city: "Bone",
+    action: "Belanja Paket 25GB",
+    time: "5 menit lalu",
+  },
+  {
+    name: "Fajar",
+    city: "Jakarta",
+    action: "Bonus Referral Masuk",
+    time: "8 menit lalu",
+  },
+  {
+    name: "Dewi",
+    city: "Bandung",
+    action: "Belanja Paket Unlimited",
+    time: "12 menit lalu",
+  },
+  {
+    name: "Akbar",
+    city: "Surabaya",
+    action: "Aktivasi Member",
+    time: "15 menit lalu",
+  },
+];
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const member = {
+    name: "Basri",
+    status: "FREE",
+    referralCode: "DAN614928",
+    referralLink: "https://dan.app/register?ref=DAN614928",
+    saldo: 0,
+    referral: 0,
+    sponsor: 0,
+    bonus: 0,
+  };
 
-  const [member, setMember] = useState<any>(null);
-  const [activities, setActivities] = useState<any[]>([]);
+  const copyCode = async () => {
+    await navigator.clipboard.writeText(member.referralCode);
+    alert("Kode referral berhasil disalin");
+  };
 
-  useEffect(() => {
-    getMember();
-    getActivities();
-  }, []);
-
-  async function getMember() {
-    const localUser = localStorage.getItem("member");
-
-    if (!localUser) {
-      router.push("/login");
-      return;
-    }
-
-    const user = JSON.parse(localUser);
-
-    const { data } = await supabase
-      .from("members")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (!data) {
-      router.push("/login");
-      return;
-    }
-
-    setMember(data);
-  }
-
-  async function getActivities() {
-    const { data } = await supabase
-      .from("activity_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(30);
-
-    if (data) {
-      setActivities(data);
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem("member");
-    router.push("/login");
-  }
-
-  if (!member) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  const statusMember =
-    member.status_member || member.status || "free";
-
-  const isActive = statusMember === "aktif";
-  const isFrozen = statusMember === "dibekukan";
-
-  const referralLink = `${window.location.origin}/register?ref=${member.referral_code}`;
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(member.referralLink);
+    alert("Link referral berhasil disalin");
+  };
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="max-w-md mx-auto px-5 py-6">
-
+      <div className="max-w-6xl mx-auto px-4 py-6 md:px-6 lg:px-8">
         {/* HEADER */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-zinc-500 text-sm md:text-base">Halo,</p>
 
-          <div className="flex-1">
-
-            <p className="text-zinc-500 text-sm mb-2">
-              Halo,
-            </p>
-
-            <h1 className="text-5xl font-black leading-tight break-words mb-4">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tight mt-1">
               {member.name}
             </h1>
 
-            {/* STATUS */}
-            <div className="flex items-center gap-3 mb-5">
-
-              <div
-                className={`w-4 h-4 rounded-full ${
-                  isActive
-                    ? "bg-green-500"
-                    : isFrozen
-                    ? "bg-red-500"
-                    : "bg-yellow-400"
-                }`}
-              />
-
-              <p
-                className={`text-2xl font-black uppercase ${
-                  isActive
-                    ? "text-green-500"
-                    : isFrozen
-                    ? "text-red-500"
-                    : "text-yellow-400"
-                }`}
-              >
-                {statusMember}
-              </p>
-
+            <div className="mt-4">
+              <span className="inline-flex items-center gap-2 text-yellow-400 font-bold text-lg md:text-xl">
+                <span className="w-4 h-4 rounded-full bg-yellow-400"></span>
+                FREE
+              </span>
             </div>
-
-            {/* REFERRAL */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-
-              <p className="text-zinc-500 text-sm mb-3">
-                Referral Code
-              </p>
-
-              <h2 className="text-4xl font-black break-all mb-5">
-                {member.referral_code}
-              </h2>
-
-              <div className="grid grid-cols-2 gap-3">
-
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(referralLink);
-
-                    alert("Link referral berhasil disalin");
-                  }}
-                  className="h-12 rounded-2xl bg-black border border-zinc-800 text-sm font-bold"
-                >
-                  Copy Link
-                </button>
-
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      member.referral_code
-                    );
-
-                    alert("Kode referral berhasil disalin");
-                  }}
-                  className="h-12 rounded-2xl bg-black border border-zinc-800 text-sm font-bold"
-                >
-                  Copy Kode
-                </button>
-
-              </div>
-
-            </div>
-
           </div>
 
-          {/* LOGOUT */}
-          <button
-            onClick={logout}
-            className="ml-4 h-12 px-5 rounded-2xl bg-red-600 text-white text-sm font-bold"
-          >
+          <button className="bg-red-600 hover:bg-red-700 transition px-5 py-3 rounded-3xl text-sm md:text-base font-bold">
             Logout
           </button>
-
         </div>
 
-        {/* FREEZE WARNING */}
-        {isFrozen && (
-          <div className="bg-red-600/20 border border-red-600 rounded-3xl p-5 mb-6">
-            <p className="text-red-400 font-bold leading-relaxed">
-              Akun dibekukan karena tidak transaksi 60 hari.
-              Bonus referral dihentikan sementara.
-            </p>
+        {/* REFERRAL CARD */}
+        <div className="mt-8 bg-zinc-900/90 border border-zinc-800 rounded-[32px] p-6 md:p-8 backdrop-blur-xl shadow-2xl">
+          <p className="text-zinc-500 text-sm md:text-base">
+            Referral Code
+          </p>
+
+          <h2 className="text-4xl md:text-5xl font-black mt-3 tracking-tight">
+            {member.referralCode}
+          </h2>
+
+          <div className="flex flex-wrap gap-3 mt-6">
+            <button
+              onClick={copyLink}
+              className="px-5 py-3 rounded-2xl bg-black border border-zinc-800 hover:border-zinc-600 transition font-semibold text-sm"
+            >
+              Copy Link
+            </button>
+
+            <button
+              onClick={copyCode}
+              className="px-5 py-3 rounded-2xl bg-black border border-zinc-800 hover:border-zinc-600 transition font-semibold text-sm"
+            >
+              Copy Kode
+            </button>
           </div>
-        )}
-
-        {/* INFO CARD */}
-        <div className="space-y-4 mb-8">
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-            <p className="text-zinc-500 text-sm mb-3">
-              Saldo Total
-            </p>
-
-            <h2 className="text-4xl font-black text-green-500 break-words">
-              Rp {Number(member.balance || 0).toLocaleString("id-ID")}
-            </h2>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-            <p className="text-zinc-500 text-sm mb-3">
-              Total Referral
-            </p>
-
-            <h2 className="text-4xl font-black">
-              {member.total_referral || 0} Member
-            </h2>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-            <p className="text-zinc-500 text-sm mb-3">
-              Bonus Sponsor
-            </p>
-
-            <h2 className="text-4xl font-black">
-              Rp{" "}
-              {Number(
-                member.bonus_sponsor || 0
-              ).toLocaleString("id-ID")}
-            </h2>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-            <p className="text-zinc-500 text-sm mb-3">
-              Bonus Referral
-            </p>
-
-            <h2 className="text-4xl font-black">
-              Rp{" "}
-              {Number(
-                member.bonus_referral || 0
-              ).toLocaleString("id-ID")}
-            </h2>
-          </div>
-
         </div>
 
-        {/* BUTTON UTAMA */}
-        <div className="mb-8">
+        {/* STATISTIK */}
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">Saldo Total</p>
 
-          {!isActive ? (
-            <Link
-              href="/member/produk"
-              className="w-full h-16 rounded-3xl bg-yellow-400 text-black text-2xl font-black flex items-center justify-center mb-4"
-            >
-              Aktivasi Member
-            </Link>
-          ) : (
-            <Link
-              href="/member/produk"
-              className="w-full h-16 rounded-3xl bg-green-500 text-black text-2xl font-black flex items-center justify-center mb-4"
-            >
-              Belanja Paket
-            </Link>
-          )}
-
-          {/* GRID MENU */}
-          <div className="grid grid-cols-2 gap-4">
-
-            <Link
-              href="/member/transaksi"
-              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
-            >
-              Transaksi
-            </Link>
-
-            <Link
-              href="/member/profile"
-              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
-            >
-              Profil
-            </Link>
-
-            <Link
-              href="/member/referral"
-              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
-            >
-              Referral
-            </Link>
-
-            <Link
-              href="/member/bantuan"
-              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold"
-            >
-              Bantuan
-            </Link>
-
-            <Link
-              href="/member/withdraw"
-              className="h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold col-span-2"
-            >
-              Withdraw
-            </Link>
-
+            <h3 className="text-green-400 text-3xl md:text-4xl font-black mt-4">
+              Rp 0
+            </h3>
           </div>
 
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">Total Referral</p>
+
+            <h3 className="text-3xl md:text-4xl font-black mt-4">
+              0
+            </h3>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">Bonus Sponsor</p>
+
+            <h3 className="text-3xl md:text-4xl font-black mt-4">
+              Rp 0
+            </h3>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[28px] p-5">
+            <p className="text-zinc-500 text-sm">Bonus Referral</p>
+
+            <h3 className="text-3xl md:text-4xl font-black mt-4">
+              Rp 0
+            </h3>
+          </div>
         </div>
 
-        {/* LIVE ACTIVITY */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+        {/* MENU UTAMA */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+          <Link
+            href="/member/produk"
+            className="bg-green-500 hover:bg-green-400 transition rounded-[28px] p-5 text-center font-black text-black text-lg"
+          >
+            Aktivasi Member
+          </Link>
 
+          <Link
+            href="/member/transaksi"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Transaksi
+          </Link>
+
+          <Link
+            href="/member/referral"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Referral
+          </Link>
+
+          <Link
+            href="/member/profile"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Profil
+          </Link>
+
+          <Link
+            href="/member/bantuan"
+            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold"
+          >
+            Bantuan
+          </Link>
+
+          <button className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition rounded-[28px] p-5 text-center font-bold">
+            Withdraw
+          </button>
+        </div>
+
+        {/* LIVE AKTIVITAS */}
+        <div className="mt-10">
           <div className="flex items-center justify-between mb-5">
-
-            <h2 className="text-xl font-black">
+            <h2 className="text-2xl md:text-3xl font-black">
               Aktivitas Member
             </h2>
 
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-
+            <span className="text-green-400 text-sm font-semibold">
+              LIVE
+            </span>
           </div>
 
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-4 h-[340px] overflow-hidden relative">
+            <div className="animate-marquee space-y-4">
+              {[...activities, ...activities].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-black/40 border border-zinc-800 rounded-2xl p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-lg">
+                        {item.name}
+                      </h3>
 
-            {activities.length === 0 && (
-              <div className="text-zinc-500 text-sm">
-                Belum ada aktivitas
-              </div>
-            )}
+                      <p className="text-zinc-500 text-sm">
+                        {item.city}
+                      </p>
+                    </div>
 
-            {activities.map((item, index) => (
-              <div
-                key={index}
-                className="bg-black border border-zinc-800 rounded-2xl p-4"
-              >
+                    <span className="text-zinc-500 text-xs">
+                      {item.time}
+                    </span>
+                  </div>
 
-                <div className="flex items-center justify-between mb-2">
-
-                  <h3 className="font-bold break-words">
-                    {item.member_name || item.name}
-                  </h3>
-
-                  <p className="text-zinc-500 text-xs">
-                    {item.city}
+                  <p className="mt-3 text-white font-medium">
+                    {item.action}
                   </p>
-
                 </div>
-
-                <p className="text-zinc-300 text-sm mb-2 break-words">
-                  {item.activity}
-                </p>
-
-                <p className="text-zinc-500 text-xs">
-                  {new Date(item.created_at).toLocaleString("id-ID")}
-                </p>
-
-              </div>
-            ))}
-
+              ))}
+            </div>
           </div>
-
         </div>
-
       </div>
+
+      <style jsx>{`
+        .animate-marquee {
+          animation: scrollUp 20s linear infinite;
+        }
+
+        @keyframes scrollUp {
+          0% {
+            transform: translateY(0%);
+          }
+
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+      `}</style>
     </main>
   );
 }
