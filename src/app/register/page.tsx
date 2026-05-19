@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
@@ -15,16 +12,15 @@ export default function RegisterPage() {
   const [loading, setLoading] =
     useState(false);
 
-  const [form, setForm] =
-    useState({
-      name: "",
-      email: "",
-      phone: "",
-      city: "",
-      address: "",
-      password: "",
-      referral: "",
-    });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+    address: "",
+    password: "",
+    referral: "",
+  });
 
   useEffect(() => {
 
@@ -65,6 +61,40 @@ export default function RegisterPage() {
 
     try {
 
+      const emailCheck =
+        await supabase
+          .from("members")
+          .select("id")
+          .eq("email", form.email)
+          .maybeSingle();
+
+      if (emailCheck.data) {
+
+        alert(
+          "Email sudah terdaftar"
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      const phoneCheck =
+        await supabase
+          .from("members")
+          .select("id")
+          .eq("phone", form.phone)
+          .maybeSingle();
+
+      if (phoneCheck.data) {
+
+        alert(
+          "Nomor HP sudah terdaftar"
+        );
+
+        setLoading(false);
+        return;
+      }
+
       let uplineId = null;
 
       if (form.referral) {
@@ -77,9 +107,10 @@ export default function RegisterPage() {
               "referral_code",
               form.referral
             )
-            .single();
+            .maybeSingle();
 
         if (upline) {
+
           uplineId = upline.id;
 
           await supabase
@@ -110,13 +141,22 @@ export default function RegisterPage() {
                 referralCode,
               upline_id: uplineId,
               status_member: "free",
+              balance: 0,
+              total_bonus_sponsor: 0,
+              total_bonus_referral: 0,
+              total_referral: 0,
+              inactive_flag: false,
             },
           ])
           .select()
           .single();
 
       if (error) {
-        alert(error.message);
+
+        alert(
+          "Register gagal"
+        );
+
         setLoading(false);
         return;
       }
@@ -149,9 +189,8 @@ export default function RegisterPage() {
     } catch (error) {
 
       alert(
-        "Terjadi kesalahan"
+        "Terjadi kesalahan sistem"
       );
-
     }
 
     setLoading(false);
@@ -164,13 +203,15 @@ export default function RegisterPage() {
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-[40px] p-8">
 
-          <h1 className="text-4xl font-black">
-            Daftar Member
+          <h1 className="text-5xl font-black leading-tight">
+            DAFTAR
+            <br />
+            MEMBER
           </h1>
 
-          <p className="text-zinc-400 mt-3">
-            Bergabung dengan
-            ekosistem DAN.
+          <p className="text-zinc-400 mt-4">
+            Platform paket data &
+            referral modern.
           </p>
 
           <form
@@ -180,8 +221,8 @@ export default function RegisterPage() {
 
             <input
               type="text"
-              placeholder="Nama Lengkap"
               required
+              placeholder="Nama Lengkap"
               value={form.name}
               onChange={(e) =>
                 setForm({
@@ -194,8 +235,8 @@ export default function RegisterPage() {
 
             <input
               type="email"
-              placeholder="Email"
               required
+              placeholder="Email"
               value={form.email}
               onChange={(e) =>
                 setForm({
@@ -208,8 +249,8 @@ export default function RegisterPage() {
 
             <input
               type="text"
-              placeholder="Nomor HP"
               required
+              placeholder="Nomor HP"
               value={form.phone}
               onChange={(e) =>
                 setForm({
@@ -222,8 +263,8 @@ export default function RegisterPage() {
 
             <input
               type="text"
-              placeholder="Kota"
               required
+              placeholder="Kota"
               value={form.city}
               onChange={(e) =>
                 setForm({
@@ -235,8 +276,8 @@ export default function RegisterPage() {
             />
 
             <textarea
-              placeholder="Alamat"
               required
+              placeholder="Alamat Lengkap"
               value={form.address}
               onChange={(e) =>
                 setForm({
@@ -245,13 +286,13 @@ export default function RegisterPage() {
                     e.target.value,
                 })
               }
-              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none h-28"
+              className="w-full h-28 bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
             />
 
             <input
               type="password"
-              placeholder="Password"
               required
+              placeholder="Password"
               value={form.password}
               onChange={(e) =>
                 setForm({
@@ -265,7 +306,7 @@ export default function RegisterPage() {
 
             <input
               type="text"
-              placeholder="Kode Referral (Opsional)"
+              placeholder="Kode Referral"
               value={form.referral}
               onChange={(e) =>
                 setForm({
@@ -280,10 +321,10 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-500 text-black py-4 rounded-2xl font-black"
+              className="w-full bg-green-500 text-black rounded-2xl py-4 font-black text-lg"
             >
               {loading
-                ? "Loading..."
+                ? "Memproses..."
                 : "Daftar Sekarang"}
             </button>
 
@@ -297,7 +338,7 @@ export default function RegisterPage() {
 
             <Link
               href="/login"
-              className="text-green-500 font-bold mt-2 inline-block"
+              className="text-green-500 font-bold inline-block mt-2"
             >
               Login di sini
             </Link>
