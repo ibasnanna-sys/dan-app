@@ -123,8 +123,7 @@ export default function DashboardPage() {
         </div>
 
       </div>
-      <MemberNavbar />
-import MemberNavbar from "@/components/MemberNavbar";
+      
     </main>
   );
 }
