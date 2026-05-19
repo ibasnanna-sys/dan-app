@@ -30,6 +30,7 @@ export default function ProfilePage() {
         .single();
 
       if (error || !data) {
+        localStorage.removeItem("member_id");
         router.push("/login");
         return;
       }
@@ -61,20 +62,20 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <p className="text-zinc-500 text-lg mb-1">
               Profile Member
             </p>
 
-            <h1 className="text-4xl md:text-5xl font-black">
+            <h1 className="text-4xl md:text-5xl font-black break-words">
               {member.name}
             </h1>
           </div>
 
           <button
             onClick={() => router.push("/dashboard")}
-            className="bg-zinc-800 hover:bg-zinc-700 transition px-5 py-4 rounded-3xl font-bold"
+            className="bg-zinc-800 hover:bg-zinc-700 transition px-5 py-4 rounded-3xl font-bold w-full sm:w-auto"
           >
             Dashboard
           </button>
@@ -119,16 +120,6 @@ export default function ProfilePage() {
 
               <p className="text-2xl md:text-3xl font-black break-words">
                 {member.city || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Alamat
-              </p>
-
-              <p className="text-lg md:text-2xl font-bold break-words leading-relaxed">
-                {member.address || "-"}
               </p>
             </div>
 
