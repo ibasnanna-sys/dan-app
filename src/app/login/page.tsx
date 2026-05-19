@@ -1,81 +1,156 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-export default function DashboardPage() {
-  const [member, setMember] =
-    useState<any>(null);
+export default function LoginPage() {
 
-  useEffect(() => {
-    const data =
-      localStorage.getItem("member");
+  const router = useRouter();
 
-    if (data) {
-      setMember(JSON.parse(data));
+  const [loading, setLoading] =
+    useState(false);
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  async function handleLogin(
+    e: React.FormEvent
+  ) {
+
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+
+      const { data, error } =
+        await supabase
+          .from("members")
+          .select("*")
+          .eq("email", email)
+          .eq("password", password)
+          .maybeSingle();
+
+      if (
+        error ||
+        !data
+      ) {
+
+        alert(
+          "Email atau password salah"
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem(
+        "member",
+        JSON.stringify(data)
+      );
+
+      alert(
+        "Login berhasil"
+      );
+
+      router.push(
+        "/member/dashboard"
+      );
+
+    } catch (error) {
+
+      alert(
+        "Terjadi kesalahan sistem"
+      );
     }
-  }, []);
 
-  if (!member) {
-    return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </main>
-    );
+    setLoading(false);
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-5 py-8">
-      <h1 className="text-4xl font-black">
-        Halo,
-        <br />
-        {member.name}
-      </h1>
+    <main className="min-h-screen bg-black text-white px-5 py-10">
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mt-8">
-        <p className="text-zinc-400">
-          Status Member
-        </p>
+      <div className="max-w-md mx-auto">
 
-        <h2 className="text-3xl font-black mt-2 text-green-500">
-          {member.status_member}
-        </h2>
-      </div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-[40px] p-8">
 
-      <div className="grid grid-cols-2 gap-4 mt-5">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-          <p className="text-zinc-400 text-sm">
-            Saldo
+          <h1 className="text-5xl font-black leading-tight">
+            LOGIN
+            <br />
+            MEMBER
+          </h1>
+
+          <p className="text-zinc-400 mt-4">
+            Masuk ke dashboard DAN.
           </p>
 
-          <h2 className="text-2xl font-bold mt-2">
-            Rp {member.balance}
-          </h2>
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5 mt-10"
+          >
+
+            <input
+              type="email"
+              required
+              placeholder="Email"
+              value={email}
+              onChange={(e) =>
+                setEmail(
+                  e.target.value
+                )
+              }
+              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+            />
+
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
+              }
+              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-500 text-black rounded-2xl py-4 font-black text-lg"
+            >
+              {loading
+                ? "Memproses..."
+                : "Login Sekarang"}
+            </button>
+
+          </form>
+
+          <div className="text-center mt-8">
+
+            <p className="text-zinc-400">
+              Belum punya akun?
+            </p>
+
+            <Link
+              href="/register"
+              className="text-green-500 font-bold inline-block mt-2"
+            >
+              Daftar di sini
+            </Link>
+
+          </div>
+
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-          <p className="text-zinc-400 text-sm">
-            Referral
-          </p>
-
-          <h2 className="text-2xl font-bold mt-2">
-            {
-              member.total_referral
-            }
-          </h2>
-        </div>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mt-5">
-        <p className="text-zinc-400">
-          Kode Referral
-        </p>
-
-        <h2 className="text-2xl font-bold mt-2">
-          {
-            member.referral_code
-          }
-        </h2>
-      </div>
     </main>
   );
 }
