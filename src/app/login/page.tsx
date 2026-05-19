@@ -7,95 +7,71 @@ import { supabase } from "@/lib/supabase";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [nomorWhatsapp,
-    setNomorWhatsapp] =
+  const [email, setEmail] =
     useState("");
 
-  const [password,
-    setPassword] =
+  const [password, setPassword] =
     useState("");
 
-  const [loading,
-    setLoading] =
+  const [loading, setLoading] =
     useState(false);
 
-  async function loginMember() {
-    if (
-      !nomorWhatsapp ||
-      !password
-    ) {
-      alert(
-        "Lengkapi data login"
+  async function handleLogin() {
+    try {
+      setLoading(true);
+
+      const { data, error } =
+        await supabase
+          .from("members")
+          .select("*")
+          .eq("email", email)
+          .eq("password", password)
+          .single();
+
+      if (error || !data) {
+        alert(
+          "Email atau password salah"
+        );
+        return;
+      }
+
+      localStorage.setItem(
+        "member",
+        JSON.stringify(data)
       );
 
-      return;
-    }
-
-    setLoading(true);
-
-    const { data, error } =
-      await supabase
-        .from("members")
-        .select("*")
-        .eq(
-          "phone",
-          nomorWhatsapp
-        )
-        .eq(
-          "password",
-          password
-        )
-        .single();
-
-    setLoading(false);
-
-    if (error || !data) {
-      alert(
-        "Nomor WhatsApp atau password salah"
+      router.push(
+        "/member/dashboard"
       );
-
-      return;
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem(
-      "member",
-      JSON.stringify(data)
-    );
-
-    alert("Login berhasil 🚀");
-
-    router.push("/dashboard");
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center px-6 py-10">
-
-      <div className="w-full max-w-md mx-auto">
-
-        <h1 className="text-6xl font-bold leading-none mb-4">
+    <main className="min-h-screen bg-black text-white px-5 py-10">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-5xl font-black">
           LOGIN
           <br />
           MEMBER
         </h1>
 
-        <p className="text-zinc-500 text-lg mb-10">
-          Masuk ke dashboard member DAN.
+        <p className="text-zinc-400 mt-4">
+          Masuk ke dashboard DAN.
         </p>
 
-        <div className="space-y-5">
-
+        <div className="space-y-4 mt-10">
           <input
-            type="text"
-            placeholder="Nomor WhatsApp"
-            value={
-              nomorWhatsapp
-            }
+            type="email"
+            placeholder="Email"
+            value={email}
             onChange={(e) =>
-              setNomorWhatsapp(
-                e.target.value
-              )
+              setEmail(e.target.value)
             }
-            className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl px-5 py-4 outline-none"
           />
 
           <input
@@ -103,27 +79,22 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) =>
-              setPassword(
-                e.target.value
-              )
+              setPassword(e.target.value)
             }
-            className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl px-6 py-5 text-xl outline-none"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-3xl px-5 py-4 outline-none"
           />
 
           <button
-            onClick={loginMember}
+            onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-green-500 text-black font-bold rounded-3xl py-5 text-2xl"
+            className="w-full bg-green-500 text-black font-bold rounded-3xl py-4"
           >
             {loading
               ? "Memproses..."
               : "Login Sekarang"}
           </button>
-
         </div>
-
       </div>
-
     </main>
   );
 }
