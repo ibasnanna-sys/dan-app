@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 export default function DashboardPage() {
   const router = useRouter();
 
-  const [member, setMember] = useState<any>(null);
+  const [member, setMember] =
+    useState<any>(null);
 
   useEffect(() => {
-    const data = localStorage.getItem("member");
+    const data =
+      localStorage.getItem(
+        "member"
+      );
 
     if (!data) {
       router.push("/login");
@@ -19,10 +23,13 @@ export default function DashboardPage() {
     setMember(JSON.parse(data));
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem("member");
+  function logout() {
+    localStorage.removeItem(
+      "member"
+    );
+
     router.push("/login");
-  };
+  }
 
   if (!member) {
     return (
@@ -38,6 +45,7 @@ export default function DashboardPage() {
       <div className="max-w-md mx-auto">
 
         <div className="mb-8">
+
           <h1 className="text-4xl font-bold">
             Halo, {member.name}
           </h1>
@@ -45,6 +53,7 @@ export default function DashboardPage() {
           <p className="text-zinc-500 mt-2">
             Dashboard Member DAN
           </p>
+
         </div>
 
         <div className="space-y-4">
@@ -55,7 +64,9 @@ export default function DashboardPage() {
             </p>
 
             <h2 className="text-2xl font-bold mt-2">
-              {member.status_member}
+              {
+                member.status_member
+              }
             </h2>
           </div>
 
@@ -85,12 +96,18 @@ export default function DashboardPage() {
             </p>
 
             <h2 className="text-2xl font-bold mt-2">
-              {member.referral_code}
+              {
+                member.referral_code
+              }
             </h2>
           </div>
 
           <button
-            onClick={() => router.push("/produk")}
+            onClick={() =>
+              router.push(
+                "/produk"
+              )
+            }
             className="w-full bg-green-500 text-black font-bold rounded-3xl py-5 text-xl"
           >
             Aktivasi Sekarang
@@ -104,7 +121,9 @@ export default function DashboardPage() {
           </button>
 
         </div>
+
       </div>
+
     </main>
   );
 }
