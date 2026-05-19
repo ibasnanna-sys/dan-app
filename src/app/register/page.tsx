@@ -60,6 +60,16 @@ export default function RegisterPage() {
           .eq("email", email)
           .maybeSingle();
 
+      if (emailCheck.error) {
+
+        alert(
+          emailCheck.error.message
+        );
+
+        setLoading(false);
+        return;
+      }
+
       if (emailCheck.data) {
 
         alert(
@@ -76,6 +86,16 @@ export default function RegisterPage() {
           .select("id")
           .eq("phone", phone)
           .maybeSingle();
+
+      if (phoneCheck.error) {
+
+        alert(
+          phoneCheck.error.message
+        );
+
+        setLoading(false);
+        return;
+      }
 
       if (phoneCheck.data) {
 
@@ -100,6 +120,16 @@ export default function RegisterPage() {
               referral
             )
             .maybeSingle();
+
+        if (uplineCheck.error) {
+
+          alert(
+            uplineCheck.error.message
+          );
+
+          setLoading(false);
+          return;
+        }
 
         if (uplineCheck.data) {
 
@@ -138,23 +168,31 @@ export default function RegisterPage() {
         );
 
         alert(
-          "Registrasi gagal"
+          insertMember.error.message
         );
 
         setLoading(false);
         return;
       }
 
-      await supabase
-        .from("activity_logs")
-        .insert([
-          {
-            member_name: name,
-            city: city,
-            activity:
-              "Member baru bergabung",
-          },
-        ]);
+      const activityInsert =
+        await supabase
+          .from("activity_logs")
+          .insert([
+            {
+              member_name: name,
+              city: city,
+              activity:
+                "Member baru bergabung",
+            },
+          ]);
+
+      if (activityInsert.error) {
+
+        alert(
+          activityInsert.error.message
+        );
+      }
 
       localStorage.setItem(
         "member",
@@ -171,12 +209,12 @@ export default function RegisterPage() {
         "/member/dashboard"
       );
 
-    } catch (error) {
+    } catch (error: any) {
 
       console.log(error);
 
       alert(
-        "Terjadi kesalahan sistem"
+        JSON.stringify(error)
       );
     }
 
