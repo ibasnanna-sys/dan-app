@@ -83,7 +83,7 @@ export default function DashboardPage() {
           <div>
 
             <p className="text-zinc-500 text-lg">
-              Halo Member
+              Selamat Datang
             </p>
 
             <h1 className="text-5xl font-black mt-1 leading-none">
@@ -94,72 +94,82 @@ export default function DashboardPage() {
 
           <button
             onClick={logout}
-            className="bg-red-600 rounded-2xl px-5 py-3 font-bold"
+            className="bg-red-600 px-5 py-3 rounded-2xl font-bold"
           >
             Logout
           </button>
 
         </div>
 
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-[36px] p-6 mt-8 overflow-hidden relative">
+        <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-[36px] p-6 mt-8 relative overflow-hidden">
 
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-500/10 rounded-full" />
+          <div className="absolute -top-16 -right-16 w-52 h-52 bg-green-500/10 rounded-full blur-3xl" />
 
           <p className="text-zinc-500 text-lg relative z-10">
             Status Member
           </p>
 
-          <h2 className="text-6xl font-black mt-2 relative z-10 capitalize">
+          <h2 className="text-6xl font-black mt-3 capitalize relative z-10">
             {member?.status_member}
           </h2>
 
-          <div className="flex items-center justify-between mt-8 relative z-10">
+          <div className="mt-8 relative z-10">
 
-            <div>
+            <p className="text-zinc-500">
+              Saldo
+            </p>
 
-              <p className="text-zinc-500">
-                Saldo
-              </p>
+            <h3 className="text-5xl font-black text-green-500 mt-2">
+              Rp{" "}
+              {Number(
+                member?.balance || 0
+              ).toLocaleString("id-ID")}
+            </h3>
 
-              <h3 className="text-4xl font-black text-green-500 mt-2">
-                Rp{" "}
-                {Number(
-                  member?.balance || 0
-                ).toLocaleString("id-ID")}
-              </h3>
+          </div>
 
-            </div>
+          {member?.status_member ===
+            "free" && (
 
             <a
               href="/member/produk"
-              className="bg-green-500 text-black px-6 py-4 rounded-2xl font-black"
+              className="inline-block bg-green-500 text-black px-6 py-4 rounded-2xl font-black text-lg mt-8 relative z-10"
             >
-              Belanja
+              Aktivasi Sekarang
             </a>
 
-          </div>
+          )}
+
+          {(member?.status_member ===
+            "aktif" ||
+            member?.status_member ===
+            "dibekukan") && (
+
+            <a
+              href="/member/produk"
+              className="inline-block bg-green-500 text-black px-6 py-4 rounded-2xl font-black text-lg mt-8 relative z-10"
+            >
+              Belanja Sekarang
+            </a>
+
+          )}
 
         </div>
 
         {member?.status_member ===
-          "free" && (
+          "dibekukan" && (
 
-          <div className="bg-green-500 text-black rounded-[32px] p-6 mt-5">
+          <div className="bg-yellow-500 text-black rounded-[32px] p-6 mt-5">
 
-            <p className="font-bold text-lg">
-              Aktivasi Member
+            <p className="font-black text-xl">
+              Akun Dibekukan
             </p>
 
-            <h2 className="text-3xl font-black mt-2 leading-tight">
-              Aktifkan akun untuk mulai mendapatkan bonus referral.
-            </h2>
-
-            <a
-              href="/member/produk"
-              className="inline-block bg-black text-white px-6 py-4 rounded-2xl font-black mt-6"
-            >
-              Aktivasi Sekarang
-            </a>
+            <p className="mt-3 text-lg">
+              Bonus referral berhenti
+              sampai member melakukan
+              transaksi kembali.
+            </p>
 
           </div>
 
@@ -174,7 +184,8 @@ export default function DashboardPage() {
             </p>
 
             <h2 className="text-5xl font-black mt-3">
-              0
+              {member?.total_referral ||
+                0}
             </h2>
 
           </div>
@@ -214,21 +225,6 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-4">
 
             <a
-              href="/member/produk"
-              className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-5"
-            >
-
-              <h2 className="text-3xl font-black">
-                Produk
-              </h2>
-
-              <p className="text-zinc-500 mt-3">
-                Belanja paket data
-              </p>
-
-            </a>
-
-            <a
               href="/member/transaksi"
               className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-5"
             >
@@ -243,22 +239,70 @@ export default function DashboardPage() {
 
             </a>
 
+            <a
+              href="/member/profile"
+              className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-5"
+            >
+
+              <h2 className="text-3xl font-black">
+                Profile
+              </h2>
+
+              <p className="text-zinc-500 mt-3">
+                Informasi akun
+              </p>
+
+            </a>
+
           </div>
 
-          <a
-            href="/member/profile"
-            className="block bg-zinc-900 border border-zinc-800 rounded-[32px] p-5 mt-4"
-          >
+        </div>
 
-            <h2 className="text-3xl font-black">
-              Profile
-            </h2>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-[32px] p-5 mt-8">
 
-            <p className="text-zinc-500 mt-3">
-              Informasi akun member
-            </p>
+          <p className="text-zinc-500 text-lg">
+            Informasi Member
+          </p>
 
-          </a>
+          <div className="mt-5 space-y-5">
+
+            <div>
+
+              <p className="text-zinc-500">
+                Email
+              </p>
+
+              <h3 className="text-2xl font-black mt-1 break-all">
+                {member?.email}
+              </h3>
+
+            </div>
+
+            <div>
+
+              <p className="text-zinc-500">
+                Nomor HP
+              </p>
+
+              <h3 className="text-2xl font-black mt-1">
+                {member?.phone || "-"}
+              </h3>
+
+            </div>
+
+            <div>
+
+              <p className="text-zinc-500">
+                Kota
+              </p>
+
+              <h3 className="text-2xl font-black mt-1">
+                {member?.city || "-"}
+              </h3>
+
+            </div>
+
+          </div>
 
         </div>
 
