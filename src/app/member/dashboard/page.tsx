@@ -1,189 +1,268 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-export default function ProfilePage() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default function DashboardPage() {
   const router = useRouter();
 
   const [member, setMember] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState<any[]>([]);
 
   useEffect(() => {
-    getProfile();
+    getMember();
+    getActivities();
   }, []);
 
-  async function getProfile() {
-    try {
-      const memberId = localStorage.getItem("member_id");
+  async function getMember() {
+    const localUser = localStorage.getItem("member");
 
-      if (!memberId) {
-        router.push("/login");
-        return;
-      }
+    if (!localUser) {
+      router.push("/login");
+      return;
+    }
 
-      const { data, error } = await supabase
-        .from("members")
-        .select("*")
-        .eq("id", memberId)
-        .single();
+    const user = JSON.parse(localUser);
 
-      if (error || !data) {
-        localStorage.removeItem("member_id");
-        router.push("/login");
-        return;
-      }
+    const { data } = await supabase
+      .from("members")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-      setMember(data);
-    } catch (error) {
-      console.log(error);
-      alert("Gagal memuat profile");
-    } finally {
-      setLoading(false);
+    if (!data) {
+      router.push("/login");
+      return;
+    }
+
+    setMember(data);
+  }
+
+  async function getActivities() {
+    const { data } = await supabase
+      .from("activity_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (data) {
+      setActivities(data);
     }
   }
 
-  function logout() {
-    localStorage.removeItem("member_id");
+  async function logout() {
+    localStorage.removeItem("member");
     router.push("/login");
   }
 
-  if (loading) {
+  if (!member) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white text-xl font-bold">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
         Loading...
       </div>
     );
   }
 
-  if (!member) return null;
+  const isActive = member.status === "aktif";
+  const isFrozen = member.status === "dibekukan";
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <p className="text-zinc-500 text-lg mb-1">
-              Profile Member
-            </p>
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-md mx-auto px-5 py-6">
 
-            <h1 className="text-4xl md:text-5xl font-black break-words">
+        {/* HEADER */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p className="text-zinc-500 text-sm">Halo,</p>
+            <h1 className="text-4xl font-bold leading-tight">
               {member.name}
             </h1>
           </div>
 
           <button
-            onClick={() => router.push("/dashboard")}
-            className="bg-zinc-800 hover:bg-zinc-700 transition px-5 py-4 rounded-3xl font-bold w-full sm:w-auto"
-          >
-            Dashboard
-          </button>
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-[36px] p-6 md:p-8">
-          <div className="space-y-6">
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Nama Lengkap
-              </p>
-
-              <p className="text-2xl md:text-3xl font-black break-words">
-                {member.name || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Email
-              </p>
-
-              <p className="text-xl md:text-2xl font-bold break-all">
-                {member.email || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Nomor HP
-              </p>
-
-              <p className="text-2xl md:text-3xl font-black break-all">
-                {member.phone || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Kota
-              </p>
-
-              <p className="text-2xl md:text-3xl font-black break-words">
-                {member.city || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Referral Code
-              </p>
-
-              <p className="text-2xl md:text-4xl font-black break-all text-green-500">
-                {member.referral_code}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Status Member
-              </p>
-
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-4 h-4 rounded-full ${
-                    member.status_member === "aktif"
-                      ? "bg-green-500"
-                      : member.status_member === "dibekukan"
-                      ? "bg-red-500"
-                      : "bg-yellow-400"
-                  }`}
-                />
-
-                <p
-                  className={`text-2xl md:text-3xl font-black uppercase ${
-                    member.status_member === "aktif"
-                      ? "text-green-500"
-                      : member.status_member === "dibekukan"
-                      ? "text-red-500"
-                      : "text-yellow-400"
-                  }`}
-                >
-                  {member.status_member}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-zinc-500 text-sm mb-2">
-                Tanggal Daftar
-              </p>
-
-              <p className="text-lg md:text-xl font-bold">
-                {new Date(
-                  member.created_at
-                ).toLocaleDateString("id-ID")}
-              </p>
-            </div>
-          </div>
-
-          <button
             onClick={logout}
-            className="w-full bg-red-600 hover:bg-red-700 transition py-5 rounded-3xl text-xl font-black mt-8"
+            className="bg-red-600 px-5 py-3 rounded-2xl font-bold"
           >
             Logout
           </button>
         </div>
+
+        {/* STATUS */}
+        <div className="bg-zinc-900 rounded-3xl p-6 mb-4 border border-zinc-800">
+          <p className="text-zinc-500 mb-2">Status Member</p>
+
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-4 h-4 rounded-full ${
+                isActive
+                  ? "bg-green-500"
+                  : isFrozen
+                  ? "bg-red-500"
+                  : "bg-yellow-400"
+              }`}
+            />
+
+            <h2
+              className={`text-3xl font-bold uppercase ${
+                isActive
+                  ? "text-green-500"
+                  : isFrozen
+                  ? "text-red-500"
+                  : "text-yellow-400"
+              }`}
+            >
+              {member.status}
+            </h2>
+          </div>
+
+          <div className="mt-6">
+            <p className="text-zinc-500 mb-2">Referral Code</p>
+
+            <h3 className="text-4xl font-bold text-white">
+              {member.referral_code}
+            </h3>
+          </div>
+        </div>
+
+        {/* INFO */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+
+          <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 mb-2">Saldo</p>
+
+            <h3 className="text-3xl font-bold text-green-500">
+              Rp {member.balance || 0}
+            </h3>
+          </div>
+
+          <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+            <p className="text-zinc-500 mb-2">Referral</p>
+
+            <h3 className="text-3xl font-bold">
+              {member.total_referral || 0}
+            </h3>
+          </div>
+        </div>
+
+        {/* MEMBER INFO */}
+        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800 mb-5">
+          <p className="text-zinc-500 mb-4">Informasi Member</p>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-zinc-500 text-sm">Nomor HP</p>
+              <p className="font-bold text-xl">{member.phone}</p>
+            </div>
+
+            <div>
+              <p className="text-zinc-500 text-sm">Kota</p>
+              <p className="font-bold text-xl">{member.city}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* TOMBOL UTAMA */}
+        <div className="space-y-3 mb-6">
+
+          {!isActive ? (
+            <Link
+              href="/member/produk"
+              className="h-14 rounded-2xl bg-green-500 text-black font-bold text-lg flex items-center justify-center"
+            >
+              Aktivasi Member
+            </Link>
+          ) : (
+            <Link
+              href="/member/produk"
+              className="h-14 rounded-2xl bg-green-500 text-black font-bold text-lg flex items-center justify-center"
+            >
+              Belanja Paket
+            </Link>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <Link
+              href="/member/transaksi"
+              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+            >
+              Transaksi
+            </Link>
+
+            <Link
+              href="/member/profile"
+              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+            >
+              Profil
+            </Link>
+
+            <Link
+              href="/member/referral"
+              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+            >
+              Referral
+            </Link>
+
+            <Link
+              href="/member/bantuan"
+              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800"
+            >
+              Bantuan
+            </Link>
+
+            <Link
+              href="/member/withdraw"
+              className="bg-zinc-900 h-14 rounded-2xl flex items-center justify-center font-bold border border-zinc-800 col-span-2"
+            >
+              Withdraw
+            </Link>
+
+          </div>
+        </div>
+
+        {/* LIVE AKTIVITAS */}
+        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg">
+              Aktivitas Member Hari Ini
+            </h3>
+
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          </div>
+
+          <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+
+            {activities.map((item, index) => (
+              <div
+                key={index}
+                className="bg-black rounded-2xl p-4 border border-zinc-800"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-bold">{item.name}</p>
+
+                  <span className="text-xs text-zinc-500">
+                    {item.city}
+                  </span>
+                </div>
+
+                <p className="text-sm text-zinc-300">
+                  {item.activity}
+                </p>
+              </div>
+            ))}
+
+          </div>
+        </div>
+
       </div>
-    </main>
+    </div>
   );
 }
