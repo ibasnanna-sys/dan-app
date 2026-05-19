@@ -10,9 +10,12 @@ export default function Home() {
           Platform paket data & referral modern.
         </p>
 
-        <button className="bg-green-500 text-black font-bold px-6 py-3 rounded-xl w-full">
-          Daftar Sekarang
-        </button>
+        <a
+  href="/register"
+  className="block bg-green-500 text-black font-bold py-4 px-6 rounded-xl text-center"
+>
+  Daftar Sekarang
+</a>
       </div>
     </main>
   )
