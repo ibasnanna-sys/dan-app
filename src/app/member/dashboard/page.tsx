@@ -108,50 +108,74 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 pb-28">
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <div>
-            <p className="text-zinc-500 text-lg mb-1">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5 mb-8">
+          <div className="min-w-0">
+            <p className="text-zinc-500 text-lg mb-2">
               Halo,
             </p>
 
-            <h1 className="text-4xl md:text-6xl font-black">
+            <h1 className="text-4xl md:text-6xl font-black break-words leading-tight">
               {member.name}
             </h1>
+
+            <div className="flex items-center gap-3 mt-5">
+              <div
+                className={`w-4 h-4 rounded-full ${
+                  member.status_member === "aktif"
+                    ? "bg-green-500"
+                    : member.status_member === "dibekukan"
+                    ? "bg-red-500"
+                    : "bg-yellow-400"
+                }`}
+              />
+
+              <h2
+                className={`text-2xl md:text-4xl font-black uppercase ${
+                  member.status_member === "aktif"
+                    ? "text-green-500"
+                    : member.status_member === "dibekukan"
+                    ? "text-red-500"
+                    : "text-yellow-400"
+                }`}
+              >
+                {member.status_member}
+              </h2>
+            </div>
           </div>
 
           <button
             onClick={logout}
-            className="bg-red-600 hover:bg-red-700 transition px-5 py-4 rounded-3xl font-bold"
+            className="bg-red-600 hover:bg-red-700 transition px-6 py-4 rounded-3xl font-bold text-lg shrink-0"
           >
             Logout
           </button>
         </div>
 
         {isFrozen && (
-          <div className="bg-red-600 text-white p-5 rounded-3xl mb-6 font-bold text-center">
-            Akun dibekukan karena tidak belanja selama 60 hari.
+          <div className="bg-red-600 border border-red-500 rounded-3xl p-5 mb-6">
+            <p className="font-black text-lg md:text-xl">
+              Akun Dibekukan
+            </p>
+
+            <p className="text-sm md:text-base mt-2 text-red-100 leading-relaxed">
+              Member tidak melakukan transaksi selama 60 hari.
+              Bonus referral dihentikan sementara sampai
+              melakukan belanja kembali.
+            </p>
           </div>
         )}
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-6">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-[36px] p-6 md:p-8">
-              <p className="text-zinc-500 text-lg mb-3">
-                Status Member
-              </p>
-
-              <h2 className="text-6xl md:text-8xl font-black uppercase mb-6">
-                {member.status_member}
-              </h2>
-
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-[36px] p-6 md:p-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-black/40 border border-zinc-800 rounded-3xl p-5">
-                  <p className="text-zinc-500 mb-2">
+                  <p className="text-zinc-500 text-sm mb-3">
                     Saldo Total
                   </p>
 
-                  <h3 className="text-3xl md:text-4xl font-black text-green-500">
+                  <h3 className="text-3xl md:text-4xl font-black text-green-500 break-words">
                     Rp{" "}
                     {Number(member.balance || 0).toLocaleString(
                       "id-ID"
@@ -160,7 +184,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="bg-black/40 border border-zinc-800 rounded-3xl p-5">
-                  <p className="text-zinc-500 mb-2">
+                  <p className="text-zinc-500 text-sm mb-3">
                     Total Referral
                   </p>
 
@@ -168,10 +192,30 @@ export default function DashboardPage() {
                     {referralCount}
                   </h3>
                 </div>
+
+                <div className="bg-black/40 border border-zinc-800 rounded-3xl p-5">
+                  <p className="text-zinc-500 text-sm mb-3">
+                    Bonus Sponsor
+                  </p>
+
+                  <h3 className="text-3xl md:text-4xl font-black text-green-500">
+                    Rp 0
+                  </h3>
+                </div>
+
+                <div className="bg-black/40 border border-zinc-800 rounded-3xl p-5">
+                  <p className="text-zinc-500 text-sm mb-3">
+                    Bonus Referral
+                  </p>
+
+                  <h3 className="text-3xl md:text-4xl font-black text-green-500">
+                    Rp 0
+                  </h3>
+                </div>
               </div>
 
               <div className="bg-black/40 border border-zinc-800 rounded-3xl p-5 mt-4">
-                <p className="text-zinc-500 mb-2">
+                <p className="text-zinc-500 text-sm mb-3">
                   Referral Code
                 </p>
 
@@ -179,25 +223,43 @@ export default function DashboardPage() {
                   {member.referral_code}
                 </h3>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-[36px] p-6 md:p-8">
+              <h3 className="text-2xl md:text-3xl font-black mb-6">
+                Menu Utama
+              </h3>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {!isActive ? (
                   <button
                     onClick={() =>
                       router.push("/member/produk")
                     }
-                    className="bg-green-500 hover:bg-green-400 transition text-black py-5 rounded-3xl text-lg md:text-xl font-black"
+                    className="bg-green-500 hover:bg-green-400 transition text-black rounded-3xl py-5 px-4"
                   >
-                    Aktivasi Member
+                    <p className="text-lg md:text-xl font-black">
+                      Aktivasi
+                    </p>
+
+                    <p className="text-sm font-medium mt-1">
+                      Member
+                    </p>
                   </button>
                 ) : (
                   <button
                     onClick={() =>
                       router.push("/member/produk")
                     }
-                    className="bg-green-500 hover:bg-green-400 transition text-black py-5 rounded-3xl text-lg md:text-xl font-black"
+                    className="bg-green-500 hover:bg-green-400 transition text-black rounded-3xl py-5 px-4"
                   >
-                    Belanja
+                    <p className="text-lg md:text-xl font-black">
+                      Belanja
+                    </p>
+
+                    <p className="text-sm font-medium mt-1">
+                      Paket Data
+                    </p>
                   </button>
                 )}
 
@@ -205,27 +267,75 @@ export default function DashboardPage() {
                   onClick={() =>
                     router.push("/member/referral")
                   }
-                  className="bg-zinc-800 hover:bg-zinc-700 transition py-5 rounded-3xl text-lg md:text-xl font-bold"
+                  className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700 rounded-3xl py-5 px-4"
                 >
-                  Referral
+                  <p className="text-lg md:text-xl font-black">
+                    Referral
+                  </p>
+
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Bonus & jaringan
+                  </p>
                 </button>
 
                 <button
                   onClick={() =>
                     router.push("/member/transaksi")
                   }
-                  className="bg-zinc-800 hover:bg-zinc-700 transition py-5 rounded-3xl text-lg md:text-xl font-bold"
+                  className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700 rounded-3xl py-5 px-4"
                 >
-                  Withdraw
+                  <p className="text-lg md:text-xl font-black">
+                    Transaksi
+                  </p>
+
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Riwayat transaksi
+                  </p>
+                </button>
+
+                <button
+                  onClick={() =>
+                    router.push("/member/withdraw")
+                  }
+                  className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700 rounded-3xl py-5 px-4"
+                >
+                  <p className="text-lg md:text-xl font-black">
+                    Withdraw
+                  </p>
+
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Tarik saldo
+                  </p>
                 </button>
 
                 <button
                   onClick={() =>
                     router.push("/member/bantuan")
                   }
-                  className="bg-zinc-800 hover:bg-zinc-700 transition py-5 rounded-3xl text-lg md:text-xl font-bold"
+                  className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700 rounded-3xl py-5 px-4"
                 >
-                  Bantuan
+                  <p className="text-lg md:text-xl font-black">
+                    Bantuan
+                  </p>
+
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Chat admin
+                  </p>
+                </button>
+
+                <button
+                  onClick={() =>
+                    router.push("/member/profile")
+                  }
+                  className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-700 rounded-3xl py-5 px-4"
+                >
+                  <p className="text-lg md:text-xl font-black">
+                    Profil
+                  </p>
+
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Data member
+                  </p>
                 </button>
               </div>
             </div>
@@ -243,7 +353,7 @@ export default function DashboardPage() {
                 </span>
               </div>
 
-              <div className="relative h-[500px] overflow-hidden">
+              <div className="relative h-[550px] overflow-hidden">
                 <div className="animate-scroll space-y-4">
                   {[...activities, ...activities].map(
                     (item, index) => (
@@ -251,11 +361,11 @@ export default function DashboardPage() {
                         key={index}
                         className="bg-black/40 border border-zinc-800 rounded-3xl p-4"
                       >
-                        <p className="font-bold text-lg">
+                        <p className="font-bold text-lg break-words">
                           {item.name} - {item.city}
                         </p>
 
-                        <p className="text-zinc-300 mt-1">
+                        <p className="text-zinc-300 mt-1 break-words">
                           {item.action}
                         </p>
 
@@ -268,55 +378,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="grid grid-cols-5 gap-3">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="bg-green-500 text-black rounded-2xl py-3 font-black text-sm"
-            >
-              Home
-            </button>
-
-            <button
-              onClick={() =>
-                router.push("/member/produk")
-              }
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl py-3 font-bold text-sm"
-            >
-              Produk
-            </button>
-
-            <button
-              onClick={() =>
-                router.push("/member/referral")
-              }
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl py-3 font-bold text-sm"
-            >
-              Referral
-            </button>
-
-            <button
-              onClick={() =>
-                router.push("/member/transaksi")
-              }
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl py-3 font-bold text-sm"
-            >
-              Riwayat
-            </button>
-
-            <button
-              onClick={() =>
-                router.push("/member/profile")
-              }
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl py-3 font-bold text-sm"
-            >
-              Profil
-            </button>
           </div>
         </div>
       </div>
