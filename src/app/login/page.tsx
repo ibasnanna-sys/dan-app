@@ -6,25 +6,23 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
-
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState("");
 
-  const [password, setPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
   async function handleLogin(
     e: React.FormEvent
   ) {
-
     e.preventDefault();
 
     setLoading(true);
 
     try {
-
       const { data } =
         await supabase
           .from("members")
@@ -34,7 +32,6 @@ export default function LoginPage() {
           .maybeSingle();
 
       if (!data) {
-
         alert(
           "Email atau password salah"
         );
@@ -48,16 +45,13 @@ export default function LoginPage() {
         JSON.stringify(data)
       );
 
-      alert(
-        "Login berhasil"
-      );
+      alert("Login berhasil");
 
       router.push(
         "/member/dashboard"
       );
 
     } catch {
-
       alert(
         "Terjadi kesalahan sistem"
       );
@@ -68,7 +62,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-black text-white px-5 py-10">
-
       <div className="max-w-md mx-auto">
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-[40px] p-8">
@@ -105,3 +98,45 @@ export default function LoginPage() {
               type="password"
               required
               placeholder="Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
+              }
+              className="w-full bg-black border border-zinc-800 rounded-2xl px-5 py-4 outline-none"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-500 text-black rounded-2xl py-4 font-black text-lg"
+            >
+              {loading
+                ? "Memproses..."
+                : "Login Sekarang"}
+            </button>
+
+          </form>
+
+          <div className="text-center mt-8">
+
+            <p className="text-zinc-400">
+              Belum punya akun?
+            </p>
+
+            <Link
+              href="/register"
+              className="text-green-500 font-bold inline-block mt-2"
+            >
+              Daftar di sini
+            </Link>
+
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  );
+}
