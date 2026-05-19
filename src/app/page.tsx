@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const activities = [
   {
     name: "Andi",
@@ -56,13 +58,19 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="px-5 py-2 rounded-xl border border-zinc-700 text-zinc-300 text-sm">
+              <Link
+                href="/login"
+                className="px-5 py-2 rounded-xl border border-zinc-700 text-zinc-300 text-sm flex items-center justify-center"
+              >
                 Login
-              </button>
+              </Link>
 
-              <button className="px-5 py-2 rounded-xl bg-lime-400 text-black font-semibold text-sm shadow-[0_0_25px_rgba(132,255,0,0.35)]">
+              <Link
+                href="/register"
+                className="px-5 py-2 rounded-xl bg-lime-400 text-black font-semibold text-sm flex items-center justify-center shadow-[0_0_25px_rgba(132,255,0,0.35)]"
+              >
                 Daftar Gratis
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -93,13 +101,19 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-lime-400 hover:bg-lime-300 transition text-black font-bold rounded-2xl px-8 py-4 text-lg shadow-[0_0_30px_rgba(132,255,0,0.35)]">
+                <Link
+                  href="/register"
+                  className="bg-lime-400 hover:bg-lime-300 transition text-black font-bold rounded-2xl px-8 py-4 text-lg shadow-[0_0_30px_rgba(132,255,0,0.35)] text-center"
+                >
                   Gabung Sekarang
-                </button>
+                </Link>
 
-                <button className="border border-zinc-700 hover:border-lime-400 hover:text-lime-400 transition rounded-2xl px-8 py-4 text-lg text-zinc-300">
+                <Link
+                  href="/login"
+                  className="border border-zinc-700 hover:border-lime-400 hover:text-lime-400 transition rounded-2xl px-8 py-4 text-lg text-zinc-300 text-center"
+                >
                   Login Member
-                </button>
+                </Link>
               </div>
 
               {/* STATS */}
@@ -142,11 +156,11 @@ export default function HomePage() {
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <h3 className="text-2xl font-bold">
-                      Dashboard Member
+                      Live Aktivitas Member
                     </h3>
 
                     <p className="text-zinc-500 text-sm mt-1">
-                      Affiliate digital modern
+                      Realtime aktivitas member DAN
                     </p>
                   </div>
 
@@ -308,9 +322,12 @@ export default function HomePage() {
                 modern dengan produk paket data yang digunakan setiap hari.
               </p>
 
-              <button className="bg-lime-400 hover:bg-lime-300 transition text-black font-bold rounded-2xl px-10 py-5 text-lg shadow-[0_0_30px_rgba(132,255,0,0.35)]">
+              <Link
+                href="/register"
+                className="bg-lime-400 hover:bg-lime-300 transition text-black font-bold rounded-2xl px-10 py-5 text-lg shadow-[0_0_30px_rgba(132,255,0,0.35)] inline-block"
+              >
                 Gabung Sekarang
-              </button>
+              </Link>
             </div>
           </section>
 
