@@ -1,309 +1,209 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import {
+  Copy,
+  Link2,
+  ShoppingBag,
+  Wallet,
+  Users,
+  User,
+  Headphones,
+  ArrowUpRight,
+  LogOut,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const member = {
     name: "Basri",
-    status: "FREE",
+    status: "FREE MEMBER",
     referralCode: "DAN614928",
-    referralLink: "https://dan-app.com/register?ref=DAN614928",
     saldo: 0,
     totalReferral: 0,
     bonusSponsor: 0,
     bonusReferral: 0,
   };
 
-  const activities = useMemo(
-    () => [
-      {
-        name: "Andi",
-        city: "Makassar",
-        action: "Aktivasi Member",
-        time: "1 menit lalu",
-      },
-      {
-        name: "Rina",
-        city: "Bone",
-        action: "Belanja Paket 25GB",
-        time: "3 menit lalu",
-      },
-      {
-        name: "Fajar",
-        city: "Jakarta",
-        action: "Bonus Referral Masuk",
-        time: "6 menit lalu",
-      },
-      {
-        name: "Dewi",
-        city: "Bandung",
-        action: "Belanja Paket Unlimited",
-        time: "10 menit lalu",
-      },
-      {
-        name: "Akbar",
-        city: "Surabaya",
-        action: "Aktivasi Member",
-        time: "15 menit lalu",
-      },
-    ],
-    []
-  );
-
-  const copyLink = async () => {
-    await navigator.clipboard.writeText(member.referralLink);
-    alert("Link referral berhasil disalin");
-  };
-
-  const copyCode = async () => {
-    await navigator.clipboard.writeText(member.referralCode);
-    alert("Kode referral berhasil disalin");
-  };
-
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
-        {/* HEADER */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-zinc-500 text-sm md:text-base">
-              Halo,
-            </p>
+    <main className="min-h-screen bg-black text-white px-5 py-6 overflow-hidden">
+      {/* BACKGROUND */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none" />
 
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-none mt-1">
+      <div className="relative max-w-md mx-auto">
+        {/* HEADER */}
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-5xl font-black tracking-tight">
               {member.name}
             </h1>
 
-            <div className="mt-5 inline-flex items-center gap-3 bg-zinc-900 border border-yellow-500/20 px-4 py-2 rounded-full">
-              <span className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)]"></span>
+            <div className="mt-5 inline-flex items-center gap-3 px-5 py-3 rounded-full border border-yellow-500/20 bg-yellow-500/10 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
+              <div className="w-4 h-4 rounded-full bg-yellow-400" />
 
-              <span className="text-yellow-400 font-bold tracking-wide text-sm md:text-base">
-                FREE MEMBER
+              <span className="text-yellow-300 font-bold text-lg">
+                {member.status}
               </span>
             </div>
           </div>
 
-          <button className="bg-red-600 hover:bg-red-700 transition-all duration-300 px-5 md:px-6 py-3 rounded-2xl font-bold text-sm shadow-[0_0_30px_rgba(220,38,38,0.35)]">
+          <button className="bg-red-600 hover:bg-red-500 transition px-6 py-4 rounded-3xl font-bold shadow-[0_0_30px_rgba(255,0,0,0.35)] flex items-center gap-2">
+            <LogOut size={22} />
             Logout
           </button>
         </div>
 
-        {/* HERO REFERRAL */}
-        <div className="mt-8 relative overflow-hidden rounded-[36px] border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 md:p-8 shadow-2xl">
-          <div className="absolute top-0 right-0 w-56 h-56 bg-green-500/10 blur-3xl rounded-full"></div>
+        {/* REFERRAL CARD */}
+        <div className="rounded-[38px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 mb-7 shadow-[0_0_40px_rgba(0,255,100,0.08)]">
+          <p className="text-zinc-500 text-xl mb-5">
+            Referral Code
+          </p>
 
-          <div className="relative z-10">
-            <p className="text-zinc-500 text-sm md:text-base">
-              Referral Code
+          <h2 className="text-6xl font-black tracking-tight mb-8">
+            {member.referralCode}
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button className="h-20 rounded-3xl border border-zinc-700 bg-black hover:border-lime-400 transition flex items-center justify-center gap-3 text-xl font-bold">
+              <Link2 size={24} />
+              Copy Link
+            </button>
+
+            <button className="h-20 rounded-3xl border border-zinc-700 bg-black hover:border-lime-400 transition flex items-center justify-center gap-3 text-xl font-bold">
+              <Copy size={24} />
+              Copy Kode
+            </button>
+          </div>
+        </div>
+
+        {/* STATS */}
+        <div className="grid grid-cols-2 gap-5 mb-7">
+          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
+            <p className="text-zinc-500 text-xl">
+              Saldo Total
             </p>
 
-            <h2 className="mt-3 text-4xl md:text-6xl font-black tracking-tight">
-              {member.referralCode}
-            </h2>
+            <h3 className="text-5xl font-black text-lime-400">
+              Rp {member.saldo}
+            </h3>
+          </div>
 
-            <div className="flex flex-wrap gap-3 mt-7">
-              <button
-                onClick={copyLink}
-                className="px-5 py-3 rounded-2xl bg-black border border-zinc-700 hover:border-green-500 transition-all font-semibold text-sm"
-              >
-                Copy Link
-              </button>
+          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
+            <p className="text-zinc-500 text-xl">
+              Total Referral
+            </p>
 
-              <button
-                onClick={copyCode}
-                className="px-5 py-3 rounded-2xl bg-black border border-zinc-700 hover:border-green-500 transition-all font-semibold text-sm"
-              >
-                Copy Kode
-              </button>
-            </div>
+            <h3 className="text-5xl font-black">
+              {member.totalReferral}
+            </h3>
+          </div>
+
+          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
+            <p className="text-zinc-500 text-xl">
+              Bonus Sponsor
+            </p>
+
+            <h3 className="text-5xl font-black">
+              Rp {member.bonusSponsor}
+            </h3>
+          </div>
+
+          <div className="rounded-[34px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-6 min-h-[180px] flex flex-col justify-between">
+            <p className="text-zinc-500 text-xl">
+              Bonus Referral
+            </p>
+
+            <h3 className="text-5xl font-black">
+              Rp {member.bonusReferral}
+            </h3>
           </div>
         </div>
 
-        {/* STATISTIK */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
-          <Card
-            title="Saldo Total"
-            value={`Rp ${member.saldo}`}
-            valueClass="text-green-400"
-            glow="green"
-          />
+        {/* AKTIVASI / BELANJA */}
+        <Link
+          href="/produk"
+          className="mb-7 rounded-[36px] bg-lime-400 text-black p-7 flex items-center justify-between shadow-[0_0_40px_rgba(0,255,100,0.45)]"
+        >
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-3xl bg-white/20 flex items-center justify-center">
+              <ShoppingBag size={38} />
+            </div>
 
-          <Card
-            title="Total Referral"
-            value={`${member.totalReferral}`}
-          />
+            <div>
+              <h3 className="text-3xl font-black leading-tight">
+                AKTIVASI MEMBER
+              </h3>
 
-          <Card
-            title="Bonus Sponsor"
-            value={`Rp ${member.bonusSponsor}`}
-          />
+              <p className="text-black/70 text-lg mt-1">
+                Klik untuk aktivasi & mulai belanja
+              </p>
+            </div>
+          </div>
 
-          <Card
-            title="Bonus Referral"
-            value={`Rp ${member.bonusReferral}`}
-          />
-        </div>
+          <ArrowUpRight size={40} />
+        </Link>
 
         {/* MENU */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-          <MenuButton
-            href="/member/produk"
-            label="Aktivasi Member"
-            active
-          />
+        <div className="grid grid-cols-2 gap-5">
+          <Link
+            href="/transaksi"
+            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+          >
+            <Wallet size={38} className="text-white" />
 
-          <MenuButton
-            href="/member/transaksi"
-            label="Transaksi"
-          />
+            <span className="text-2xl font-bold">
+              Transaksi
+            </span>
+          </Link>
 
-          <MenuButton
-            href="/member/referral"
-            label="Referral"
-          />
+          <Link
+            href="/referral"
+            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+          >
+            <Users size={38} className="text-white" />
 
-          <MenuButton
-            href="/member/profile"
-            label="Profil"
-          />
+            <span className="text-2xl font-bold">
+              Referral
+            </span>
+          </Link>
 
-          <MenuButton
-            href="/member/bantuan"
-            label="Bantuan"
-          />
+          <Link
+            href="/profil"
+            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+          >
+            <User size={38} className="text-white" />
 
-          <MenuButton
-            href="/member/withdraw"
-            label="Withdraw"
-          />
+            <span className="text-2xl font-bold">
+              Profil
+            </span>
+          </Link>
+
+          <Link
+            href="/bantuan"
+            className="rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-7 min-h-[150px] flex flex-col items-center justify-center gap-5 hover:border-lime-400 transition"
+          >
+            <Headphones size={38} className="text-white" />
+
+            <span className="text-2xl font-bold">
+              Bantuan
+            </span>
+          </Link>
         </div>
 
-        {/* LIVE AKTIVITAS */}
-        <div className="mt-10">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight">
-              Aktivitas Member
-            </h2>
+        {/* WITHDRAW */}
+        <Link
+          href="/withdraw"
+          className="mt-5 rounded-[32px] border border-zinc-800 bg-gradient-to-br from-zinc-950 to-black p-8 flex items-center justify-center gap-4 hover:border-lime-400 transition"
+        >
+          <ArrowUpRight size={34} />
 
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></span>
+          <span className="text-3xl font-bold">
+            Withdraw
+          </span>
+        </Link>
 
-              <span className="text-green-400 text-xs md:text-sm font-bold tracking-widest">
-                LIVE
-              </span>
-            </div>
-          </div>
-
-          <div className="relative h-[380px] overflow-hidden rounded-[32px] border border-zinc-800 bg-zinc-950 p-4">
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black to-transparent z-10"></div>
-
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black to-transparent z-10"></div>
-
-            <div className="animate-scroll space-y-4">
-              {[...activities, ...activities].map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-3xl border border-zinc-800 bg-zinc-900/80 backdrop-blur-xl p-5"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-bold text-lg">
-                        {item.name}
-                      </h3>
-
-                      <p className="text-zinc-500 text-sm mt-1">
-                        {item.city}
-                      </p>
-                    </div>
-
-                    <span className="text-zinc-500 text-xs whitespace-nowrap">
-                      {item.time}
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-white font-medium">
-                    {item.action}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* FOOTER SPACE */}
+        <div className="h-10" />
       </div>
-
-      <style jsx>{`
-        .animate-scroll {
-          animation: scrollUp 24s linear infinite;
-        }
-
-        @keyframes scrollUp {
-          0% {
-            transform: translateY(0%);
-          }
-
-          100% {
-            transform: translateY(-50%);
-          }
-        }
-      `}</style>
     </main>
-  );
-}
-
-function Card({
-  title,
-  value,
-  valueClass = "",
-  glow = "",
-}: {
-  title: string;
-  value: string;
-  valueClass?: string;
-  glow?: string;
-}) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[30px] border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-5 md:p-6 ${
-        glow === "green"
-          ? "shadow-[0_0_40px_rgba(34,197,94,0.12)]"
-          : ""
-      }`}
-    >
-      <div className="absolute top-0 right-0 w-28 h-28 bg-white/5 blur-3xl rounded-full"></div>
-
-      <p className="text-zinc-500 text-sm md:text-base relative z-10">
-        {title}
-      </p>
-
-      <h3
-        className={`relative z-10 mt-5 text-3xl md:text-4xl font-black tracking-tight ${valueClass}`}
-      >
-        {value}
-      </h3>
-    </div>
-  );
-}
-
-function MenuButton({
-  href,
-  label,
-  active = false,
-}: {
-  href: string;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`rounded-[26px] px-5 py-5 text-center font-bold transition-all duration-300 ${
-        active
-          ? "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_40px_rgba(34,197,94,0.35)]"
-          : "bg-zinc-900 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
-      }`}
-    >
-      {label}
-    </Link>
   );
 }
