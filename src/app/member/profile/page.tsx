@@ -3,50 +3,53 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import {
   ArrowLeft,
-  LogOut,
   Copy,
-  Share2,
-  Crown,
-  ShieldAlert,
-  Sparkles,
+  LogOut,
+  User,
   Mail,
   Phone,
   MapPin,
-  CalendarDays,
+  Calendar,
+  Crown,
+  ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 
-export default function ProfilePage() {
+type Member = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  status: "aktif" | "dibekukan" | "free";
+  referral_code: string;
+  created_at: string;
+};
 
+export default function ProfilePage() {
   const router = useRouter();
 
   const [member, setMember] =
-    useState<any>(null);
+    useState<Member | null>(null);
 
   const [loading, setLoading] =
     useState(true);
 
   useEffect(() => {
-
     loadMember();
-
   }, []);
 
   async function loadMember() {
-
     try {
-
       const memberId =
         localStorage.getItem("member_id");
 
       if (!memberId) {
-
         router.push("/login");
-
         return;
       }
 
@@ -58,33 +61,25 @@ export default function ProfilePage() {
           .single();
 
       if (error || !data) {
-
         localStorage.removeItem(
           "member_id"
         );
 
-        localStorage.removeItem(
-          "member"
-        );
-
         router.push("/login");
-
         return;
       }
 
       setMember(data);
-
-    } catch {
+    } catch (error) {
+      console.error(error);
 
       router.push("/login");
-
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
-  function logout() {
-
+  async function logout() {
     localStorage.removeItem(
       "member_id"
     );
@@ -96,35 +91,19 @@ export default function ProfilePage() {
     router.push("/login");
   }
 
-  function copyCode() {
+  function copyReferral() {
+    if (!member) return;
 
     navigator.clipboard.writeText(
       member.referral_code
     );
 
-    alert(
-      "Kode referral disalin"
-    );
+    alert("Kode referral disalin");
   }
 
-  function copyLink() {
-
-    const link =
-      `${window.location.origin}/register?ref=${member.referral_code}`;
-
-    navigator.clipboard.writeText(
-      link
-    );
-
-    alert(
-      "Link referral disalin"
-    );
-  }
-
-  if (loading) {
-
+  if (loading || !member) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center text-lg font-bold">
         Loading...
       </div>
     );
@@ -137,127 +116,80 @@ export default function ProfilePage() {
     member.status === "dibekukan";
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <main className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_35%)] pointer-events-none" />
 
-      <div className="fixed bottom-0 left-0 w-72 h-72 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
+      <div className="relative max-w-xl mx-auto px-5 py-6 pb-32">
 
-      <div className="relative max-w-5xl mx-auto p-5 pb-32">
-
-        {/* TOP BAR */}
-        <div className="flex items-center justify-between gap-4 mb-8">
+        {/* TOPBAR */}
+        <div className="flex items-center justify-between mb-8">
 
           <Link
             href="/member/dashboard"
-            className="inline-flex items-center gap-3 h-14 px-6 rounded-[24px] bg-zinc-900 border border-zinc-800 hover:border-green-500 transition font-black"
+            className="w-14 h-14 rounded-2xl border border-zinc-800 bg-zinc-900/80 flex items-center justify-center hover:border-green-500 transition"
           >
-
-            <ArrowLeft size={20} />
-
-            Dashboard
-
+            <ArrowLeft size={22} />
           </Link>
 
-          <button
-            onClick={logout}
-            className="inline-flex items-center gap-3 h-14 px-6 rounded-[24px] bg-red-600 hover:bg-red-500 transition font-black shadow-[0_0_30px_rgba(255,0,0,0.25)]"
-          >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
 
-            <LogOut size={20} />
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
 
-            Logout
+            <span className="text-green-400 text-sm font-black tracking-[0.2em]">
+              PROFILE
+            </span>
 
-          </button>
+          </div>
 
         </div>
 
         {/* HEADER */}
-        <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-7 shadow-[0_0_45px_rgba(0,255,100,0.08)]">
+        <div className="flex flex-col items-center text-center">
 
-          <div className="absolute top-0 right-0 w-72 h-72 bg-green-500/10 blur-[120px] rounded-full"></div>
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-black text-5xl font-black shadow-[0_0_45px_rgba(0,255,100,0.35)]">
 
-          <div className="relative z-10">
+            {member.name?.charAt(0)}
 
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
+          </div>
 
-              {/* AVATAR */}
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-5xl font-black text-black shadow-[0_0_40px_rgba(0,255,100,0.45)]">
+          <h1 className="text-5xl font-black mt-6 break-words">
+            {member.name}
+          </h1>
 
-                {member.name?.charAt(0)}
+          <p className="text-zinc-500 mt-3">
+            Digital Affiliate Network
+          </p>
 
-              </div>
+          {/* STATUS */}
+          <div className="mt-6">
 
-              {/* INFO */}
-              <div className="flex-1">
+            <div
+              className={`inline-flex items-center gap-3 px-5 py-3 rounded-full border ${
+                isActive
+                  ? "bg-green-500/10 border-green-500/20 text-green-400"
+                  : isFrozen
+                  ? "bg-red-500/10 border-red-500/20 text-red-400"
+                  : "bg-yellow-500/10 border-yellow-500/20 text-yellow-300"
+              }`}
+            >
 
-                <p className="text-zinc-500 text-sm tracking-[0.2em] uppercase">
-                  Digital Affiliate Network
-                </p>
+              {isActive ? (
+                <Crown size={18} />
+              ) : isFrozen ? (
+                <ShieldAlert size={18} />
+              ) : (
+                <Sparkles size={18} />
+              )}
 
-                <h1 className="text-5xl md:text-6xl font-black leading-tight mt-3 break-words">
-                  {member.name}
-                </h1>
-
-                {/* STATUS */}
-                <div className="mt-5">
-
-                  {isActive && (
-
-                    <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-green-500/10 border border-green-500/20 shadow-[0_0_30px_rgba(0,255,100,0.18)]">
-
-                      <Crown
-                        size={18}
-                        className="text-green-400"
-                      />
-
-                      <span className="text-green-400 font-black uppercase tracking-wide">
-                        MEMBER AKTIF
-                      </span>
-
-                    </div>
-
-                  )}
-
-                  {isFrozen && (
-
-                    <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-orange-500/10 border border-orange-500/20 shadow-[0_0_30px_rgba(255,120,0,0.18)]">
-
-                      <ShieldAlert
-                        size={18}
-                        className="text-orange-400"
-                      />
-
-                      <span className="text-orange-400 font-black uppercase tracking-wide">
-                        AKUN DIBEKUKAN
-                      </span>
-
-                    </div>
-
-                  )}
-
-                  {!isActive &&
-                    !isFrozen && (
-
-                    <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-yellow-500/10 border border-yellow-500/20 shadow-[0_0_30px_rgba(255,215,0,0.12)]">
-
-                      <Sparkles
-                        size={18}
-                        className="text-yellow-400"
-                      />
-
-                      <span className="text-yellow-400 font-black uppercase tracking-wide">
-                        FREE MEMBER
-                      </span>
-
-                    </div>
-
-                  )}
-
-                </div>
-
-              </div>
+              <span className="font-black uppercase tracking-wider">
+                {isActive
+                  ? "Member Aktif"
+                  : isFrozen
+                  ? "Akun Dibekukan"
+                  : "Free Member"}
+              </span>
 
             </div>
 
@@ -265,197 +197,121 @@ export default function ProfilePage() {
 
         </div>
 
-        {/* REFERRAL CARD */}
-        <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-7 mt-7 shadow-[0_0_40px_rgba(0,255,100,0.08)]">
+        {/* REFERRAL */}
+        <div className="relative overflow-hidden mt-10 rounded-[36px] border border-green-500/20 bg-green-500/10 p-6 shadow-[0_0_40px_rgba(0,255,100,0.10)]">
 
-          <div className="absolute top-0 right-0 w-60 h-60 bg-green-500/10 blur-3xl rounded-full"></div>
+          <div className="absolute top-0 right-0 w-48 h-48 bg-green-400/10 blur-3xl rounded-full" />
 
           <div className="relative z-10">
 
-            <p className="text-zinc-500 text-sm">
+            <p className="text-green-300/70 text-sm uppercase tracking-widest">
               Referral Code
             </p>
 
-            <h2 className="text-5xl md:text-7xl font-black text-green-400 tracking-tight mt-4 break-words">
+            <h2 className="text-5xl font-black text-green-400 mt-4 break-all">
               {member.referral_code}
             </h2>
 
-            <p className="text-2xl font-black leading-relaxed mt-7 max-w-3xl">
-              Bagikan referralmu sekarang dan bangun jaringan affiliate digital modern bersama DAN.
-            </p>
+            <button
+              onClick={copyReferral}
+              className="mt-6 h-14 px-6 rounded-2xl bg-black/40 border border-green-500/20 hover:border-green-400 transition flex items-center gap-3 font-bold"
+            >
 
-            {/* BUTTONS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+              <Copy size={18} />
 
-              <button
-                onClick={copyCode}
-                className="h-16 rounded-[24px] bg-zinc-900 border border-zinc-800 hover:border-green-500 transition text-lg font-black flex items-center justify-center gap-3"
-              >
+              Copy Referral
 
-                <Copy size={20} />
-
-                Copy Kode
-
-              </button>
-
-              <button
-                onClick={copyLink}
-                className="h-16 rounded-[24px] bg-green-500 hover:bg-green-400 transition text-black text-lg font-black shadow-[0_0_35px_rgba(0,255,100,0.30)] flex items-center justify-center gap-3"
-              >
-
-                <Share2 size={20} />
-
-                Copy Link
-
-              </button>
-
-            </div>
+            </button>
 
           </div>
 
         </div>
 
-        {/* MEMBER INFO */}
-        <div className="grid md:grid-cols-2 gap-5 mt-7">
+        {/* INFO */}
+        <div className="space-y-5 mt-8">
 
-          {/* EMAIL */}
-          <div className="rounded-[34px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="rounded-[30px] border border-zinc-800 bg-white/[0.03] p-5">
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-zinc-500">
 
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <Mail size={18} />
 
-                <Mail
-                  size={24}
-                  className="text-green-400"
-                />
-
-              </div>
-
-              <div>
-
-                <p className="text-zinc-500 text-sm">
-                  Email
-                </p>
-
-                <h2 className="text-2xl font-black mt-1 break-all">
-                  {member.email}
-                </h2>
-
-              </div>
+              Email
 
             </div>
+
+            <h2 className="text-2xl font-black mt-4 break-words">
+              {member.email}
+            </h2>
 
           </div>
 
-          {/* PHONE */}
-          <div className="rounded-[34px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="rounded-[30px] border border-zinc-800 bg-white/[0.03] p-5">
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-zinc-500">
 
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <Phone size={18} />
 
-                <Phone
-                  size={24}
-                  className="text-green-400"
-                />
-
-              </div>
-
-              <div>
-
-                <p className="text-zinc-500 text-sm">
-                  Nomor HP
-                </p>
-
-                <h2 className="text-2xl font-black mt-1">
-                  {member.phone}
-                </h2>
-
-              </div>
+              Nomor HP
 
             </div>
+
+            <h2 className="text-2xl font-black mt-4">
+              {member.phone}
+            </h2>
 
           </div>
 
-          {/* CITY */}
-          <div className="rounded-[34px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="rounded-[30px] border border-zinc-800 bg-white/[0.03] p-5">
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-zinc-500">
 
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <MapPin size={18} />
 
-                <MapPin
-                  size={24}
-                  className="text-green-400"
-                />
-
-              </div>
-
-              <div>
-
-                <p className="text-zinc-500 text-sm">
-                  Kota
-                </p>
-
-                <h2 className="text-2xl font-black mt-1">
-                  {member.city}
-                </h2>
-
-              </div>
+              Kota
 
             </div>
+
+            <h2 className="text-2xl font-black mt-4">
+              {member.city}
+            </h2>
 
           </div>
 
-          {/* CREATED */}
-          <div className="rounded-[34px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="rounded-[30px] border border-zinc-800 bg-white/[0.03] p-5">
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-zinc-500">
 
-              <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <Calendar size={18} />
 
-                <CalendarDays
-                  size={24}
-                  className="text-green-400"
-                />
-
-              </div>
-
-              <div>
-
-                <p className="text-zinc-500 text-sm">
-                  Tanggal Daftar
-                </p>
-
-                <h2 className="text-2xl font-black mt-1">
-                  {new Date(
-                    member.created_at
-                  ).toLocaleDateString(
-                    "id-ID"
-                  )}
-                </h2>
-
-              </div>
+              Tanggal Daftar
 
             </div>
+
+            <h2 className="text-2xl font-black mt-4">
+              {new Date(
+                member.created_at
+              ).toLocaleDateString("id-ID")}
+            </h2>
 
           </div>
 
         </div>
 
-        {/* CTA */}
-        <Link
-          href="/member/dashboard"
-          className="w-full h-16 mt-7 rounded-[28px] bg-gradient-to-r from-green-500 to-lime-400 hover:scale-[1.01] transition text-black text-xl font-black shadow-[0_0_40px_rgba(0,255,100,0.30)] flex items-center justify-center"
+        {/* ACTION */}
+        <button
+          onClick={logout}
+          className="w-full h-16 mt-10 rounded-[28px] bg-red-600 hover:bg-red-500 transition text-white text-xl font-black shadow-[0_0_35px_rgba(255,0,0,0.30)] flex items-center justify-center gap-3"
         >
 
-          Kembali Ke Dashboard
+          <LogOut size={22} />
 
-        </Link>
+          Logout
+
+        </button>
 
       </div>
 
-    </div>
+    </main>
   );
 }
