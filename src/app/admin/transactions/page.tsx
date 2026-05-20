@@ -1,0 +1,320 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import {
+  ArrowLeft,
+  Wallet,
+  ShieldCheck,
+  XCircle,
+  Clock3,
+  Users,
+} from "lucide-react";
+
+type Transaction = {
+  id: number;
+  memberName: string;
+  city: string;
+  product: string;
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  memberStatus: "free" | "aktif" | "dibekukan";
+  createdAt: string;
+};
+
+export default function AdminTransactionsPage() {
+
+  const [transactions, setTransactions] =
+    useState<Transaction[]>([]);
+
+  useEffect(() => {
+
+    const stored =
+      localStorage.getItem(
+        "dan-transactions"
+      );
+
+    if (stored) {
+
+      setTransactions(
+        JSON.parse(stored)
+      );
+
+    } else {
+
+      const dummy = [
+        {
+          id: 1001,
+          memberName: "Akbar",
+          city: "Makassar",
+          product:
+            "Paket Aktivasi DAN",
+          amount: 350000,
+          status: "pending",
+          memberStatus: "free",
+          createdAt: "2 menit lalu",
+        },
+        {
+          id: 1002,
+          memberName: "Dewi",
+          city: "Bandung",
+          product:
+            "Paket Unlimited",
+          amount: 500000,
+          status: "approved",
+          memberStatus: "aktif",
+          createdAt: "8 menit lalu",
+        },
+      ];
+
+      localStorage.setItem(
+        "dan-transactions",
+        JSON.stringify(dummy)
+      );
+
+      setTransactions(dummy);
+
+    }
+
+  }, []);
+
+  function updateStatus(
+    id: number,
+    status:
+      | "approved"
+      | "rejected"
+  ) {
+
+    const updated =
+      transactions.map((trx) => {
+
+        if (trx.id === id) {
+
+          return {
+            ...trx,
+            status,
+            memberStatus:
+              status === "approved"
+                ? "aktif"
+                : "free",
+          };
+        }
+
+        return trx;
+
+      });
+
+    setTransactions(updated);
+
+    localStorage.setItem(
+      "dan-transactions",
+      JSON.stringify(updated)
+    );
+
+    const members =
+      updated.map((trx) => ({
+        id: trx.id,
+        name: trx.memberName,
+        city: trx.city,
+        status: trx.memberStatus,
+        transactionStatus:
+          trx.status,
+      }));
+
+    localStorage.setItem(
+      "dan-members",
+      JSON.stringify(members)
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-black text-white">
+
+      <div className="max-w-7xl mx-auto px-4 py-6 pb-32">
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-10">
+
+          <div>
+
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 h-12 px-5 rounded-2xl border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all text-sm font-bold mb-5"
+            >
+
+              <ArrowLeft size={18} />
+
+              Kembali
+
+            </Link>
+
+            <h1 className="text-5xl md:text-6xl font-black">
+              Approval
+              <span className="text-green-400">
+                {" "}
+                Transaksi
+              </span>
+            </h1>
+
+            <p className="text-zinc-500 mt-5 max-w-2xl">
+              Approval aktivasi
+              member & transaksi
+              realtime platform DAN.
+            </p>
+
+          </div>
+
+          <div className="h-16 px-6 rounded-3xl border border-green-500/20 bg-green-500/10 flex items-center gap-3">
+
+            <Wallet className="text-green-400" />
+
+            <span className="font-black text-green-400">
+              {
+                transactions.filter(
+                  (trx) =>
+                    trx.status ===
+                    "pending"
+                ).length
+              }{" "}
+              Pending
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* LIST */}
+        <div className="space-y-5">
+
+          {transactions.map((trx) => (
+
+            <div
+              key={trx.id}
+              className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6"
+            >
+
+              <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+
+                {/* LEFT */}
+                <div>
+
+                  <div className="flex items-center gap-3 flex-wrap">
+
+                    <h2 className="text-3xl font-black">
+                      {
+                        trx.memberName
+                      }
+                    </h2>
+
+                    <div
+                      className={`px-4 py-2 rounded-full text-xs font-black ${
+                        trx.status ===
+                        "approved"
+                          ? "bg-green-500/20 text-green-400"
+                          : trx.status ===
+                            "rejected"
+                          ? "bg-red-500/20 text-red-400"
+                          : "bg-yellow-500/20 text-yellow-300"
+                      }`}
+                    >
+
+                      {trx.status}
+
+                    </div>
+
+                  </div>
+
+                  <div className="flex flex-wrap gap-5 mt-5 text-zinc-400">
+
+                    <div className="flex items-center gap-2">
+
+                      <Users size={16} />
+
+                      {trx.city}
+
+                    </div>
+
+                    <div className="flex items-center gap-2">
+
+                      <Wallet size={16} />
+
+                      Rp{" "}
+                      {trx.amount.toLocaleString(
+                        "id-ID"
+                      )}
+
+                    </div>
+
+                    <div className="flex items-center gap-2">
+
+                      <Clock3 size={16} />
+
+                      {
+                        trx.createdAt
+                      }
+
+                    </div>
+
+                  </div>
+
+                  <p className="mt-5 text-lg text-zinc-300">
+                    {trx.product}
+                  </p>
+
+                </div>
+
+                {/* RIGHT */}
+                <div className="flex flex-wrap gap-3">
+
+                  <button
+                    onClick={() =>
+                      updateStatus(
+                        trx.id,
+                        "approved"
+                      )
+                    }
+                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 transition-all flex items-center gap-2 font-black text-black"
+                  >
+
+                    <ShieldCheck
+                      size={20}
+                    />
+
+                    Approve
+
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      updateStatus(
+                        trx.id,
+                        "rejected"
+                      )
+                    }
+                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 transition-all flex items-center gap-2 font-black"
+                  >
+
+                    <XCircle
+                      size={20}
+                    />
+
+                    Reject
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
+    </main>
+  );
+                    }
