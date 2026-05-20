@@ -8,7 +8,6 @@ import {
   Wallet,
   Users,
   Gift,
-  ArrowRight,
   Bell,
   User,
   CreditCard,
@@ -20,13 +19,23 @@ import {
   ShoppingBag,
   Crown,
   TrendingUp,
+  ArrowRight,
 } from "lucide-react";
 
 export default function Home() {
 
-  const memberStatus: "free" | "aktif" | "dibekukan" = "free";
+  const memberStatus =
+    "free" as
+      | "free"
+      | "aktif"
+      | "dibekukan";
 
-  const activities = [
+  const activities: {
+    name: string;
+    city: string;
+    activity: string;
+    time: string;
+  }[] = [
     {
       name: "Akbar",
       city: "Surabaya",
@@ -56,6 +65,7 @@ export default function Home() {
   function renderMemberBadge() {
 
     if (memberStatus === "aktif") {
+
       return (
         <div className="flex items-center gap-3 mt-5">
 
@@ -70,6 +80,7 @@ export default function Home() {
     }
 
     if (memberStatus === "dibekukan") {
+
       return (
         <div className="flex items-center gap-3 mt-5">
 
@@ -99,19 +110,21 @@ export default function Home() {
   function renderGreeting() {
 
     if (memberStatus === "aktif") {
+
       return (
         <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
           Selamat datang kembali di ekosistem affiliate modern DAN.
-          Bangun jaringan digitalmu, kelola transaksi, dan tingkatkan penghasilanmu langsung dari dashboard premium ini.
+          Bangun jaringan digitalmu dan tingkatkan penghasilan langsung dari dashboard premium ini.
         </p>
       );
     }
 
     if (memberStatus === "dibekukan") {
+
       return (
         <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
           Akunmu sedang dibekukan sementara.
-          Lakukan transaksi pembelian untuk mengaktifkan kembali seluruh fitur affiliate dan layanan digital DAN.
+          Lakukan transaksi pembelian untuk mengaktifkan kembali seluruh fitur affiliate DAN.
         </p>
       );
     }
@@ -119,7 +132,7 @@ export default function Home() {
     return (
       <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
         Selamat datang di Digital Affiliate Network.
-        Aktifkan akunmu untuk membuka seluruh fitur premium dan mulai membangun penghasilan digital modern bersama DAN.
+        Aktifkan akunmu sekarang dan mulai membangun penghasilan digital modern bersama DAN.
       </p>
     );
   }
@@ -149,11 +162,11 @@ export default function Home() {
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-              Bangun jaringan digital yang menghasilkan bersama ekosistem affiliate modern DAN.
+              Bangun jaringan digital yang menghasilkan bersama DAN.
             </h2>
 
             <p className="text-green-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-              Bagikan referralmu sekarang dan nikmati seluruh fitur premium untuk mengembangkan jaringan affiliate digital tanpa batas.
+              Nikmati seluruh fitur premium dan bangun penghasilan affiliate digital tanpa batas.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
@@ -208,11 +221,11 @@ export default function Home() {
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-              Aktifkan kembali akunmu untuk melanjutkan seluruh aktivitas digital bersama DAN.
+              Aktifkan kembali akunmu untuk melanjutkan aktivitas digital.
             </h2>
 
             <p className="text-orange-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-              Lakukan transaksi pembelian untuk mengaktifkan kembali fitur referral, transaksi digital, dan seluruh layanan premium DAN secara otomatis.
+              Lakukan transaksi pembelian untuk membuka kembali seluruh fitur DAN secara otomatis.
             </p>
 
             <Link
@@ -253,11 +266,11 @@ export default function Home() {
           </div>
 
           <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-            Aktifkan akunmu sekarang dan mulai membangun penghasilan digital bersama DAN.
+            Aktifkan akunmu sekarang dan mulai membangun penghasilan digital.
           </h2>
 
           <p className="text-yellow-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-            Buka seluruh fitur premium DAN dan nikmati pengalaman affiliate digital modern langsung dari dashboard eksklusif ini.
+            Buka seluruh fitur premium DAN dan nikmati pengalaman affiliate modern langsung dari dashboard eksklusif ini.
           </p>
 
           <Link
@@ -286,7 +299,6 @@ export default function Home() {
 
       <div className="max-w-6xl mx-auto px-5 py-6 md:px-8 relative z-10">
 
-        {/* HEADER */}
         <div className="flex items-start justify-between gap-5 flex-wrap">
 
           <div>
@@ -325,62 +337,136 @@ export default function Home() {
 
         </div>
 
-        {/* STATUS */}
         {renderStatusCard()}
 
-        {/* REFERRAL */}
-        <div className="relative overflow-hidden mt-8 rounded-[38px] border border-zinc-800/80 bg-white/[0.03] backdrop-blur-xl p-6 md:p-8 shadow-[0_0_45px_rgba(0,255,100,0.06)]">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-8">
 
-          <div className="absolute top-0 right-0 w-72 h-72 bg-green-500/10 blur-[140px] rounded-full"></div>
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
 
-          <div className="relative z-10">
+            <div className="flex items-center justify-between">
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
+              <p className="text-zinc-500 text-sm">
+                Saldo Total
+              </p>
 
-              <Users
-                size={16}
+              <Wallet
+                size={18}
                 className="text-green-400"
               />
 
-              <span className="text-green-400 text-sm font-black tracking-[0.2em]">
-                REFERRAL SYSTEM
-              </span>
-
             </div>
 
-            <p className="text-zinc-500 text-sm uppercase tracking-wider mt-6">
-              Referral Code
-            </p>
-
-            <h2 className="text-5xl md:text-7xl font-black mt-4 tracking-tight">
-              DAN614928
+            <h2 className="text-green-400 text-4xl font-black mt-5">
+              Rp 0
             </h2>
 
-            <div className="flex flex-wrap gap-3 mt-8">
+          </div>
 
-              <button className="h-14 px-6 rounded-[22px] bg-black border border-zinc-800 hover:border-green-500 transition flex items-center gap-3 text-sm font-bold">
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
 
-                <Copy size={18} />
+            <div className="flex items-center justify-between">
 
-                Copy Link
+              <p className="text-zinc-500 text-sm">
+                Total Referral
+              </p>
 
-              </button>
-
-              <button className="h-14 px-6 rounded-[22px] bg-black border border-zinc-800 hover:border-green-500 transition flex items-center gap-3 text-sm font-bold">
-
-                <Copy size={18} />
-
-                Copy Kode
-
-              </button>
+              <Users
+                size={18}
+                className="text-white"
+              />
 
             </div>
 
-            <p className="text-zinc-400 text-sm leading-relaxed mt-6 max-w-2xl">
-              Bangun jaringan affiliate digital modern bersama DAN dan dapatkan peluang penghasilan dari aktivitas referral tanpa batas.
-            </p>
+            <h2 className="text-4xl font-black mt-5">
+              0
+            </h2>
 
           </div>
+
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+
+            <div className="flex items-center justify-between">
+
+              <p className="text-zinc-500 text-sm">
+                Bonus Sponsor
+              </p>
+
+              <Gift
+                size={18}
+                className="text-white"
+              />
+
+            </div>
+
+            <h2 className="text-4xl font-black mt-5">
+              Rp 0
+            </h2>
+
+          </div>
+
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+
+            <div className="flex items-center justify-between">
+
+              <p className="text-zinc-500 text-sm">
+                Bonus Referral
+              </p>
+
+              <BadgeDollarSign
+                size={18}
+                className="text-white"
+              />
+
+            </div>
+
+            <h2 className="text-4xl font-black mt-5">
+              Rp 0
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+
+          <Link
+            href="/member/transaksi"
+            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+          >
+
+            <Wallet size={34} />
+
+            <h2 className="text-2xl font-black mt-6">
+              Transaksi
+            </h2>
+
+          </Link>
+
+          <Link
+            href="/member/referral"
+            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+          >
+
+            <Users size={34} />
+
+            <h2 className="text-2xl font-black mt-6">
+              Referral
+            </h2>
+
+          </Link>
+
+          <Link
+            href="/member/profile"
+            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+          >
+
+            <User size={34} />
+
+            <h2 className="text-2xl font-black mt-6">
+              Profil
+            </h2>
+
+          </Link>
 
         </div>
 
