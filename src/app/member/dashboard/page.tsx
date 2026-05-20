@@ -4,35 +4,38 @@ import Link from "next/link";
 import { useState } from "react";
 
 import {
-  Copy,
   LogOut,
   Wallet,
   Users,
   Gift,
   Bell,
   User,
-  CreditCard,
-  Megaphone,
   ShieldCheck,
   Sparkles,
-  Activity,
   BadgeDollarSign,
   ShoppingBag,
   Crown,
   TrendingUp,
   ArrowRight,
+  CreditCard,
+  Megaphone,
 } from "lucide-react";
 
 export default function Home() {
 
-  const [memberStatus] = useState<"free" | "aktif" | "dibekukan">("free");
+  /*
+    STATUS:
+    - free
+    - aktif
+    - dibekukan
+  */
 
-  const activities: {
-    name: string;
-    city: string;
-    activity: string;
-    time: string;
-  }[] = [
+  const [memberStatus] =
+    useState<"free" | "aktif" | "dibekukan">(
+      "free"
+    );
+
+  const activities = [
     {
       name: "Akbar",
       city: "Surabaya",
@@ -66,9 +69,9 @@ export default function Home() {
       return (
         <div className="flex items-center gap-3 mt-5">
 
-          <div className="w-4 h-4 rounded-full bg-green-400 shadow-[0_0_25px_rgba(0,255,120,0.9)]"></div>
+          <div className="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_20px_rgba(0,255,120,1)]"></div>
 
-          <span className="text-green-400 font-black text-xl uppercase">
+          <span className="text-green-400 font-black text-sm md:text-lg tracking-[0.2em] uppercase">
             MEMBER AKTIF
           </span>
 
@@ -81,9 +84,9 @@ export default function Home() {
       return (
         <div className="flex items-center gap-3 mt-5">
 
-          <div className="w-4 h-4 rounded-full bg-orange-400 shadow-[0_0_25px_rgba(255,120,0,0.9)]"></div>
+          <div className="w-3 h-3 rounded-full bg-orange-400 shadow-[0_0_20px_rgba(255,120,0,1)]"></div>
 
-          <span className="text-orange-400 font-black text-xl uppercase">
+          <span className="text-orange-400 font-black text-sm md:text-lg tracking-[0.2em] uppercase">
             AKUN DIBEKUKAN
           </span>
 
@@ -94,9 +97,9 @@ export default function Home() {
     return (
       <div className="flex items-center gap-3 mt-5">
 
-        <div className="w-4 h-4 rounded-full bg-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.9)]"></div>
+        <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,1)]"></div>
 
-        <span className="text-yellow-400 font-black text-xl uppercase">
+        <span className="text-yellow-400 font-black text-sm md:text-lg tracking-[0.2em] uppercase">
           FREE MEMBER
         </span>
 
@@ -109,9 +112,9 @@ export default function Home() {
     if (memberStatus === "aktif") {
 
       return (
-        <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
-          Selamat datang kembali di ekosistem affiliate modern DAN.
-          Bangun jaringan digitalmu dan tingkatkan penghasilan langsung dari dashboard premium ini.
+        <p className="text-zinc-400 mt-5 text-sm md:text-lg max-w-2xl leading-relaxed">
+          Selamat datang kembali di Digital Affiliate Network.
+          Nikmati seluruh fitur premium DAN dan mulai bangun penghasilan digital modern langsung dari dashboard ini.
         </p>
       );
     }
@@ -119,29 +122,29 @@ export default function Home() {
     if (memberStatus === "dibekukan") {
 
       return (
-        <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
+        <p className="text-zinc-400 mt-5 text-sm md:text-lg max-w-2xl leading-relaxed">
           Akunmu sedang dibekukan sementara.
-          Lakukan transaksi pembelian untuk mengaktifkan kembali seluruh fitur affiliate DAN.
+          Lakukan pembelian paket data untuk mengaktifkan kembali seluruh fitur member DAN.
         </p>
       );
     }
 
     return (
-      <p className="text-zinc-400 mt-4 text-base md:text-lg max-w-2xl leading-relaxed">
+      <p className="text-zinc-400 mt-5 text-sm md:text-lg max-w-2xl leading-relaxed">
         Selamat datang di Digital Affiliate Network.
-        Aktifkan akunmu sekarang dan mulai membangun penghasilan digital modern bersama DAN.
+        Aktivasi akunmu sekarang untuk membuka seluruh fitur premium dan mulai menghasilkan bersama DAN.
       </p>
     );
   }
 
-  function renderStatusCard() {
+  function renderHeroCard() {
 
     if (memberStatus === "aktif") {
 
       return (
-        <div className="relative overflow-hidden mt-8 rounded-[38px] border border-green-500/20 bg-green-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(0,255,100,0.12)]">
+        <div className="relative overflow-hidden mt-8 rounded-[32px] md:rounded-[40px] border border-green-500/20 bg-green-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(0,255,100,0.10)]">
 
-          <div className="absolute top-0 right-0 w-72 h-72 bg-green-400/10 blur-[140px] rounded-full"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-green-500/10 blur-[140px] rounded-full"></div>
 
           <div className="relative z-10">
 
@@ -152,29 +155,32 @@ export default function Home() {
                 className="text-green-400"
               />
 
-              <span className="text-green-400 text-sm font-black tracking-[0.2em]">
-                MEMBER AKTIF
+              <span className="text-green-400 text-xs md:text-sm font-black tracking-[0.2em]">
+                PREMIUM MEMBER
               </span>
 
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-              Bangun jaringan digital yang menghasilkan bersama DAN.
+              Bangun jaringan digital modern dan hasilkan bonus tanpa batas.
             </h2>
 
             <p className="text-green-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-              Nikmati seluruh fitur premium dan bangun penghasilan affiliate digital tanpa batas.
+              Seluruh fitur premium DAN sudah aktif dan siap digunakan untuk membangun bisnis affiliate digitalmu.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
 
-              <button className="inline-flex h-14 px-7 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(0,255,120,0.20)]">
+              <Link
+                href="/member/produk"
+                className="inline-flex h-14 px-7 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(0,255,120,0.25)]"
+              >
 
-                <Users size={20} />
+                <ShoppingBag size={20} />
 
-                Bagikan Referral
+                Belanja Paket Data
 
-              </button>
+              </Link>
 
               <Link
                 href="/member/referral"
@@ -198,9 +204,9 @@ export default function Home() {
     if (memberStatus === "dibekukan") {
 
       return (
-        <div className="relative overflow-hidden mt-8 rounded-[38px] border border-orange-500/20 bg-orange-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(255,120,0,0.10)]">
+        <div className="relative overflow-hidden mt-8 rounded-[32px] md:rounded-[40px] border border-orange-500/20 bg-orange-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(255,120,0,0.10)]">
 
-          <div className="absolute top-0 right-0 w-72 h-72 bg-orange-400/10 blur-[140px] rounded-full"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-orange-500/10 blur-[140px] rounded-full"></div>
 
           <div className="relative z-10">
 
@@ -211,28 +217,28 @@ export default function Home() {
                 className="text-orange-400"
               />
 
-              <span className="text-orange-400 text-sm font-black tracking-[0.2em]">
+              <span className="text-orange-400 text-xs md:text-sm font-black tracking-[0.2em]">
                 AKUN DIBEKUKAN
               </span>
 
             </div>
 
             <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-              Aktifkan kembali akunmu untuk melanjutkan aktivitas digital.
+              Aktifkan kembali akunmu untuk membuka fitur member premium.
             </h2>
 
             <p className="text-orange-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-              Lakukan transaksi pembelian untuk membuka kembali seluruh fitur DAN secara otomatis.
+              Lakukan pembelian paket data agar akun aktif kembali secara otomatis.
             </p>
 
             <Link
               href="/member/produk"
-              className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-orange-500 hover:bg-orange-400 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(255,120,0,0.20)]"
+              className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-orange-500 hover:bg-orange-400 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(255,120,0,0.25)]"
             >
 
               <ShoppingBag size={20} />
 
-              Belanja Sekarang
+              Belanja Paket Data
 
             </Link>
 
@@ -243,7 +249,7 @@ export default function Home() {
     }
 
     return (
-      <div className="relative overflow-hidden mt-8 rounded-[38px] border border-yellow-500/20 bg-yellow-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(250,204,21,0.12)]">
+      <div className="relative overflow-hidden mt-8 rounded-[32px] md:rounded-[40px] border border-yellow-500/20 bg-yellow-500/10 p-6 md:p-8 shadow-[0_0_45px_rgba(250,204,21,0.10)]">
 
         <div className="absolute top-0 right-0 w-72 h-72 bg-yellow-400/10 blur-[140px] rounded-full"></div>
 
@@ -256,28 +262,28 @@ export default function Home() {
               className="text-yellow-400"
             />
 
-            <span className="text-yellow-400 text-sm font-black tracking-[0.2em]">
+            <span className="text-yellow-400 text-xs md:text-sm font-black tracking-[0.2em]">
               FREE MEMBER
             </span>
 
           </div>
 
           <h2 className="text-3xl md:text-5xl font-black leading-tight mt-6 max-w-4xl">
-            Aktifkan akunmu sekarang dan mulai membangun penghasilan digital.
+            Aktifkan akunmu sekarang dan mulai bangun penghasilan digital.
           </h2>
 
           <p className="text-yellow-100/70 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
-            Buka seluruh fitur premium DAN dan nikmati pengalaman affiliate modern langsung dari dashboard eksklusif ini.
+            Setelah aktivasi, seluruh fitur premium DAN akan terbuka otomatis termasuk referral, bonus, dan withdraw.
           </p>
 
           <Link
             href="/member/produk"
-            className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-yellow-400 hover:bg-yellow-300 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(250,204,21,0.20)]"
+            className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-yellow-400 hover:bg-yellow-300 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(250,204,21,0.25)]"
           >
 
-            <Sparkles size={20} />
+            <ShoppingBag size={20} />
 
-            Aktivasi Sekarang
+            Beli Paket Data
 
           </Link>
 
@@ -290,13 +296,15 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_30%)] pointer-events-none"></div>
+      {/* BACKGROUND */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_35%)] pointer-events-none"></div>
 
       <div className="fixed bottom-0 left-0 w-72 h-72 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
 
-      <div className="max-w-6xl mx-auto px-5 py-6 md:px-8 relative z-10">
+      <div className="relative max-w-6xl mx-auto px-4 md:px-6 py-5 md:py-6 pb-32">
 
-        <div className="flex items-start justify-between gap-5 flex-wrap">
+        {/* HEADER */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
 
           <div>
 
@@ -304,17 +312,17 @@ export default function Home() {
 
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
 
-              <span className="text-green-400 text-sm font-black tracking-[0.2em]">
+              <span className="text-green-400 text-xs md:text-sm font-black tracking-[0.2em]">
                 MEMBER DASHBOARD
               </span>
 
             </div>
 
-            <p className="text-zinc-500 text-sm tracking-[0.2em] uppercase">
+            <p className="text-zinc-500 text-xs md:text-sm tracking-[0.2em] uppercase">
               Digital Affiliate Network
             </p>
 
-            <h1 className="text-5xl md:text-7xl font-black mt-3 tracking-tight leading-none">
+            <h1 className="text-4xl md:text-7xl font-black mt-3 tracking-tight leading-none">
               Basri
             </h1>
 
@@ -324,7 +332,7 @@ export default function Home() {
 
           </div>
 
-          <button className="h-14 px-6 rounded-[24px] bg-red-600 hover:bg-red-700 transition-all duration-300 flex items-center gap-3 font-black text-sm shadow-[0_0_30px_rgba(255,0,0,0.35)]">
+          <button className="w-full lg:w-auto h-14 px-6 rounded-[24px] bg-red-600 hover:bg-red-700 transition-all duration-300 flex items-center justify-center gap-3 font-black text-sm shadow-[0_0_30px_rgba(255,0,0,0.35)]">
 
             <LogOut size={20} />
 
@@ -334,16 +342,18 @@ export default function Home() {
 
         </div>
 
-        {renderStatusCard()}
+        {/* HERO */}
+        {renderHeroCard()}
 
+        {/* STATS */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-8">
 
-          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[28px] p-5">
 
             <div className="flex items-center justify-between">
 
               <p className="text-zinc-500 text-sm">
-                Saldo Total
+                Saldo
               </p>
 
               <Wallet
@@ -353,18 +363,18 @@ export default function Home() {
 
             </div>
 
-            <h2 className="text-green-400 text-4xl font-black mt-5">
+            <h2 className="text-green-400 text-2xl md:text-4xl font-black mt-5 break-words">
               Rp 0
             </h2>
 
           </div>
 
-          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[28px] p-5">
 
             <div className="flex items-center justify-between">
 
               <p className="text-zinc-500 text-sm">
-                Total Referral
+                Referral
               </p>
 
               <Users
@@ -374,13 +384,13 @@ export default function Home() {
 
             </div>
 
-            <h2 className="text-4xl font-black mt-5">
+            <h2 className="text-2xl md:text-4xl font-black mt-5">
               0
             </h2>
 
           </div>
 
-          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[28px] p-5">
 
             <div className="flex items-center justify-between">
 
@@ -395,13 +405,13 @@ export default function Home() {
 
             </div>
 
-            <h2 className="text-4xl font-black mt-5">
+            <h2 className="text-2xl md:text-4xl font-black mt-5 break-words">
               Rp 0
             </h2>
 
           </div>
 
-          <div className="bg-white/[0.03] border border-zinc-800 rounded-[30px] p-5">
+          <div className="bg-white/[0.03] border border-zinc-800 rounded-[28px] p-5">
 
             <div className="flex items-center justify-between">
 
@@ -416,7 +426,7 @@ export default function Home() {
 
             </div>
 
-            <h2 className="text-4xl font-black mt-5">
+            <h2 className="text-2xl md:text-4xl font-black mt-5 break-words">
               Rp 0
             </h2>
 
@@ -424,50 +434,190 @@ export default function Home() {
 
         </div>
 
+        {/* MENU */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
 
+          {/* PRODUK */}
           <Link
-            href="/member/transaksi"
-            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+            href="/member/produk"
+            className="bg-green-500/10 border border-green-500/20 hover:border-green-400 transition-all duration-300 rounded-[30px] p-5 md:p-6 shadow-[0_0_30px_rgba(0,255,120,0.08)]"
           >
 
-            <Wallet size={34} />
+            <ShoppingBag
+              size={34}
+              className="text-green-400"
+            />
 
-            <h2 className="text-2xl font-black mt-6">
-              Transaksi
+            <h2 className="text-xl md:text-2xl font-black mt-6">
+              Beli Paket
             </h2>
+
+            <p className="text-zinc-400 text-sm mt-2">
+              Belanja paket data digital
+            </p>
 
           </Link>
 
+          {/* PEMBERITAHUAN */}
           <Link
-            href="/member/referral"
-            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+            href="/member/pemberitahuan"
+            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-5 md:p-6"
           >
 
-            <Users size={34} />
+            <Bell size={34} />
 
-            <h2 className="text-2xl font-black mt-6">
-              Referral
+            <h2 className="text-xl md:text-2xl font-black mt-6">
+              Pesan
             </h2>
+
+            <p className="text-zinc-500 text-sm mt-2">
+              Pemberitahuan & pesan admin
+            </p>
 
           </Link>
 
+          {/* PROFILE */}
           <Link
             href="/member/profile"
-            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-6"
+            className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-5 md:p-6"
           >
 
             <User size={34} />
 
-            <h2 className="text-2xl font-black mt-6">
+            <h2 className="text-xl md:text-2xl font-black mt-6">
               Profil
             </h2>
 
+            <p className="text-zinc-500 text-sm mt-2">
+              Pengaturan akun member
+            </p>
+
           </Link>
+
+          {/* MENU KHUSUS MEMBER AKTIF */}
+          {memberStatus === "aktif" && (
+            <>
+              <Link
+                href="/member/transaksi"
+                className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-5 md:p-6"
+              >
+
+                <Wallet size={34} />
+
+                <h2 className="text-xl md:text-2xl font-black mt-6">
+                  Transaksi
+                </h2>
+
+                <p className="text-zinc-500 text-sm mt-2">
+                  Riwayat transaksi member
+                </p>
+
+              </Link>
+
+              <Link
+                href="/member/referral"
+                className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-5 md:p-6"
+              >
+
+                <Users size={34} />
+
+                <h2 className="text-xl md:text-2xl font-black mt-6">
+                  Referral
+                </h2>
+
+                <p className="text-zinc-500 text-sm mt-2">
+                  Jaringan referral member
+                </p>
+
+              </Link>
+
+              <Link
+                href="/member/withdraw"
+                className="bg-white/[0.03] border border-zinc-800 hover:border-green-500 transition-all duration-300 rounded-[30px] p-5 md:p-6"
+              >
+
+                <CreditCard size={34} />
+
+                <h2 className="text-xl md:text-2xl font-black mt-6">
+                  Withdraw
+                </h2>
+
+                <p className="text-zinc-500 text-sm mt-2">
+                  Tarik saldo bonus referral
+                </p>
+
+              </Link>
+            </>
+          )}
+
+        </div>
+
+        {/* LIVE ACTIVITY */}
+        <div className="mt-12">
+
+          <div className="flex items-center justify-between mb-6">
+
+            <h2 className="text-2xl md:text-4xl font-black">
+              Aktivitas Member
+            </h2>
+
+            <div className="flex items-center gap-2">
+
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+
+              <span className="text-green-400 text-xs md:text-sm font-black">
+                REALTIME
+              </span>
+
+            </div>
+
+          </div>
+
+          <div className="space-y-4">
+
+            {activities.map((item, index) => (
+
+              <div
+                key={index}
+                className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-white/[0.03] p-5"
+              >
+
+                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
+
+                <div className="relative z-10 flex items-start justify-between gap-4">
+
+                  <div>
+
+                    <h3 className="text-lg md:text-2xl font-black">
+                      {item.name}
+                    </h3>
+
+                    <p className="text-zinc-500 text-sm mt-1">
+                      {item.city}
+                    </p>
+
+                    <p className="text-sm md:text-base mt-4">
+                      {item.activity}
+                    </p>
+
+                  </div>
+
+                  <span className="text-zinc-500 text-xs md:text-sm whitespace-nowrap">
+                    {item.time}
+                  </span>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
 
         </div>
 
       </div>
+
     </main>
   );
 }
