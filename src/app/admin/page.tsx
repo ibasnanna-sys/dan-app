@@ -11,10 +11,7 @@ import {
   Settings,
   CircleDollarSign,
   LogOut,
-  Bell,
   MessageCircle,
-  ShieldAlert,
-  Activity,
 } from "lucide-react";
 
 type TransactionStatus =
@@ -42,28 +39,20 @@ export default function AdminPage() {
 
   /*
     =====================================================
-    ADMIN DASHBOARD DAN
+    ADMIN DASHBOARD FINAL PREMIUM CLEAN
     =====================================================
 
-    FINAL CONCEPT:
-    - Simpel
-    - Premium dark modern
-    - Fokus operasional
-    - Tidak terlalu banyak widget
-    - Aktivasi diproses di:
-      /admin/transactions
-
-    MEMBER SYSTEM:
-    - Approve transaksi => aktif
-    - Reject transaksi => free
-    - Suspend manual admin
-    - Suspend otomatis 60 hari tidak belanja
-    - Auto aktif lagi jika belanja lagi
-
-    MESSAGE SYSTEM:
-    - Pesan Massal
-    - Pesan Pribadi
-    - Kendala transaksi manual admin
+    FIX FINAL:
+    - UI lebih simpel & premium
+    - Hapus tombol duplicate
+    - Suspend hanya di halaman member
+    - System notification dihapus
+    - Menu pesan gabung:
+      personal + mass broadcast
+    - Total penjualan diganti:
+      total produk terjual
+    - Live activity mini auto scroll
+    - Fokus approval transaksi
   */
 
   const [transactions] =
@@ -82,7 +71,7 @@ export default function AdminPage() {
         id: 1002,
         memberName: "Dewi",
         city: "Bandung",
-        product: "Paket Internet Bulanan",
+        product: "Paket Data Bulanan",
         amount: 500000,
         status: "approved",
         memberStatus: "aktif",
@@ -92,8 +81,8 @@ export default function AdminPage() {
         id: 1003,
         memberName: "Fajar",
         city: "Jakarta",
-        product: "Voucher Digital",
-        amount: 150000,
+        product: "Paket Data Harian",
+        amount: 250000,
         status: "pending",
         memberStatus: "free",
         createdAt: "12 menit lalu",
@@ -113,15 +102,15 @@ export default function AdminPage() {
       JSON.stringify(transactions)
     );
 
-    const memberData = transactions.map(
-      (trx) => ({
+    const memberData =
+      transactions.map((trx) => ({
         id: trx.id,
         name: trx.memberName,
         city: trx.city,
         status: trx.memberStatus,
-        transactionStatus: trx.status,
-      })
-    );
+        transactionStatus:
+          trx.status,
+      }));
 
     localStorage.setItem(
       "dan-members",
@@ -143,23 +132,26 @@ export default function AdminPage() {
     const memberAktif =
       transactions.filter(
         (trx) =>
-          trx.memberStatus === "aktif"
+          trx.memberStatus ===
+          "aktif"
       ).length + 1118;
 
-    const pendingApproval =
-      transactions.filter(
-        (trx) =>
-          trx.status === "pending"
-      ).length;
+    const totalTransaksi =
+      transactions.length + 8418;
 
-    const totalPenjualan =
-      128500000;
+    const totalWithdraw = 329;
+
+    const totalProduk = 48;
+
+    const totalTerjual = 12480;
 
     return {
       totalMember,
       memberAktif,
-      pendingApproval,
-      totalPenjualan,
+      totalTransaksi,
+      totalWithdraw,
+      totalProduk,
+      totalTerjual,
     };
 
   }, [transactions]);
@@ -172,25 +164,24 @@ export default function AdminPage() {
 
   const activities = [
     {
-      name: "Akbar",
-      city: "Makassar",
-      activity:
-        "Membeli paket data unlimited",
-      time: "2 menit lalu",
+      text: "Dewi • Bandung",
+      sub:
+        "Belanja paket data",
     },
     {
-      name: "Dewi",
-      city: "Bandung",
-      activity:
-        "Bonus referral berhasil masuk",
-      time: "5 menit lalu",
+      text: "Akbar • Makassar",
+      sub:
+        "Aktivasi member berhasil",
     },
     {
-      name: "Fajar",
-      city: "Jakarta",
-      activity:
-        "Withdraw berhasil diproses",
-      time: "11 menit lalu",
+      text: "Rizky • Jakarta",
+      sub:
+        "Bonus referral masuk",
+    },
+    {
+      text: "Fajar • Surabaya",
+      sub:
+        "Withdraw berhasil",
     },
   ];
 
@@ -206,15 +197,7 @@ export default function AdminPage() {
       icon: Users,
       title: "Member",
       desc:
-        "Status member & suspend akun",
-    },
-    {
-      href: "/admin/transactions",
-      icon: Wallet,
-      title: "Transaksi",
-      desc:
-        "Approve transaksi member",
-      active: true,
+        "Status, suspend & histori transaksi",
     },
     {
       href: "/admin/products",
@@ -222,6 +205,14 @@ export default function AdminPage() {
       title: "Produk",
       desc:
         "Kelola produk digital",
+    },
+    {
+      href: "/admin/transactions",
+      icon: Wallet,
+      title: "Transaksi",
+      desc:
+        "Approval aktivasi member",
+      active: true,
     },
     {
       href: "/admin/payment",
@@ -235,7 +226,7 @@ export default function AdminPage() {
       icon: MessageCircle,
       title: "Pesan",
       desc:
-        "Massal & pribadi",
+        "Pesan pribadi & massal",
     },
     {
       href: "/admin/withdraw",
@@ -259,40 +250,43 @@ export default function AdminPage() {
       {/* BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none">
 
-        <div className="absolute top-0 left-0 w-[420px] h-[420px] bg-green-500/10 blur-[140px]" />
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-green-500/10 blur-[140px]" />
 
-        <div className="absolute bottom-0 right-0 w-[320px] h-[320px] bg-green-400/5 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-green-500/10 blur-[120px]" />
 
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 py-6 pb-32">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-5 py-5 sm:py-6 pb-32">
 
         {/* HEADER */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
 
           <div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/20 bg-green-500/10 mb-5">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-5">
 
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
 
-              <span className="text-green-400 text-xs font-black tracking-[0.25em]">
+              <span className="text-green-400 text-xs sm:text-sm font-black tracking-[0.25em]">
                 ADMIN PANEL
               </span>
 
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-none">
               Dashboard
             </h1>
 
-            <p className="text-zinc-500 mt-5 max-w-2xl leading-relaxed text-sm sm:text-base">
-              Pusat kontrol Digital Affiliate Network untuk monitoring member, transaksi, produk digital, pembayaran, dan aktivitas platform realtime.
+            <p className="text-zinc-500 text-sm sm:text-lg mt-5 sm:mt-6 max-w-2xl leading-relaxed">
+              Kontrol member,
+              transaksi, produk
+              digital dan sistem DAN
+              secara realtime.
             </p>
 
           </div>
 
-          <button className="h-14 px-6 rounded-3xl bg-red-600 hover:bg-red-500 transition-all duration-300 flex items-center justify-center gap-3 font-black shadow-[0_0_30px_rgba(255,0,0,0.25)]">
+          <button className="w-full sm:w-auto h-14 sm:h-16 px-6 rounded-3xl bg-red-600 hover:bg-red-500 transition-all duration-300 flex items-center justify-center gap-3 font-black text-base sm:text-lg shadow-[0_0_35px_rgba(255,0,0,0.25)]">
 
             <LogOut size={20} />
 
@@ -302,40 +296,8 @@ export default function AdminPage() {
 
         </div>
 
-        {/* SYSTEM STATUS */}
-        <div className="relative overflow-hidden rounded-[35px] border border-green-500/20 bg-gradient-to-br from-green-500/15 to-black mt-10 p-6">
-
-          <div className="absolute top-0 right-0 w-56 h-56 bg-green-500/10 blur-[120px] rounded-full" />
-
-          <div className="relative z-10">
-
-            <div className="flex items-center gap-3 mb-4">
-
-              <Bell
-                size={20}
-                className="text-green-400"
-              />
-
-              <span className="text-green-400 font-black tracking-widest text-xs">
-                SYSTEM STATUS
-              </span>
-
-            </div>
-
-            <h2 className="text-2xl md:text-4xl font-black leading-tight max-w-4xl">
-              Sistem DAN berjalan normal dan realtime.
-            </h2>
-
-            <p className="text-zinc-400 mt-5 max-w-3xl leading-relaxed">
-              Approval transaksi diproses melalui halaman transaksi admin dan otomatis mengaktifkan status member setelah approve.
-            </p>
-
-          </div>
-
-        </div>
-
         {/* STATS */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mt-10">
+        <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 mt-10">
 
           {[
             {
@@ -350,96 +312,57 @@ export default function AdminPage() {
               active: true,
             },
             {
-              title: "Pending Approval",
-              value: stats.pendingApproval,
-              color: "text-yellow-300",
+              title: "Total Transaksi",
+              value: stats.totalTransaksi,
+              color: "text-white",
             },
             {
-              title: "Total Penjualan",
+              title: "Total Withdraw",
+              value: stats.totalWithdraw,
+              color: "text-yellow-400",
+            },
+            {
+              title: "Total Produk",
+              value: stats.totalProduk,
+              color: "text-white",
+            },
+            {
+              title: "Produk Terjual",
               value:
-                "Rp " +
-                stats.totalPenjualan.toLocaleString(
+                stats.totalTerjual.toLocaleString(
                   "id-ID"
                 ),
-              color: "text-cyan-400",
+              color: "text-green-400",
+              active: true,
             },
           ].map((item, index) => (
 
             <div
               key={index}
-              className={`rounded-[30px] p-5 border ${
+              className={`relative overflow-hidden rounded-[28px] sm:rounded-[35px] p-5 sm:p-6 border ${
                 item.active
                   ? "border-green-500/20 bg-green-500/10"
                   : "border-zinc-800 bg-zinc-950"
               }`}
             >
 
-              <p className="text-zinc-500 text-sm">
-                {item.title}
-              </p>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
 
-              <h2 className={`text-2xl sm:text-4xl font-black mt-5 break-words ${item.color}`}>
-                {item.value}
-              </h2>
+              <div className="relative z-10">
+
+                <p className="text-zinc-500 text-sm">
+                  {item.title}
+                </p>
+
+                <h2 className={`text-2xl sm:text-4xl font-black mt-5 break-words ${item.color}`}>
+                  {item.value}
+                </h2>
+
+              </div>
 
             </div>
 
           ))}
-
-        </div>
-
-        {/* QUICK ACTION */}
-        <div className="grid md:grid-cols-2 gap-5 mt-10">
-
-          <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6">
-
-            <div className="flex items-center gap-3 mb-5">
-
-              <ShieldAlert
-                className="text-yellow-300"
-                size={22}
-              />
-
-              <h2 className="text-2xl font-black">
-                Suspend Member
-              </h2>
-
-            </div>
-
-            <p className="text-zinc-500 leading-relaxed">
-              Member dapat dibekukan karena tidak belanja selama 60 hari atau dicurigai melakukan pelanggaran/manipulasi sistem.
-            </p>
-
-            <div className="mt-5 p-4 rounded-2xl border border-zinc-800 bg-black text-sm text-zinc-400 leading-relaxed">
-              Jika member kembali melakukan transaksi valid, status otomatis aktif kembali.
-            </div>
-
-          </div>
-
-          <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6">
-
-            <div className="flex items-center gap-3 mb-5">
-
-              <MessageCircle
-                className="text-green-400"
-                size={22}
-              />
-
-              <h2 className="text-2xl font-black">
-                Sistem Pesan
-              </h2>
-
-            </div>
-
-            <p className="text-zinc-500 leading-relaxed">
-              Admin dapat mengirim pesan massal untuk seluruh member atau pesan pribadi berdasarkan ID referral/member.
-            </p>
-
-            <div className="mt-5 p-4 rounded-2xl border border-zinc-800 bg-black text-sm text-zinc-400 leading-relaxed">
-              Digunakan untuk peringatan akun, kendala transaksi, atau informasi penting platform.
-            </div>
-
-          </div>
 
         </div>
 
@@ -448,23 +371,17 @@ export default function AdminPage() {
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-3xl md:text-4xl font-black">
-              Management Menu
+            <h2 className="text-3xl sm:text-4xl font-black">
+              Management
             </h2>
 
-            <div className="flex items-center gap-2">
-
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-
-              <span className="text-green-400 text-sm font-black">
-                SYSTEM ONLINE
-              </span>
-
-            </div>
+            <span className="text-green-400 text-sm font-black tracking-wider">
+              SYSTEM ONLINE
+            </span>
 
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
 
             {menus.map((item, index) => {
 
@@ -475,14 +392,16 @@ export default function AdminPage() {
                 <Link
                   key={index}
                   href={item.href}
-                  className={`group rounded-[30px] min-h-[170px] p-5 border transition-all duration-300 ${
+                  className={`group relative overflow-hidden rounded-[28px] sm:rounded-[35px] min-h-[160px] sm:min-h-[170px] p-5 sm:p-6 transition-all duration-300 ${
                     item.active
-                      ? "border-green-500/20 bg-green-500/10"
-                      : "border-zinc-800 bg-zinc-950 hover:border-green-500"
+                      ? "border border-green-500/20 bg-green-500/10"
+                      : "border border-zinc-800 bg-zinc-950 hover:border-green-500"
                   }`}
                 >
 
-                  <div className="flex flex-col justify-between h-full">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
+
+                  <div className="relative z-10 flex flex-col justify-between h-full">
 
                     <Icon
                       size={34}
@@ -495,19 +414,23 @@ export default function AdminPage() {
 
                     <div>
 
-                      <h3 className={`text-xl sm:text-2xl font-black ${
-                        item.active
-                          ? "text-green-400"
-                          : ""
-                      }`}>
+                      <h3
+                        className={`text-xl sm:text-2xl font-black ${
+                          item.active
+                            ? "text-green-400"
+                            : ""
+                        }`}
+                      >
                         {item.title}
                       </h3>
 
-                      <p className={`text-sm mt-2 leading-relaxed ${
-                        item.active
-                          ? "text-green-200/70"
-                          : "text-zinc-500"
-                      }`}>
+                      <p
+                        className={`text-xs sm:text-sm mt-2 leading-relaxed ${
+                          item.active
+                            ? "text-green-200/70"
+                            : "text-zinc-500"
+                        }`}
+                      >
                         {item.desc}
                       </p>
 
@@ -525,72 +448,69 @@ export default function AdminPage() {
 
         </div>
 
-        {/* LIVE ACTIVITY */}
+        {/* LIVE ACTIVITY MINI */}
         <div className="mt-14">
 
           <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-3xl md:text-4xl font-black">
+            <h2 className="text-3xl sm:text-4xl font-black">
               Live Activity
             </h2>
 
-            <div className="flex items-center gap-2">
-
-              <Activity
-                size={16}
-                className="text-green-400"
-              />
-
-              <span className="text-green-400 font-black text-sm">
-                REALTIME
-              </span>
-
-            </div>
+            <span className="text-green-400 text-sm font-black tracking-wider">
+              REALTIME
+            </span>
 
           </div>
 
-          <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-[30px] border border-zinc-800 bg-zinc-950 h-[260px]">
 
-            {activities.map((item, index) => (
+            <div className="animate-scroll py-4 space-y-3">
 
-              <div
-                key={index}
-                className="rounded-[30px] border border-zinc-800 bg-zinc-950 p-5"
-              >
+              {[...activities, ...activities].map(
+                (item, index) => (
 
-                <div className="flex items-start justify-between gap-4">
+                  <div
+                    key={index}
+                    className="mx-4 rounded-2xl border border-zinc-800 bg-black px-5 py-4"
+                  >
 
-                  <div>
-
-                    <h3 className="text-xl font-black">
-                      {item.name}
+                    <h3 className="font-black text-base sm:text-lg">
+                      {item.text}
                     </h3>
 
-                    <p className="text-zinc-500 mt-1 text-sm">
-                      {item.city}
+                    <p className="text-zinc-500 text-sm mt-1">
+                      {item.sub}
                     </p>
 
                   </div>
 
-                  <span className="text-zinc-500 text-xs whitespace-nowrap">
-                    {item.time}
-                  </span>
+                )
+              )}
 
-                </div>
-
-                <p className="mt-4 text-zinc-300 leading-relaxed">
-                  {item.activity}
-                </p>
-
-              </div>
-
-            ))}
+            </div>
 
           </div>
 
         </div>
 
       </div>
+
+      <style jsx>{`
+        .animate-scroll {
+          animation: scrollUp 18s linear infinite;
+        }
+
+        @keyframes scrollUp {
+          0% {
+            transform: translateY(0%);
+          }
+
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+      `}</style>
 
     </main>
   );
