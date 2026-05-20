@@ -4,102 +4,128 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function AdminDashboardPage() {
+export default function AdminPaymentPage() {
 
-  const [stats, setStats] =
-    useState({
-      totalMembers: 0,
-      activeMembers: 0,
-      frozenMembers: 0,
-      totalTransactions: 0,
-      totalWithdraw: 0,
-    });
-
-  const [activities, setActivities] =
+  const [payments, setPayments] =
     useState<any[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
+  const [saving, setSaving] =
+    useState(false);
+
+  const [form, setForm] =
+    useState({
+      name: "",
+      type: "ewallet",
+      account_name: "",
+      account_number: "",
+      logo: "",
+    });
+
   useEffect(() => {
 
-    loadDashboard();
+    loadPayments();
 
   }, []);
 
-  async function loadDashboard() {
+  async function loadPayments() {
 
-    try {
-
-      // MEMBERS
-      const {
-        data: members,
-      } = await supabase
-        .from("members")
-        .select("*");
-
-      // TRANSACTIONS
-      const {
-        data: transactions,
-      } = await supabase
-        .from("transactions")
-        .select("*");
-
-      // WITHDRAW
-      const {
-        data: withdraws,
-      } = await supabase
-        .from("withdraws")
-        .select("*");
-
-      // ACTIVITIES
-      const {
-        data: activityData,
-      } = await supabase
-        .from("activity_logs")
+    const { data } =
+      await supabase
+        .from("payment_methods")
         .select("*")
         .order("created_at", {
           ascending: false,
-        })
-        .limit(20);
+        });
 
-      setStats({
-
-        totalMembers:
-          members?.length || 0,
-
-        activeMembers:
-          members?.filter(
-            (item) =>
-              item.status === "aktif"
-          ).length || 0,
-
-        frozenMembers:
-          members?.filter(
-            (item) =>
-              item.status ===
-              "dibekukan"
-          ).length || 0,
-
-        totalTransactions:
-          transactions?.length || 0,
-
-        totalWithdraw:
-          withdraws?.length || 0,
-
-      });
-
-      setActivities(
-        activityData || []
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
+    setPayments(data || []);
 
     setLoading(false);
+  }
+
+  async function createPayment() {
+
+    if (
+      !form.name ||
+      !form.account_name ||
+      !form.account_number
+    ) {
+
+      alert("Lengkapi data");
+
+      return;
+    }
+
+    setSaving(true);
+
+    const { error } =
+      await supabase
+        .from("payment_methods")
+        .insert([
+          {
+            ...form,
+            is_active: true,
+          },
+        ]);
+
+    if (error) {
+
+      alert(error.message);
+
+      setSaving(false);
+
+      return;
+    }
+
+    setForm({
+      name: "",
+      type: "ewallet",
+      account_name: "",
+      account_number: "",
+      logo: "",
+    });
+
+    loadPayments();
+
+    setSaving(false);
+
+    alert("Metode pembayaran berhasil ditambahkan");
+  }
+
+  async function toggleStatus(
+    id: string,
+    status: boolean
+  ) {
+
+    await supabase
+      .from("payment_methods")
+      .update({
+        is_active: !status,
+      })
+      .eq("id", id);
+
+    loadPayments();
+  }
+
+  async function deletePayment(
+    id: string
+  ) {
+
+    const confirmDelete =
+      confirm(
+        "Hapus metode pembayaran?"
+      );
+
+    if (!confirmDelete) return;
+
+    await supabase
+      .from("payment_methods")
+      .delete()
+      .eq("id", id);
+
+    loadPayments();
   }
 
   if (loading) {
@@ -115,272 +141,268 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_35%)] pointer-events-none"></div>
+      <div className="fixed inset-0">
 
-      <div className="relative max-w-7xl mx-auto p-5 pb-32">
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-green-500/10 blur-[140px]" />
+
+        <div className="absolute bottom-0 right-0 w-[350px] h-[350px] bg-green-400/10 blur-[140px]" />
+
+      </div>
+
+      <div className="relative z-10 max-w-md mx-auto px-5 py-6 pb-32">
 
         {/* HEADER */}
-        <div className="flex items-start justify-between gap-5 flex-wrap">
+        <div className="mb-10">
 
-          <div>
+          <p className="text-green-500 text-sm tracking-[5px] uppercase mb-3">
+            Admin Payment
+          </p>
 
-            <p className="text-zinc-500 text-sm tracking-[0.25em] uppercase">
-              DAN ADMIN PANEL
-            </p>
+          <h1 className="text-5xl font-black leading-none">
+            Kelola Pembayaran
+          </h1>
 
-            <h1 className="text-6xl font-black tracking-tight mt-2">
-              Dashboard
-            </h1>
-
-            <p className="text-zinc-400 text-lg mt-5 max-w-2xl leading-relaxed">
-              Pusat kontrol Digital Affiliate Network untuk mengelola member, transaksi, produk digital, withdraw, referral, dan seluruh aktivitas platform secara realtime.
-            </p>
-
-          </div>
-
-          <div className="inline-flex items-center gap-3 px-6 py-4 rounded-full bg-green-500/10 border border-green-500/20 shadow-[0_0_40px_rgba(0,255,100,0.15)]">
-
-            <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
-
-            <span className="text-green-400 font-black tracking-wide">
-              SYSTEM ONLINE
-            </span>
-
-          </div>
+          <p className="text-zinc-500 text-lg mt-5 leading-relaxed">
+            Atur rekening bank,
+            e-wallet, dan QRIS
+            agar member dapat
+            melakukan pembayaran
+            secara realtime.
+          </p>
 
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-2 xl:grid-cols-5 gap-5 mt-10">
+        {/* NAVIGATION */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
 
-          <div className="relative overflow-hidden rounded-[36px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
-
-            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 blur-3xl rounded-full"></div>
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Member
-              </p>
-
-              <h2 className="text-5xl font-black mt-5">
-                {stats.totalMembers}
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div className="relative overflow-hidden rounded-[36px] border border-green-500/20 bg-green-500/10 backdrop-blur-xl p-6 shadow-[0_0_30px_rgba(0,255,100,0.12)]">
-
-            <div className="relative z-10">
-
-              <p className="text-green-300 text-sm">
-                Member Aktif
-              </p>
-
-              <h2 className="text-5xl font-black text-green-400 mt-5">
-                {stats.activeMembers}
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div className="relative overflow-hidden rounded-[36px] border border-red-500/20 bg-red-500/10 backdrop-blur-xl p-6 shadow-[0_0_30px_rgba(255,0,0,0.12)]">
-
-            <div className="relative z-10">
-
-              <p className="text-red-300 text-sm">
-                Member Freeze
-              </p>
-
-              <h2 className="text-5xl font-black text-red-400 mt-5">
-                {stats.frozenMembers}
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div className="relative overflow-hidden rounded-[36px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Transaksi
-              </p>
-
-              <h2 className="text-5xl font-black mt-5">
-                {stats.totalTransactions}
-              </h2>
-
-            </div>
-
-          </div>
-
-          <div className="relative overflow-hidden rounded-[36px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6">
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Withdraw
-              </p>
-
-              <h2 className="text-5xl font-black mt-5">
-                {stats.totalWithdraw}
-              </h2>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* MENU */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5 mt-10">
+          <Link
+            href="/admin"
+            className="h-16 rounded-3xl border border-zinc-800 bg-zinc-900 flex items-center justify-center font-bold"
+          >
+            Dashboard
+          </Link>
 
           <Link
             href="/admin/products"
-            className="rounded-[32px] bg-green-500 text-black min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black shadow-[0_0_40px_rgba(0,255,100,0.30)]"
+            className="h-16 rounded-3xl border border-zinc-800 bg-zinc-900 flex items-center justify-center font-bold"
           >
             Produk
           </Link>
 
-          <Link
-            href="/admin/transactions"
-            className="rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black hover:border-green-500 transition"
-          >
-            Transaksi
-          </Link>
-
-          <Link
-            href="/admin/members"
-            className="rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black hover:border-green-500 transition"
-          >
-            Member
-          </Link>
-
-          <Link
-            href="/admin/withdraw"
-            className="rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black hover:border-green-500 transition"
-          >
-            Withdraw
-          </Link>
-
-          <Link
-            href="/admin/chats"
-            className="rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black hover:border-green-500 transition"
-          >
-            Bantuan
-          </Link>
-
-          <Link
-            href="/admin/settings"
-            className="rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl min-h-[140px] p-6 flex items-center justify-center text-center text-2xl font-black hover:border-green-500 transition"
-          >
-            Pengaturan
-          </Link>
-
         </div>
 
-        {/* LIVE ACTIVITY */}
-        <div className="mt-12">
+        {/* FORM */}
+        <div className="bg-zinc-950 border border-zinc-800 rounded-[35px] p-6 mb-8">
 
-          <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-black mb-6">
+            Tambah Pembayaran
+          </h2>
 
-            <h2 className="text-4xl font-black">
-              Aktivitas Platform
-            </h2>
+          <div className="space-y-4">
 
-            <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Nama Pembayaran"
+              value={form.name}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  name: e.target.value,
+                })
+              }
+              className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none"
+            />
 
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            <select
+              value={form.type}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  type: e.target.value,
+                })
+              }
+              className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none"
+            >
 
-              <span className="text-green-400 font-black text-sm">
-                REALTIME
-              </span>
+              <option value="ewallet">
+                E-Wallet
+              </option>
 
-            </div>
+              <option value="bank">
+                Bank
+              </option>
+
+              <option value="qris">
+                QRIS
+              </option>
+
+            </select>
+
+            <input
+              type="text"
+              placeholder="Nama Pemilik"
+              value={form.account_name}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  account_name:
+                    e.target.value,
+                })
+              }
+              className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none"
+            />
+
+            <input
+              type="text"
+              placeholder="Nomor Rekening / Nomor E-Wallet"
+              value={form.account_number}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  account_number:
+                    e.target.value,
+                })
+              }
+              className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none"
+            />
+
+            <input
+              type="text"
+              placeholder="Logo URL (opsional)"
+              value={form.logo}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  logo: e.target.value,
+                })
+              }
+              className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none"
+            />
+
+            <button
+              onClick={createPayment}
+              disabled={saving}
+              className="w-full h-16 rounded-3xl bg-green-500 text-black font-black text-xl mt-4"
+            >
+              {saving
+                ? "Menyimpan..."
+                : "Tambah Pembayaran"}
+            </button>
 
           </div>
 
-          <div className="relative h-[500px] overflow-hidden rounded-[40px] border border-zinc-800 bg-zinc-950 p-5">
+        </div>
 
-            <div className="animate-scroll space-y-5">
+        {/* LIST */}
+        <div className="space-y-5">
 
-              {[...activities, ...activities].map(
-                (item, index) => (
+          {payments.map((item) => (
 
-                  <div
-                    key={index}
-                    className="relative overflow-hidden rounded-[32px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6"
-                  >
+            <div
+              key={item.id}
+              className="bg-zinc-950 border border-zinc-800 rounded-[35px] p-6"
+            >
 
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/5 blur-3xl rounded-full"></div>
+              <div className="flex items-start justify-between">
 
-                    <div className="relative z-10">
+                <div>
 
-                      <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
 
-                        <div>
+                    <h2 className="text-3xl font-black">
+                      {item.name}
+                    </h2>
 
-                          <h3 className="text-2xl font-black">
-                            {item.member_name}
-                          </h3>
-
-                          <p className="text-zinc-500 mt-2">
-                            {item.city}
-                          </p>
-
-                        </div>
-
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
-
-                          <div className="w-2 h-2 rounded-full bg-green-400"></div>
-
-                          <span className="text-green-400 text-sm font-black">
-                            LIVE
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                      <p className="text-xl mt-5 leading-relaxed">
-                        {item.activity}
-                      </p>
-
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        item.is_active
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      }`}
+                    >
+                      {item.is_active
+                        ? "ACTIVE"
+                        : "OFF"}
                     </div>
 
                   </div>
 
-                )
-              )}
+                  <p className="text-zinc-500 mt-2 uppercase">
+                    {item.type}
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="mt-8 space-y-5">
+
+                <div>
+
+                  <p className="text-zinc-500 text-sm mb-2">
+                    Nama Pemilik
+                  </p>
+
+                  <h3 className="text-2xl font-bold">
+                    {item.account_name}
+                  </h3>
+
+                </div>
+
+                <div>
+
+                  <p className="text-zinc-500 text-sm mb-2">
+                    Nomor
+                  </p>
+
+                  <h3 className="text-2xl font-bold break-all">
+                    {item.account_number}
+                  </h3>
+
+                </div>
+
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-8">
+
+                <button
+                  onClick={() =>
+                    toggleStatus(
+                      item.id,
+                      item.is_active
+                    )
+                  }
+                  className={`h-14 rounded-2xl font-bold ${
+                    item.is_active
+                      ? "bg-red-500 text-white"
+                      : "bg-green-500 text-black"
+                  }`}
+                >
+                  {item.is_active
+                    ? "Nonaktifkan"
+                    : "Aktifkan"}
+                </button>
+
+                <button
+                  onClick={() =>
+                    deletePayment(
+                      item.id
+                    )
+                  }
+                  className="h-14 rounded-2xl bg-zinc-800 font-bold"
+                >
+                  Hapus
+                </button>
+
+              </div>
 
             </div>
 
-          </div>
+          ))}
 
         </div>
 
       </div>
-
-      <style jsx>{`
-        .animate-scroll {
-          animation: scrollUp 25s linear infinite;
-        }
-
-        @keyframes scrollUp {
-          0% {
-            transform: translateY(0%);
-          }
-
-          100% {
-            transform: translateY(-50%);
-          }
-        }
-      `}</style>
 
     </div>
   );
