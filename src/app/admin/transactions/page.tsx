@@ -37,13 +37,14 @@ export default function AdminTransactionsPage() {
 
     if (stored) {
 
-      setTransactions(
-        JSON.parse(stored)
-      );
+      const parsed: Transaction[] =
+        JSON.parse(stored);
+
+      setTransactions(parsed);
 
     } else {
 
-      const dummy = [
+      const dummy: Transaction[] = [
         {
           id: 1001,
           memberName: "Akbar",
@@ -86,7 +87,7 @@ export default function AdminTransactionsPage() {
       | "rejected"
   ) {
 
-    const updated =
+    const updated: Transaction[] =
       transactions.map((trx) => {
 
         if (trx.id === id) {
@@ -131,10 +132,19 @@ export default function AdminTransactionsPage() {
   return (
     <main className="min-h-screen bg-black text-white">
 
-      <div className="max-w-7xl mx-auto px-4 py-6 pb-32">
+      {/* BACKGROUND */}
+      <div className="fixed inset-0 pointer-events-none">
+
+        <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-green-500/10 blur-[140px]" />
+
+        <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-green-500/5 blur-[120px]" />
+
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 py-6 pb-32">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-10">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-10">
 
           <div>
 
@@ -149,7 +159,7 @@ export default function AdminTransactionsPage() {
 
             </Link>
 
-            <h1 className="text-5xl md:text-6xl font-black">
+            <h1 className="text-4xl md:text-6xl font-black leading-tight">
               Approval
               <span className="text-green-400">
                 {" "}
@@ -157,19 +167,19 @@ export default function AdminTransactionsPage() {
               </span>
             </h1>
 
-            <p className="text-zinc-500 mt-5 max-w-2xl">
-              Approval aktivasi
-              member & transaksi
-              realtime platform DAN.
+            <p className="text-zinc-500 mt-5 max-w-2xl leading-relaxed">
+              Approval aktivasi member
+              dan transaksi realtime
+              platform DAN.
             </p>
 
           </div>
 
-          <div className="h-16 px-6 rounded-3xl border border-green-500/20 bg-green-500/10 flex items-center gap-3">
+          <div className="h-16 px-6 rounded-3xl border border-green-500/20 bg-green-500/10 flex items-center gap-3 shadow-[0_0_35px_rgba(0,255,120,0.10)]">
 
             <Wallet className="text-green-400" />
 
-            <span className="font-black text-green-400">
+            <span className="font-black text-green-400 text-lg">
               {
                 transactions.filter(
                   (trx) =>
@@ -184,6 +194,23 @@ export default function AdminTransactionsPage() {
 
         </div>
 
+        {/* EMPTY */}
+        {transactions.length === 0 && (
+
+          <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-10 text-center">
+
+            <h2 className="text-2xl font-black">
+              Tidak ada transaksi
+            </h2>
+
+            <p className="text-zinc-500 mt-3">
+              Belum ada transaksi masuk.
+            </p>
+
+          </div>
+
+        )}
+
         {/* LIST */}
         <div className="space-y-5">
 
@@ -191,24 +218,24 @@ export default function AdminTransactionsPage() {
 
             <div
               key={trx.id}
-              className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6"
+              className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6 hover:border-green-500/30 transition-all duration-300"
             >
 
               <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
 
                 {/* LEFT */}
-                <div>
+                <div className="flex-1">
 
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex flex-wrap items-center gap-3">
 
-                    <h2 className="text-3xl font-black">
+                    <h2 className="text-2xl md:text-3xl font-black">
                       {
                         trx.memberName
                       }
                     </h2>
 
                     <div
-                      className={`px-4 py-2 rounded-full text-xs font-black ${
+                      className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-[0.15em] ${
                         trx.status ===
                         "approved"
                           ? "bg-green-500/20 text-green-400"
@@ -225,7 +252,7 @@ export default function AdminTransactionsPage() {
 
                   </div>
 
-                  <div className="flex flex-wrap gap-5 mt-5 text-zinc-400">
+                  <div className="flex flex-wrap gap-5 mt-5 text-zinc-400 text-sm">
 
                     <div className="flex items-center gap-2">
 
@@ -274,7 +301,7 @@ export default function AdminTransactionsPage() {
                         "approved"
                       )
                     }
-                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 transition-all flex items-center gap-2 font-black text-black"
+                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 transition-all flex items-center gap-2 font-black text-black shadow-[0_0_30px_rgba(0,255,120,0.18)]"
                   >
 
                     <ShieldCheck
@@ -292,7 +319,7 @@ export default function AdminTransactionsPage() {
                         "rejected"
                       )
                     }
-                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 transition-all flex items-center gap-2 font-black"
+                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 transition-all flex items-center gap-2 font-black shadow-[0_0_30px_rgba(255,0,0,0.15)]"
                   >
 
                     <XCircle
@@ -317,4 +344,4 @@ export default function AdminTransactionsPage() {
 
     </main>
   );
-                    }
+}
