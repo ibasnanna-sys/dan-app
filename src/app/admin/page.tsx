@@ -9,7 +9,7 @@ import {
   Wallet,
   CreditCard,
   Activity,
- Settings,
+  Settings,
   ArrowUpRight,
   ShieldCheck,
   CircleDollarSign,
@@ -46,21 +46,20 @@ export default function AdminPage() {
 
   /*
     =====================================================
-    SINKRONISASI ADMIN ↔ MEMBER
+    DASHBOARD ADMIN BERSIH
     =====================================================
 
-    RULE:
-    - pending  => member FREE
-    - approved => member AKTIF
-    - rejected => member FREE
+    - Approval transaksi DIPINDAHKAN ke:
+      /admin/transactions
 
-    Semua transaksi approval hanya ada
-    di halaman /admin/transactions
+    - Dashboard hanya menampilkan:
+      statistik + menu + live activity
 
-    Dashboard admin tetap bersih.
+    - Sinkronisasi status tetap berjalan:
+      approved => member aktif
   */
 
-  const [transactions, setTransactions] =
+  const [transactions] =
     useState<Transaction[]>([
       {
         id: 1001,
@@ -96,7 +95,7 @@ export default function AdminPage() {
 
   /*
     =====================================================
-    SIMPAN KE LOCAL STORAGE
+    SINKRON LOCAL STORAGE
     =====================================================
   */
 
@@ -106,11 +105,6 @@ export default function AdminPage() {
       "dan-transactions",
       JSON.stringify(transactions)
     );
-
-    /*
-      DATA MEMBER AKTIF
-      untuk halaman member nanti
-    */
 
     const memberData = transactions.map(
       (trx) => ({
@@ -235,8 +229,7 @@ export default function AdminPage() {
       icon: Wallet,
       title: "Transaksi",
       desc:
-        "Monitoring & approval transaksi",
-      active: true,
+        "Approval transaksi aktivasi member",
     },
     {
       href: "/admin/payment",
@@ -349,7 +342,7 @@ export default function AdminPage() {
             </h2>
 
             <p className="text-zinc-400 mt-5 text-sm sm:text-lg leading-relaxed max-w-3xl">
-              Approval transaksi aktivasi sekarang dipusatkan di halaman transaksi admin dan otomatis mengaktifkan status member.
+              Approval transaksi aktivasi dipusatkan di halaman transaksi admin dan otomatis mengaktifkan status member secara realtime.
             </p>
 
           </div>
