@@ -21,7 +21,7 @@ import {
 
 export default function Home() {
 
-  const memberStatus = "free";
+  const memberStatus: "free" | "aktif" | "freeze" = "free";
 
   const activities = [
     {
