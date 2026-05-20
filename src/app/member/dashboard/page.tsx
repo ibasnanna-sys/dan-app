@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import {
   Copy,
@@ -24,11 +25,7 @@ import {
 
 export default function Home() {
 
-  const memberStatus =
-    "free" as
-      | "free"
-      | "aktif"
-      | "dibekukan";
+  const [memberStatus] = useState<"free" | "aktif" | "dibekukan">("free");
 
   const activities: {
     name: string;
