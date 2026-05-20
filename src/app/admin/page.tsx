@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   CircleDollarSign,
   LogOut,
+  Megaphone,
+  Bell,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -79,7 +81,7 @@ export default function AdminPage() {
 
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
 
-              <span className="text-green-400 text-sm font-black tracking-widest">
+              <span className="text-green-400 text-sm font-black tracking-[0.25em]">
                 ADMIN PANEL
               </span>
 
@@ -95,13 +97,60 @@ export default function AdminPage() {
 
           </div>
 
-          <button className="h-16 px-6 rounded-3xl bg-red-600 hover:bg-red-500 transition flex items-center gap-3 font-black text-lg shadow-[0_0_30px_rgba(255,0,0,0.35)]">
+          <button className="h-16 px-6 rounded-3xl bg-red-600 hover:bg-red-500 transition-all duration-300 flex items-center gap-3 font-black text-lg shadow-[0_0_35px_rgba(255,0,0,0.30)]">
 
             <LogOut size={22} />
 
             Logout
 
           </button>
+
+        </div>
+
+        {/* QUICK ALERT */}
+        <div className="relative overflow-hidden rounded-[40px] border border-green-500/20 bg-gradient-to-br from-green-500/15 to-black mt-10 p-7">
+
+          <div className="absolute top-0 right-0 w-56 h-56 bg-green-500/10 blur-[120px] rounded-full"></div>
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+            <div>
+
+              <div className="flex items-center gap-3 mb-4">
+
+                <Bell
+                  size={24}
+                  className="text-green-400"
+                />
+
+                <span className="text-green-400 font-black tracking-widest text-sm">
+                  SYSTEM NOTIFICATION
+                </span>
+
+              </div>
+
+              <h2 className="text-3xl md:text-4xl font-black leading-tight max-w-3xl">
+                Kelola pemberitahuan dan pesan massal untuk seluruh member DAN secara realtime.
+              </h2>
+
+              <p className="text-zinc-400 mt-5 text-lg leading-relaxed max-w-2xl">
+                Kirim pengumuman maintenance, promo, motivasi referral, update sistem, dan informasi penting lainnya langsung ke dashboard member.
+              </p>
+
+            </div>
+
+            <Link
+              href="/admin/announcements"
+              className="h-16 px-7 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,255,120,0.30)] whitespace-nowrap"
+            >
+
+              <Megaphone size={22} />
+
+              Pesan Massal
+
+            </Link>
+
+          </div>
 
         </div>
 
@@ -272,7 +321,7 @@ export default function AdminPage() {
         </div>
 
         {/* MENU */}
-        <div className="mt-12">
+        <div className="mt-14">
 
           <div className="flex items-center justify-between mb-6">
 
@@ -296,7 +345,7 @@ export default function AdminPage() {
 
             <Link
               href="/admin/members"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
@@ -304,7 +353,7 @@ export default function AdminPage() {
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <Users
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -314,8 +363,8 @@ export default function AdminPage() {
                     Member
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
-                    Kelola semua member platform
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
+                    Kelola seluruh member platform DAN
                   </p>
 
                 </div>
@@ -326,13 +375,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/products"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <ShoppingBag
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -342,8 +391,8 @@ export default function AdminPage() {
                     Produk
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
-                    Kelola produk digital
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
+                    Kelola produk digital & aktivasi
                   </p>
 
                 </div>
@@ -354,13 +403,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/transactions"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <Wallet
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -370,7 +419,7 @@ export default function AdminPage() {
                     Transaksi
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
                     Monitoring transaksi member
                   </p>
 
@@ -382,13 +431,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/payment"
-              className="group relative overflow-hidden rounded-[35px] border border-green-500/20 bg-green-500/10 min-h-[170px] p-6 shadow-[0_0_40px_rgba(0,255,100,0.10)]"
+              className="group relative overflow-hidden rounded-[35px] border border-green-500/20 bg-green-500/10 min-h-[180px] p-6 shadow-[0_0_40px_rgba(0,255,100,0.10)]"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <CreditCard
-                  size={40}
+                  size={42}
                   className="text-green-400"
                 />
 
@@ -398,8 +447,36 @@ export default function AdminPage() {
                     Pembayaran
                   </h3>
 
-                  <p className="text-green-200/70 text-sm mt-2">
-                    Kelola bank & e-wallet
+                  <p className="text-green-200/70 text-sm mt-2 leading-relaxed">
+                    Kelola bank & e-wallet member
+                  </p>
+
+                </div>
+
+              </div>
+
+            </Link>
+
+            <Link
+              href="/admin/announcements"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
+            >
+
+              <div className="relative z-10 flex flex-col justify-between h-full">
+
+                <Megaphone
+                  size={42}
+                  className="text-white"
+                />
+
+                <div>
+
+                  <h3 className="text-2xl font-black">
+                    Pesan Massal
+                  </h3>
+
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
+                    Broadcast pemberitahuan ke seluruh member
                   </p>
 
                 </div>
@@ -410,13 +487,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/activity"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <Activity
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -426,7 +503,7 @@ export default function AdminPage() {
                     Aktivitas
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
                     Aktivitas realtime platform
                   </p>
 
@@ -438,13 +515,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/withdraw"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <CircleDollarSign
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -454,7 +531,7 @@ export default function AdminPage() {
                     Withdraw
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
                     Approval withdraw member
                   </p>
 
@@ -466,13 +543,13 @@ export default function AdminPage() {
 
             <Link
               href="/admin/settings"
-              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[170px] p-6 hover:border-green-500 transition"
+              className="group relative overflow-hidden rounded-[35px] border border-zinc-800 bg-zinc-950 min-h-[180px] p-6 hover:border-green-500 transition-all duration-300"
             >
 
               <div className="relative z-10 flex flex-col justify-between h-full">
 
                 <Settings
-                  size={40}
+                  size={42}
                   className="text-white"
                 />
 
@@ -482,7 +559,7 @@ export default function AdminPage() {
                     Settings
                   </h3>
 
-                  <p className="text-zinc-500 text-sm mt-2">
+                  <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
                     Pengaturan aplikasi DAN
                   </p>
 
