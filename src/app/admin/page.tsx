@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+
 import {
   Users,
   ShoppingBag,
@@ -17,21 +19,199 @@ import {
   TrendingUp,
   BarChart3,
   MessageCircle,
+  CheckCircle2,
+  XCircle,
+  Clock3,
 } from "lucide-react";
+
+type TransactionStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
+
+type MemberStatus =
+  | "free"
+  | "aktif"
+  | "dibekukan";
+
+type Transaction = {
+  id: number;
+  memberName: string;
+  city: string;
+  product: string;
+  amount: number;
+  status: TransactionStatus;
+  memberStatus: MemberStatus;
+  createdAt: string;
+};
 
 export default function AdminPage() {
 
-  const stats = {
-    totalMember: 1250,
-    memberAktif: 1120,
-    totalTransaksi: 8421,
-    totalWithdraw: 329,
-    totalProduk: 48,
+  /*
+    =====================================================
+    SINKRONISASI STATUS MEMBER & TRANSAKSI
+    =====================================================
 
-    totalModal: 86500000,
-    totalPenjualan: 128500000,
-    totalProfit: 42000000,
-  };
+    RULE:
+    - pending  -> member tetap FREE
+    - approved -> member otomatis AKTIF
+    - rejected -> member tetap FREE / DIBEKUKAN
+
+    Halaman admin dan member harus memakai data/status
+    yang sama dari database/API nantinya.
+
+    Untuk sementara simulasi local state dulu.
+  */
+
+  const [transactions, setTransactions] =
+    useState<Transaction[]>([
+      {
+        id: 1001,
+        memberName: "Akbar",
+        city: "Makassar",
+        product: "Paket Aktivasi DAN",
+        amount: 350000,
+        status: "pending",
+        memberStatus: "free",
+        createdAt: "2 menit lalu",
+      },
+      {
+        id: 1002,
+        memberName: "Dewi",
+        city: "Bandung",
+        product: "Paket Unlimited",
+        amount: 500000,
+        status: "approved",
+        memberStatus: "aktif",
+        createdAt: "8 menit lalu",
+      },
+      {
+        id: 1003,
+        memberName: "Fajar",
+        city: "Jakarta",
+        product: "Paket Aktivasi DAN",
+        amount: 350000,
+        status: "pending",
+        memberStatus: "free",
+        createdAt: "12 menit lalu",
+      },
+    ]);
+
+  /*
+    =====================================================
+    AUTO SINKRON STATUS KE MEMBER PAGE
+    =====================================================
+
+    Saat transaksi approved:
+    - memberStatus => aktif
+
+    Simulasi localStorage untuk sinkron sementara.
+    Nanti tinggal ganti database/API.
+  */
+
+  useEffect(() => {
+
+    localStorage.setItem(
+      "dan-transactions",
+      JSON.stringify(transactions)
+    );
+
+  }, [transactions]);
+
+  /*
+    =====================================================
+    APPROVE TRANSACTION
+    =====================================================
+  */
+
+  function approveTransaction(id: number) {
+
+    setTransactions((prev) =>
+      prev.map((trx) => {
+
+        if (trx.id === id) {
+
+          return {
+            ...trx,
+            status: "approved",
+            memberStatus: "aktif",
+          };
+        }
+
+        return trx;
+      })
+    );
+  }
+
+  /*
+    =====================================================
+    REJECT TRANSACTION
+    =====================================================
+  */
+
+  function rejectTransaction(id: number) {
+
+    setTransactions((prev) =>
+      prev.map((trx) => {
+
+        if (trx.id === id) {
+
+          return {
+            ...trx,
+            status: "rejected",
+            memberStatus: "free",
+          };
+        }
+
+        return trx;
+      })
+    );
+  }
+
+  /*
+    =====================================================
+    STATS REALTIME
+    =====================================================
+  */
+
+  const stats = useMemo(() => {
+
+    const totalMember = 1250;
+
+    const memberAktif =
+      transactions.filter(
+        (trx) =>
+          trx.memberStatus === "aktif"
+      ).length + 1118;
+
+    const totalTransaksi =
+      transactions.length + 8418;
+
+    const pendingTransaction =
+      transactions.filter(
+        (trx) =>
+          trx.status === "pending"
+      ).length;
+
+    return {
+      totalMember,
+      memberAktif,
+      totalTransaksi,
+      pendingTransaction,
+      totalWithdraw: 329,
+      totalProduk: 48,
+      totalModal: 86500000,
+      totalPenjualan: 128500000,
+      totalProfit: 42000000,
+    };
+
+  }, [transactions]);
+
+  /*
+    =====================================================
+    LIVE ACTIVITY
+    =====================================================
+  */
 
   const activities = [
     {
@@ -64,55 +244,69 @@ export default function AdminPage() {
     },
   ];
 
+  /*
+    =====================================================
+    MENU
+    =====================================================
+  */
+
   const menus = [
     {
       href: "/admin/members",
       icon: Users,
       title: "Member",
-      desc: "Kelola seluruh member platform DAN",
+      desc:
+        "Kelola seluruh member platform DAN",
     },
     {
       href: "/admin/products",
       icon: ShoppingBag,
       title: "Produk",
-      desc: "Kelola produk & pencarian produk",
+      desc:
+        "Kelola produk & pencarian produk",
     },
     {
       href: "/admin/transactions",
       icon: Wallet,
       title: "Transaksi",
-      desc: "Monitoring transaksi member",
+      desc:
+        "Approval transaksi aktivasi member",
+      active: true,
     },
     {
       href: "/admin/payment",
       icon: CreditCard,
       title: "Pembayaran",
-      desc: "Kelola bank & e-wallet",
-      active: true,
+      desc:
+        "Kelola bank & e-wallet",
     },
     {
       href: "/admin/messages",
       icon: MessageCircle,
       title: "Pesan",
-      desc: "Pesan pribadi ke member",
+      desc:
+        "Pesan pribadi ke member",
     },
     {
       href: "/admin/activity",
       icon: Activity,
       title: "Aktivitas",
-      desc: "Aktivitas realtime platform",
+      desc:
+        "Aktivitas realtime platform",
     },
     {
       href: "/admin/withdraw",
       icon: CircleDollarSign,
       title: "Withdraw",
-      desc: "Approval withdraw member",
+      desc:
+        "Approval withdraw member",
     },
     {
       href: "/admin/settings",
       icon: Settings,
       title: "Pengaturan",
-      desc: "Bonus & minimal withdraw",
+      desc:
+        "Bonus & minimal withdraw",
     },
   ];
 
@@ -150,7 +344,7 @@ export default function AdminPage() {
             </h1>
 
             <p className="text-zinc-500 text-sm sm:text-lg mt-5 sm:mt-6 max-w-2xl leading-relaxed">
-              Pusat kontrol Digital Affiliate Network untuk memantau member, transaksi, produk digital, pembayaran, dan seluruh aktivitas platform secara realtime.
+              Sinkronisasi transaksi aktivasi member DAN berjalan realtime antara halaman admin dan member.
             </p>
 
           </div>
@@ -186,11 +380,11 @@ export default function AdminPage() {
             </div>
 
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight max-w-4xl">
-              Seluruh sistem DAN berjalan normal dan realtime.
+              Approval transaksi sekarang otomatis mengaktifkan member.
             </h2>
 
             <p className="text-zinc-400 mt-5 text-sm sm:text-lg leading-relaxed max-w-3xl">
-              Monitoring member, transaksi, bonus referral, withdraw, dan aktivitas platform berjalan stabil tanpa kendala.
+              Ketika admin klik tombol SETUJUI, status transaksi berubah menjadi APPROVED dan status member otomatis menjadi AKTIF.
             </p>
 
           </div>
@@ -198,232 +392,53 @@ export default function AdminPage() {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-10">
 
-          {/* TOTAL MEMBER */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
+          <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6">
 
-            <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 blur-3xl rounded-full"></div>
+            <p className="text-zinc-500 text-sm">
+              Total Member
+            </p>
 
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Member
-              </p>
-
-              <h2 className="text-4xl sm:text-5xl font-black mt-5">
-                {stats.totalMember}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-green-400">
-
-                <ArrowUpRight size={18} />
-
-                <span className="font-bold text-sm">
-                  +18 hari ini
-                </span>
-
-              </div>
-
-            </div>
+            <h2 className="text-5xl font-black mt-5">
+              {stats.totalMember}
+            </h2>
 
           </div>
 
-          {/* MEMBER AKTIF */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-green-500/20 bg-green-500/10 p-5 sm:p-6 shadow-[0_0_40px_rgba(0,255,100,0.12)]">
+          <div className="rounded-[35px] border border-green-500/20 bg-green-500/10 p-6">
 
-            <div className="relative z-10">
+            <p className="text-green-300 text-sm">
+              Member Aktif
+            </p>
 
-              <p className="text-green-300 text-sm">
-                Member Aktif
-              </p>
-
-              <h2 className="text-4xl sm:text-5xl font-black text-green-400 mt-5">
-                {stats.memberAktif}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-green-300">
-
-                <ShieldCheck size={18} />
-
-                <span className="font-bold text-sm">
-                  Sistem normal
-                </span>
-
-              </div>
-
-            </div>
+            <h2 className="text-5xl font-black text-green-400 mt-5">
+              {stats.memberAktif}
+            </h2>
 
           </div>
 
-          {/* TRANSAKSI */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
+          <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-6">
 
-            <div className="relative z-10">
+            <p className="text-zinc-500 text-sm">
+              Total Transaksi
+            </p>
 
-              <p className="text-zinc-500 text-sm">
-                Total Transaksi
-              </p>
-
-              <h2 className="text-4xl sm:text-5xl font-black mt-5">
-                {stats.totalTransaksi}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-green-400">
-
-                <ArrowUpRight size={18} />
-
-                <span className="font-bold text-sm">
-                  Realtime berjalan
-                </span>
-
-              </div>
-
-            </div>
+            <h2 className="text-5xl font-black mt-5">
+              {stats.totalTransaksi}
+            </h2>
 
           </div>
 
-          {/* WITHDRAW */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
+          <div className="rounded-[35px] border border-yellow-500/20 bg-yellow-500/10 p-6">
 
-            <div className="relative z-10">
+            <p className="text-yellow-300 text-sm">
+              Pending Approval
+            </p>
 
-              <p className="text-zinc-500 text-sm">
-                Total Withdraw
-              </p>
-
-              <h2 className="text-4xl sm:text-5xl font-black mt-5">
-                {stats.totalWithdraw}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-yellow-400">
-
-                <Wallet size={18} />
-
-                <span className="font-bold text-sm">
-                  Menunggu approval
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* PRODUK */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Produk
-              </p>
-
-              <h2 className="text-4xl sm:text-5xl font-black mt-5">
-                {stats.totalProduk}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-green-400">
-
-                <PackageSearch size={18} />
-
-                <span className="font-bold text-sm">
-                  Produk aktif
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* MODAL */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Modal
-              </p>
-
-              <h2 className="text-2xl sm:text-4xl font-black text-yellow-300 mt-5 break-words">
-                Rp{" "}
-                {stats.totalModal.toLocaleString(
-                  "id-ID"
-                )}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-yellow-300">
-
-                <BarChart3 size={18} />
-
-                <span className="font-bold text-sm">
-                  Biaya produk
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* PENJUALAN */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-green-500/20 bg-green-500/10 p-5 sm:p-6 shadow-[0_0_40px_rgba(0,255,100,0.12)]">
-
-            <div className="relative z-10">
-
-              <p className="text-green-300 text-sm">
-                Total Penjualan
-              </p>
-
-              <h2 className="text-2xl sm:text-4xl font-black text-green-400 mt-5 break-words">
-                Rp{" "}
-                {stats.totalPenjualan.toLocaleString(
-                  "id-ID"
-                )}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-green-300">
-
-                <TrendingUp size={18} />
-
-                <span className="font-bold text-sm">
-                  Penjualan realtime
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* PROFIT */}
-          <div className="relative overflow-hidden rounded-[30px] sm:rounded-[35px] border border-zinc-800 bg-zinc-950 p-5 sm:p-6">
-
-            <div className="relative z-10">
-
-              <p className="text-zinc-500 text-sm">
-                Total Profit
-              </p>
-
-              <h2 className="text-2xl sm:text-4xl font-black text-cyan-400 mt-5 break-words">
-                Rp{" "}
-                {stats.totalProfit.toLocaleString(
-                  "id-ID"
-                )}
-              </h2>
-
-              <div className="flex items-center gap-2 mt-5 text-cyan-400">
-
-                <CircleDollarSign size={18} />
-
-                <span className="font-bold text-sm">
-                  Keuntungan bersih
-                </span>
-
-              </div>
-
-            </div>
+            <h2 className="text-5xl font-black text-yellow-400 mt-5">
+              {stats.pendingTransaction}
+            </h2>
 
           </div>
 
@@ -467,8 +482,6 @@ export default function AdminPage() {
                       : "border border-zinc-800 bg-zinc-950 hover:border-green-500"
                   }`}
                 >
-
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
 
                   <div className="relative z-10 flex flex-col justify-between h-full">
 
@@ -517,8 +530,208 @@ export default function AdminPage() {
 
         </div>
 
+        {/* TRANSACTION APPROVAL */}
+        <div className="mt-16">
+
+          <div className="flex items-center justify-between mb-8">
+
+            <h2 className="text-3xl sm:text-4xl font-black">
+              Approval Transaksi
+            </h2>
+
+            <div className="flex items-center gap-2">
+
+              <Clock3
+                size={18}
+                className="text-yellow-400"
+              />
+
+              <span className="text-yellow-400 font-black text-sm">
+                REALTIME APPROVAL
+              </span>
+
+            </div>
+
+          </div>
+
+          <div className="space-y-5">
+
+            {transactions.map((trx) => (
+
+              <div
+                key={trx.id}
+                className="relative overflow-hidden rounded-[32px] border border-zinc-800 bg-zinc-950 p-6"
+              >
+
+                <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/5 blur-3xl rounded-full"></div>
+
+                <div className="relative z-10">
+
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+                    {/* LEFT */}
+                    <div>
+
+                      <div className="flex flex-wrap items-center gap-3">
+
+                        <h3 className="text-2xl font-black">
+                          {trx.memberName}
+                        </h3>
+
+                        {trx.status ===
+                          "pending" && (
+                          <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-black">
+                            PENDING
+                          </div>
+                        )}
+
+                        {trx.status ===
+                          "approved" && (
+                          <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-black">
+                            APPROVED
+                          </div>
+                        )}
+
+                        {trx.status ===
+                          "rejected" && (
+                          <div className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black">
+                            REJECTED
+                          </div>
+                        )}
+
+                      </div>
+
+                      <p className="text-zinc-500 mt-2">
+                        {trx.city}
+                      </p>
+
+                      <div className="mt-5 space-y-2">
+
+                        <p className="text-zinc-300">
+                          Produk:
+                          <span className="font-black ml-2 text-white">
+                            {trx.product}
+                          </span>
+                        </p>
+
+                        <p className="text-zinc-300">
+                          Nominal:
+                          <span className="font-black ml-2 text-green-400">
+                            Rp{" "}
+                            {trx.amount.toLocaleString(
+                              "id-ID"
+                            )}
+                          </span>
+                        </p>
+
+                        <p className="text-zinc-300">
+                          Status Member:
+                          <span
+                            className={`font-black ml-2 ${
+                              trx.memberStatus ===
+                              "aktif"
+                                ? "text-green-400"
+                                : trx.memberStatus ===
+                                  "dibekukan"
+                                ? "text-orange-400"
+                                : "text-yellow-400"
+                            }`}
+                          >
+                            {trx.memberStatus.toUpperCase()}
+                          </span>
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="flex flex-col items-start lg:items-end gap-5">
+
+                      <span className="text-zinc-500 text-sm">
+                        {trx.createdAt}
+                      </span>
+
+                      {trx.status ===
+                        "pending" ? (
+                        <div className="flex flex-wrap gap-3">
+
+                          <button
+                            onClick={() =>
+                              approveTransaction(
+                                trx.id
+                              )
+                            }
+                            className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black flex items-center gap-3 shadow-[0_0_30px_rgba(0,255,120,0.20)]"
+                          >
+
+                            <CheckCircle2 size={20} />
+
+                            Setujui
+
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              rejectTransaction(
+                                trx.id
+                              )
+                            }
+                            className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 transition-all duration-300 text-white font-black flex items-center gap-3 shadow-[0_0_30px_rgba(255,0,0,0.20)]"
+                          >
+
+                            <XCircle size={20} />
+
+                            Tolak
+
+                          </button>
+
+                        </div>
+                      ) : trx.status ===
+                        "approved" ? (
+                        <div className="inline-flex items-center gap-3 px-5 py-4 rounded-2xl bg-green-500/10 border border-green-500/20">
+
+                          <CheckCircle2
+                            size={20}
+                            className="text-green-400"
+                          />
+
+                          <span className="text-green-400 font-black">
+                            Member Sudah Aktif
+                          </span>
+
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-3 px-5 py-4 rounded-2xl bg-red-500/10 border border-red-500/20">
+
+                          <XCircle
+                            size={20}
+                            className="text-red-400"
+                          />
+
+                          <span className="text-red-400 font-black">
+                            Transaksi Ditolak
+                          </span>
+
+                        </div>
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
         {/* LIVE ACTIVITY */}
-        <div className="mt-14">
+        <div className="mt-16">
 
           <div className="flex items-center justify-between mb-6">
 
@@ -538,7 +751,7 @@ export default function AdminPage() {
 
           </div>
 
-          <div className="relative h-[420px] sm:h-[450px] overflow-hidden rounded-[30px] sm:rounded-[40px] border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
+          <div className="relative h-[420px] overflow-hidden rounded-[40px] border border-zinc-800 bg-zinc-950 p-5">
 
             <div className="animate-scroll space-y-5">
 
@@ -547,10 +760,8 @@ export default function AdminPage() {
 
                   <div
                     key={index}
-                    className="relative overflow-hidden rounded-[24px] sm:rounded-[32px] border border-zinc-800 bg-black p-5 sm:p-6"
+                    className="relative overflow-hidden rounded-[32px] border border-zinc-800 bg-black p-6"
                   >
-
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
 
                     <div className="relative z-10">
 
@@ -558,23 +769,23 @@ export default function AdminPage() {
 
                         <div>
 
-                          <h3 className="text-xl sm:text-2xl font-black">
+                          <h3 className="text-2xl font-black">
                             {item.name}
                           </h3>
 
-                          <p className="text-zinc-500 mt-2 text-sm sm:text-base">
+                          <p className="text-zinc-500 mt-2">
                             {item.city}
                           </p>
 
                         </div>
 
-                        <span className="text-zinc-500 text-xs sm:text-sm whitespace-nowrap">
+                        <span className="text-zinc-500 text-sm whitespace-nowrap">
                           {item.time}
                         </span>
 
                       </div>
 
-                      <p className="text-sm sm:text-lg mt-5 leading-relaxed">
+                      <p className="text-lg mt-5 leading-relaxed">
                         {item.activity}
                       </p>
 
