@@ -1,20 +1,23 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 import {
-  Sparkles,
-  ShieldCheck,
+  ArrowLeft,
   ShoppingBag,
-  CreditCard,
   Zap,
-  CalendarDays,
-  CheckCircle2,
-  ArrowRight,
+  Package,
+  Calendar,
 } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+
 export default function ProdukPage() {
+
+  const [member, setMember] =
+    useState<any>(null);
 
   const [products, setProducts] =
     useState<any[]>([]);
@@ -22,27 +25,13 @@ export default function ProdukPage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [selectedProduct, setSelectedProduct] =
-    useState<any>(null);
-
-  const [nomorTujuan, setNomorTujuan] =
-    useState("");
-
-  const [paymentMethod, setPaymentMethod] =
-    useState("saldo");
-
-  const [member, setMember] =
-    useState<any>(null);
-
-  const [buyLoading, setBuyLoading] =
-    useState(false);
-
   useEffect(() => {
-    loadMember();
-    loadProducts();
+
+    loadData();
+
   }, []);
 
-  async function loadMember() {
+  async function loadData() {
 
     const memberId =
       localStorage.getItem("member_id");
@@ -55,72 +44,63 @@ export default function ProdukPage() {
       return;
     }
 
-    const { data } =
+    const { data: memberData } =
       await supabase
         .from("members")
         .select("*")
         .eq("id", memberId)
         .single();
 
-    setMember(data);
-  }
+    if (!memberData) {
 
-  async function loadProducts() {
+      window.location.href =
+        "/login";
 
-    const { data, error } =
+      return;
+    }
+
+    setMember(memberData);
+
+    const { data: productData } =
       await supabase
         .from("products")
         .select("*")
-        .eq("status", true)
+        .eq("is_active", true)
         .order("price", {
           ascending: true,
         });
 
-    if (!error && data) {
-
-      setProducts(data);
-    }
+    setProducts(productData || []);
 
     setLoading(false);
   }
 
-  async function handleBuy() {
+  async function pilihProduk(
+    product: any
+  ) {
 
-    if (!selectedProduct) {
+    const nomor =
+      prompt(
+        "Masukkan nomor tujuan"
+      );
 
-      alert("Pilih produk terlebih dahulu");
-      return;
-    }
+    if (!nomor) return;
 
-    if (!nomorTujuan) {
-
-      alert("Masukkan nomor tujuan");
-      return;
-    }
-
-    if (!member) {
-
-      alert("Member tidak ditemukan");
-      return;
-    }
-
-    setBuyLoading(true);
+    const memberId =
+      localStorage.getItem("member_id");
 
     const { error } =
       await supabase
         .from("transactions")
         .insert([
           {
-            member_id: member.id,
-            product_id:
-              selectedProduct.id,
-            nomor_tujuan:
-              nomorTujuan,
-            amount:
-              selectedProduct.price,
+            member_id: memberId,
+            product_id: product.id,
+            nomor_tujuan: nomor,
+            amount: product.price,
             payment_method:
-              paymentMethod,
-            status: "proses",
+              "saldo",
+            status: "pending",
           },
         ]);
 
@@ -128,115 +108,140 @@ export default function ProdukPage() {
 
       alert(error.message);
 
-      setBuyLoading(false);
-
       return;
     }
 
-    await supabase
-      .from("activity_logs")
-      .insert([
-        {
-          member_name:
-            member.name,
-          city:
-            member.city,
-          activity:
-            "Membeli " +
-            selectedProduct.name,
-        },
-      ]);
+    /*
+      AKTIVASI OTOMATIS
+      transaksi pertama
+    */
+
+    if (
+      member.status !== "aktif"
+    ) {
+
+      await supabase
+        .from("members")
+        .update({
+          status: "aktif",
+        })
+        .eq("id", member.id);
+
+    }
 
     alert(
       "Transaksi berhasil dibuat"
     );
 
-    setSelectedProduct(null);
-
-    setNomorTujuan("");
-
-    setPaymentMethod("saldo");
-
-    setBuyLoading(false);
+    window.location.href =
+      "/member/transaksi";
   }
 
   if (loading) {
 
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-
-        <div className="flex flex-col items-center">
-
-          <div className="w-14 h-14 rounded-full border-4 border-zinc-700 border-t-green-400 animate-spin"></div>
-
-          <p className="text-zinc-400 mt-5">
-            Memuat produk digital...
-          </p>
-
-        </div>
-
+        Loading...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
 
-      {/* BACKGROUND */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,120,0.10),transparent_35%)] pointer-events-none"></div>
+      {/* BG */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_35%)] pointer-events-none"></div>
 
-      <div className="fixed top-0 right-0 w-[400px] h-[400px] bg-green-500/10 blur-[140px] rounded-full pointer-events-none"></div>
+      <div className="relative max-w-6xl mx-auto p-5 pb-32">
 
-      <div className="fixed bottom-0 left-0 w-[300px] h-[300px] bg-yellow-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+        {/* TOPBAR */}
+        <div className="flex items-center justify-between mb-8">
 
-      <div className="relative max-w-6xl mx-auto px-5 py-6 md:px-8 pb-44">
+          <Link
+            href="/member/dashboard"
+            className="w-14 h-14 rounded-2xl border border-zinc-800 bg-zinc-900/80 flex items-center justify-center hover:border-green-500 transition"
+          >
+            <ArrowLeft size={22} />
+          </Link>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
+
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+
+            <span className="text-green-400 text-sm font-black tracking-[0.2em]">
+              PRODUK DIGITAL
+            </span>
+
+          </div>
+
+        </div>
 
         {/* HERO */}
-        <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-2xl p-7 md:p-10">
+        <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-7 shadow-[0_0_40px_rgba(0,255,100,0.08)]">
 
-          <div className="absolute top-0 right-0 w-72 h-72 bg-green-500/10 blur-[140px] rounded-full"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-green-500/10 blur-3xl rounded-full"></div>
 
           <div className="relative z-10">
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20">
-
-              <Sparkles
-                size={16}
-                className="text-green-400"
-              />
-
-              <span className="text-green-400 text-xs font-black tracking-[0.2em] uppercase">
-                Produk Digital DAN
-              </span>
-
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight mt-6">
-
+            <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
               Paket Data
               <br />
               Premium
-
             </h1>
 
-            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-2xl mt-6">
-
+            <p className="text-zinc-400 text-lg leading-relaxed mt-6 max-w-2xl">
               Belanja paket data digital langsung dari dashboard premium DAN.
-              Setiap transaksi dapat mengaktifkan akun member dan membuka seluruh fitur affiliate modern.
-
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            {/* INFO */}
+            <div className="mt-8 rounded-[32px] border border-green-500/20 bg-green-500/10 p-5 shadow-[0_0_30px_rgba(0,255,100,0.08)]">
+
+              <div className="flex items-start gap-4">
+
+                <div className="w-12 h-12 rounded-2xl bg-green-500 text-black flex items-center justify-center flex-shrink-0">
+
+                  <Zap size={22} />
+
+                </div>
+
+                <div>
+
+                  <h3 className="text-2xl font-black">
+                    Aktivasi Otomatis
+                  </h3>
+
+                  <p className="text-zinc-300 mt-3 leading-relaxed">
+                    Transaksi pertama otomatis mengaktifkan akun member DAN tanpa produk aktivasi khusus.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* STATS */}
+            <div className="grid grid-cols-3 gap-4 mt-8">
 
               <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
 
                 <p className="text-zinc-500 text-sm">
-                  Status Member
+                  Status
                 </p>
 
-                <h2 className="text-2xl font-black text-yellow-400 mt-3 uppercase">
-                  {member?.status || "free"}
-                </h2>
+                <h3
+                  className={`text-2xl font-black mt-3 ${
+                    member.status ===
+                    "aktif"
+                      ? "text-green-400"
+                      : "text-yellow-300"
+                  }`}
+                >
+                  {member.status ===
+                  "aktif"
+                    ? "AKTIF"
+                    : "FREE"}
+                </h3>
 
               </div>
 
@@ -246,24 +251,21 @@ export default function ProdukPage() {
                   Saldo
                 </p>
 
-                <h2 className="text-2xl font-black text-green-400 mt-3">
-                  Rp{" "}
-                  {Number(
-                    member?.balance || 0
-                  ).toLocaleString("id-ID")}
-                </h2>
+                <h3 className="text-2xl font-black text-green-400 mt-3">
+                  Rp 0
+                </h3>
 
               </div>
 
               <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
 
                 <p className="text-zinc-500 text-sm">
-                  Produk Aktif
+                  Produk
                 </p>
 
-                <h2 className="text-2xl font-black mt-3">
+                <h3 className="text-2xl font-black mt-3">
                   {products.length}
-                </h2>
+                </h3>
 
               </div>
 
@@ -273,88 +275,30 @@ export default function ProdukPage() {
 
         </div>
 
-        {/* INFO ACTIVATION */}
-        <div className="relative overflow-hidden mt-8 rounded-[36px] border border-yellow-500/20 bg-yellow-500/10 p-6 md:p-7 shadow-[0_0_40px_rgba(250,204,21,0.10)]">
-
-          <div className="absolute top-0 right-0 w-56 h-56 bg-yellow-400/10 blur-[120px] rounded-full"></div>
-
-          <div className="relative z-10">
-
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/20">
-
-              <ShieldCheck
-                size={16}
-                className="text-yellow-400"
-              />
-
-              <span className="text-yellow-400 text-xs font-black tracking-[0.2em] uppercase">
-                Aktivasi Otomatis
-              </span>
-
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-black leading-tight mt-5 max-w-4xl">
-
-              Member FREE akan otomatis menjadi MEMBER AKTIF setelah transaksi berhasil diproses admin.
-
-            </h2>
-
-            <p className="text-yellow-100/70 leading-relaxed mt-5 max-w-3xl">
-
-              Tidak ada lagi produk aktivasi khusus.
-              Sistem DAN sekarang menggunakan transaksi produk digital pertama sebagai aktivasi akun otomatis.
-
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* PRODUCT LIST */}
-        <div className="space-y-6 mt-10">
+        {/* PRODUK */}
+        <div className="space-y-6 mt-8">
 
           {products.map((item) => (
 
             <div
               key={item.id}
-              className={`relative overflow-hidden rounded-[38px] border transition-all duration-300 backdrop-blur-xl p-6 md:p-8 ${
-                selectedProduct?.id === item.id
-                  ? "border-green-500 bg-green-500/5 shadow-[0_0_50px_rgba(0,255,120,0.18)]"
-                  : "border-zinc-800 bg-white/[0.03]"
-              }`}
+              className="relative overflow-hidden rounded-[36px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_0_30px_rgba(255,255,255,0.02)]"
             >
 
-              {/* GLOW */}
-              <div className="absolute top-0 right-0 w-60 h-60 bg-green-500/10 blur-[120px] rounded-full"></div>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/5 blur-3xl rounded-full"></div>
 
               <div className="relative z-10">
 
                 {/* TOP */}
-                <div className="flex items-start justify-between gap-6 flex-wrap">
+                <div className="flex items-start justify-between gap-4">
 
                   <div>
 
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <h2 className="text-4xl font-black">
+                      {item.name}
+                    </h2>
 
-                      <h2 className="text-4xl font-black tracking-tight">
-                        {item.name}
-                      </h2>
-
-                      {member?.status === "free" && (
-
-                        <div className="inline-flex items-center gap-2 bg-green-500 text-black text-xs font-black px-4 py-2 rounded-full shadow-[0_0_25px_rgba(0,255,120,0.35)]">
-
-                          <Sparkles size={14} />
-
-                          PRODUK AKTIVASI
-
-                        </div>
-
-                      )}
-
-                    </div>
-
-                    <p className="text-zinc-500 mt-4 text-lg">
+                    <p className="text-zinc-500 mt-3 text-lg">
                       Provider {item.provider}
                     </p>
 
@@ -366,27 +310,27 @@ export default function ProdukPage() {
                       Harga
                     </p>
 
-                    <h2 className="text-4xl md:text-5xl font-black text-green-400 mt-2 tracking-tight">
-
+                    <h2 className="text-5xl font-black text-green-400 mt-3">
                       Rp{" "}
                       {Number(
                         item.price
-                      ).toLocaleString("id-ID")}
-
+                      ).toLocaleString(
+                        "id-ID"
+                      )}
                     </h2>
 
                   </div>
 
                 </div>
 
-                {/* DETAIL */}
+                {/* INFO */}
                 <div className="grid grid-cols-2 gap-4 mt-8">
 
-                  <div className="rounded-[28px] border border-zinc-800 bg-black/40 p-5">
+                  <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
 
                     <div className="flex items-center gap-2 text-zinc-500 text-sm">
 
-                      <Zap size={15} />
+                      <Package size={14} />
 
                       Kuota
 
@@ -398,11 +342,11 @@ export default function ProdukPage() {
 
                   </div>
 
-                  <div className="rounded-[28px] border border-zinc-800 bg-black/40 p-5">
+                  <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
 
                     <div className="flex items-center gap-2 text-zinc-500 text-sm">
 
-                      <CalendarDays size={15} />
+                      <Calendar size={14} />
 
                       Masa Aktif
 
@@ -419,26 +363,14 @@ export default function ProdukPage() {
                 {/* BUTTON */}
                 <button
                   onClick={() =>
-                    setSelectedProduct(item)
+                    pilihProduk(item)
                   }
-                  className={`w-full h-16 mt-8 rounded-[26px] font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
-                    selectedProduct?.id === item.id
-                      ? "bg-green-500 text-black shadow-[0_0_35px_rgba(0,255,120,0.35)]"
-                      : "bg-zinc-900 border border-zinc-700 hover:border-green-500"
-                  }`}
+                  className="w-full h-16 mt-6 rounded-[28px] bg-green-500 hover:bg-green-400 transition text-black font-black text-xl shadow-[0_0_35px_rgba(0,255,100,0.30)] flex items-center justify-center gap-3"
                 >
 
-                  {selectedProduct?.id === item.id ? (
-                    <>
-                      <CheckCircle2 size={22} />
-                      Produk Dipilih
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag size={22} />
-                      Pilih Produk
-                    </>
-                  )}
+                  <ShoppingBag size={22} />
+
+                  Beli Sekarang
 
                 </button>
 
@@ -452,112 +384,6 @@ export default function ProdukPage() {
 
       </div>
 
-      {/* CHECKOUT */}
-      {selectedProduct && (
-
-        <div className="fixed bottom-0 left-0 right-0 z-50">
-
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-2xl"></div>
-
-          <div className="relative border-t border-zinc-800 p-5">
-
-            <div className="max-w-6xl mx-auto">
-
-              <div className="flex items-center justify-between gap-5 flex-wrap">
-
-                <div>
-
-                  <p className="text-zinc-500 text-sm">
-                    Produk Dipilih
-                  </p>
-
-                  <h2 className="text-3xl font-black mt-2">
-                    {selectedProduct.name}
-                  </h2>
-
-                </div>
-
-                <div className="text-right">
-
-                  <p className="text-zinc-500 text-sm">
-                    Total Pembayaran
-                  </p>
-
-                  <h2 className="text-4xl font-black text-green-400 mt-2">
-
-                    Rp{" "}
-                    {Number(
-                      selectedProduct.price
-                    ).toLocaleString("id-ID")}
-
-                  </h2>
-
-                </div>
-
-              </div>
-
-              <div className="space-y-4 mt-6">
-
-                <input
-                  type="text"
-                  placeholder="Masukkan nomor tujuan"
-                  value={nomorTujuan}
-                  onChange={(e) =>
-                    setNomorTujuan(
-                      e.target.value
-                    )
-                  }
-                  className="w-full h-16 rounded-[24px] border border-zinc-800 bg-zinc-900/80 px-5 outline-none focus:border-green-500 transition"
-                />
-
-                <select
-                  value={paymentMethod}
-                  onChange={(e) =>
-                    setPaymentMethod(
-                      e.target.value
-                    )
-                  }
-                  className="w-full h-16 rounded-[24px] border border-zinc-800 bg-zinc-900/80 px-5 outline-none focus:border-green-500 transition"
-                >
-
-                  <option value="saldo">
-                    Bayar dengan Saldo
-                  </option>
-
-                  <option value="transfer manual">
-                    Transfer Manual
-                  </option>
-
-                </select>
-
-                <button
-                  onClick={handleBuy}
-                  disabled={buyLoading}
-                  className="w-full h-16 rounded-[24px] bg-gradient-to-r from-green-500 to-lime-400 text-black text-xl font-black shadow-[0_0_45px_rgba(0,255,120,0.30)] hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-3"
-                >
-
-                  {buyLoading ? (
-                    "Memproses..."
-                  ) : (
-                    <>
-                      <CreditCard size={22} />
-                      Beli Sekarang
-                      <ArrowRight size={20} />
-                    </>
-                  )}
-
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
-    </main>
+    </div>
   );
 }
