@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Bell,
@@ -10,52 +10,152 @@ import {
   Share2,
   Users,
   Wallet,
- Gift,
+  Gift,
   BadgeDollarSign,
   ShoppingBag,
   CreditCard,
   ReceiptText,
   Crown,
   Sparkles,
+  ShieldAlert,
 } from "lucide-react";
+
+type MemberStatus =
+  | "free"
+  | "aktif"
+  | "dibekukan";
+
+type MemberData = {
+  id: string;
+  name: string;
+  city: string;
+  status: MemberStatus;
+  transactionStatus?: string;
+};
 
 export default function Home() {
 
   /*
-    STATUS:
-    - free
-    - aktif
-    - dibekukan
+    =====================================================
+    MEMBER DASHBOARD FINAL SYNC
+    =====================================================
+
+    SINKRON:
+    - Status member otomatis ambil dari localStorage
+    - Jika admin approve transaksi:
+      member => aktif
+    - Jika admin reject:
+      tetap free
+    - Jika dibekukan:
+      tampil warning
+    - Aktivasi sekarang:
+      langsung ke produk digital
+    - Live activity mini realtime
+    =====================================================
   */
 
-  const [memberStatus] =
-    useState<"free" | "aktif" | "dibekukan">(
-      "free"
-    );
+  const [memberStatus, setMemberStatus] =
+    useState<MemberStatus>("free");
+
+  const [memberName, setMemberName] =
+    useState("Basri");
+
+  const [memberCity, setMemberCity] =
+    useState("Makassar");
+
+  /*
+    =====================================================
+    LOAD MEMBER STATUS
+    =====================================================
+  */
+
+  useEffect(() => {
+
+    const memberId =
+      localStorage.getItem("member_id");
+
+    const members =
+      localStorage.getItem("dan-members");
+
+    if (!members) return;
+
+    try {
+
+      const parsed: MemberData[] =
+        JSON.parse(members);
+
+      const currentMember =
+        parsed.find(
+          (m) =>
+            String(m.id) ===
+            String(memberId)
+        );
+
+      if (currentMember) {
+
+        setMemberStatus(
+          currentMember.status
+        );
+
+        if (currentMember.name) {
+
+          setMemberName(
+            currentMember.name
+          );
+
+        }
+
+        if (currentMember.city) {
+
+          setMemberCity(
+            currentMember.city
+          );
+
+        }
+
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
+
+  }, []);
+
+  /*
+    =====================================================
+    LIVE ACTIVITY
+    =====================================================
+  */
 
   const activities = [
     {
       name: "Akbar",
       city: "Makassar",
-      activity: "Aktivasi member",
+      activity:
+        "Aktivasi member berhasil",
       time: "2 menit lalu",
     },
     {
       name: "Dewi",
       city: "Bandung",
-      activity: "Belanja paket data",
+      activity:
+        "Belanja paket data",
       time: "5 menit lalu",
     },
     {
       name: "Rizky",
       city: "Jakarta",
-      activity: "Bonus referral masuk",
+      activity:
+        "Bonus referral masuk",
       time: "9 menit lalu",
     },
     {
       name: "Fajar",
       city: "Surabaya",
-      activity: "Withdraw berhasil",
+      activity:
+        "Withdraw berhasil",
       time: "12 menit lalu",
     },
   ];
@@ -65,21 +165,30 @@ export default function Home() {
 
   useEffect(() => {
 
-    const interval = setInterval(() => {
+    const interval =
+      setInterval(() => {
 
-      setActivityIndex((prev) =>
-        prev === activities.length - 1
-          ? 0
-          : prev + 1
-      );
+        setActivityIndex((prev) =>
+          prev ===
+          activities.length - 1
+            ? 0
+            : prev + 1
+        );
 
-    }, 3500);
+      }, 3500);
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
 
   }, [activities.length]);
 
-  function statusColor() {
+  /*
+    =====================================================
+    STATUS STYLE
+    =====================================================
+  */
+
+  const status = useMemo(() => {
 
     if (memberStatus === "aktif") {
 
@@ -88,15 +197,20 @@ export default function Home() {
         dot: "bg-green-400",
         label: "MEMBER AKTIF",
       };
+
     }
 
-    if (memberStatus === "dibekukan") {
+    if (
+      memberStatus ===
+      "dibekukan"
+    ) {
 
       return {
         text: "text-orange-400",
         dot: "bg-orange-400",
         label: "DIBEKUKAN",
       };
+
     }
 
     return {
@@ -104,9 +218,8 @@ export default function Home() {
       dot: "bg-yellow-400",
       label: "FREE MEMBER",
     };
-  }
 
-  const status = statusColor();
+  }, [memberStatus]);
 
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
@@ -144,8 +257,12 @@ export default function Home() {
               </p>
 
               <h1 className="text-3xl sm:text-5xl font-black mt-2 tracking-tight">
-                Basri
+                {memberName}
               </h1>
+
+              <p className="text-zinc-500 mt-1 text-sm">
+                {memberCity}
+              </p>
 
               <div className="flex items-center gap-2 mt-3">
 
@@ -229,18 +346,9 @@ export default function Home() {
 
               <div className="rounded-[24px] border border-zinc-800 bg-black/40 p-4">
 
-                <div className="flex items-center justify-between">
-
-                  <p className="text-zinc-500 text-sm">
-                    Bonus Sponsor
-                  </p>
-
-                  <Gift
-                    size={16}
-                    className="text-white"
-                  />
-
-                </div>
+                <p className="text-zinc-500 text-sm">
+                  Bonus Sponsor
+                </p>
 
                 <h3 className="text-xl sm:text-2xl font-black mt-4">
                   Rp 0
@@ -250,18 +358,9 @@ export default function Home() {
 
               <div className="rounded-[24px] border border-zinc-800 bg-black/40 p-4">
 
-                <div className="flex items-center justify-between">
-
-                  <p className="text-zinc-500 text-sm">
-                    Bonus Referral
-                  </p>
-
-                  <BadgeDollarSign
-                    size={16}
-                    className="text-white"
-                  />
-
-                </div>
+                <p className="text-zinc-500 text-sm">
+                  Bonus Referral
+                </p>
 
                 <h3 className="text-xl sm:text-2xl font-black mt-4">
                   Rp 0
@@ -271,18 +370,9 @@ export default function Home() {
 
               <div className="rounded-[24px] border border-zinc-800 bg-black/40 p-4">
 
-                <div className="flex items-center justify-between">
-
-                  <p className="text-zinc-500 text-sm">
-                    Total Bonus
-                  </p>
-
-                  <Wallet
-                    size={16}
-                    className="text-green-400"
-                  />
-
-                </div>
+                <p className="text-zinc-500 text-sm">
+                  Total Bonus
+                </p>
 
                 <h3 className="text-xl sm:text-2xl font-black text-green-400 mt-4">
                   Rp 0
@@ -292,18 +382,9 @@ export default function Home() {
 
               <div className="rounded-[24px] border border-zinc-800 bg-black/40 p-4">
 
-                <div className="flex items-center justify-between">
-
-                  <p className="text-zinc-500 text-sm">
-                    Total Referral
-                  </p>
-
-                  <Users
-                    size={16}
-                    className="text-white"
-                  />
-
-                </div>
+                <p className="text-zinc-500 text-sm">
+                  Total Referral
+                </p>
 
                 <h3 className="text-xl sm:text-2xl font-black mt-4">
                   0
@@ -367,12 +448,49 @@ export default function Home() {
 
         </div>
 
+        {/* MEMBER DIBEKUKAN */}
+        {memberStatus ===
+          "dibekukan" && (
+
+          <div className="relative overflow-hidden rounded-[32px] border border-orange-500/20 bg-orange-500/10 mt-8 p-6 sm:p-7 shadow-[0_0_40px_rgba(255,165,0,0.10)]">
+
+            <div className="relative z-10">
+
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20">
+
+                <ShieldAlert
+                  size={16}
+                  className="text-orange-400"
+                />
+
+                <span className="text-orange-400 text-xs font-black tracking-[0.2em]">
+                  STATUS DIBEKUKAN
+                </span>
+
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black mt-6 leading-tight">
+                Akun sedang dibekukan sementara.
+              </h2>
+
+              <p className="text-orange-100/70 mt-5 leading-relaxed max-w-3xl">
+                Pembekuan dapat terjadi karena tidak ada transaksi selama 60 hari atau terdeteksi aktivitas yang memerlukan pemeriksaan admin.
+              </p>
+
+              <p className="text-orange-100/70 mt-3 leading-relaxed max-w-3xl">
+                Status akan aktif kembali otomatis setelah melakukan transaksi pembelian produk.
+              </p>
+
+            </div>
+
+          </div>
+
+        )}
+
         {/* FREE MEMBER */}
         {memberStatus === "free" && (
 
           <div className="relative overflow-hidden rounded-[32px] sm:rounded-[40px] border border-yellow-500/20 bg-yellow-500/10 mt-8 p-6 sm:p-7 shadow-[0_0_40px_rgba(250,204,21,0.10)]">
-
-            <div className="absolute top-0 right-0 w-72 h-72 bg-yellow-400/10 blur-[140px] rounded-full"></div>
 
             <div className="relative z-10">
 
@@ -394,37 +512,8 @@ export default function Home() {
               </h2>
 
               <p className="text-yellow-100/70 text-sm sm:text-base leading-relaxed mt-5 max-w-3xl">
-                Setelah aktivasi kamu dapat belanja paket data,
-                menerima bonus referral, dan melakukan withdraw.
+                Setelah aktivasi kamu dapat belanja paket data, menerima bonus referral, dan melakukan withdraw.
               </p>
-
-              <div className="space-y-3 mt-7">
-
-                <div className="flex items-center gap-3 text-sm sm:text-base">
-
-                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-
-                  Bonus sponsor otomatis
-
-                </div>
-
-                <div className="flex items-center gap-3 text-sm sm:text-base">
-
-                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-
-                  Bonus referral realtime
-
-                </div>
-
-                <div className="flex items-center gap-3 text-sm sm:text-base">
-
-                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-
-                  Fitur withdraw premium
-
-                </div>
-
-              </div>
 
               <Link
                 href="/member/produk"
@@ -443,7 +532,7 @@ export default function Home() {
 
         )}
 
-        {/* MENU MEMBER AKTIF */}
+        {/* MEMBER MENU */}
         {memberStatus !== "free" && (
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
@@ -529,50 +618,51 @@ export default function Home() {
 
           <div className="relative overflow-hidden h-[170px]">
 
-            {activities.map((item, index) => (
+            {activities.map(
+              (item, index) => (
 
-              <div
-                key={index}
-                className={`absolute inset-0 transition-all duration-700 ${
-                  index === activityIndex
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8 pointer-events-none"
-                }`}
-              >
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-all duration-700 ${
+                    index ===
+                    activityIndex
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-8 pointer-events-none"
+                  }`}
+                >
 
-                <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950 p-5 h-full">
+                  <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950 p-5 h-full">
 
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
+                    <div className="relative z-10 flex items-start justify-between gap-4">
 
-                  <div className="relative z-10 flex items-start justify-between gap-4">
+                      <div>
 
-                    <div>
+                        <h3 className="text-xl sm:text-2xl font-black">
+                          {item.name}
+                        </h3>
 
-                      <h3 className="text-xl sm:text-2xl font-black">
-                        {item.name}
-                      </h3>
+                        <p className="text-zinc-500 text-sm mt-1">
+                          {item.city}
+                        </p>
 
-                      <p className="text-zinc-500 text-sm mt-1">
-                        {item.city}
-                      </p>
+                        <p className="text-sm sm:text-base mt-4">
+                          {item.activity}
+                        </p>
 
-                      <p className="text-sm sm:text-base mt-4">
-                        {item.activity}
-                      </p>
+                      </div>
+
+                      <span className="text-zinc-500 text-xs sm:text-sm whitespace-nowrap">
+                        {item.time}
+                      </span>
 
                     </div>
-
-                    <span className="text-zinc-500 text-xs sm:text-sm whitespace-nowrap">
-                      {item.time}
-                    </span>
 
                   </div>
 
                 </div>
 
-              </div>
-
-            ))}
+              )
+            )}
 
           </div>
 
