@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   LogOut,
@@ -16,9 +16,7 @@ import {
   ShoppingBag,
   Crown,
   TrendingUp,
-  ArrowRight,
   CreditCard,
-  Megaphone,
 } from "lucide-react";
 
 export default function Home() {
@@ -61,6 +59,24 @@ export default function Home() {
       time: "12 menit lalu",
     },
   ];
+
+  const [activityIndex, setActivityIndex] = useState(0);
+
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+
+      setActivityIndex((prev) =>
+        prev === activities.length - 1
+          ? 0
+          : prev + 1
+      );
+
+    }, 3500);
+
+    return () => clearInterval(interval);
+
+  }, [activities.length]);
 
   function renderMemberBadge() {
 
@@ -281,9 +297,9 @@ export default function Home() {
             className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-yellow-400 hover:bg-yellow-300 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(250,204,21,0.25)]"
           >
 
-            <ShoppingBag size={20} />
+            <Sparkles size={20} />
 
-            Beli Paket Data
+            Aktivasi Sekarang
 
           </Link>
 
@@ -437,26 +453,28 @@ export default function Home() {
         {/* MENU */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
 
-          {/* PRODUK */}
-          <Link
-            href="/member/produk"
-            className="bg-green-500/10 border border-green-500/20 hover:border-green-400 transition-all duration-300 rounded-[30px] p-5 md:p-6 shadow-[0_0_30px_rgba(0,255,120,0.08)]"
-          >
+          {/* KHUSUS MEMBER AKTIF & DIBEKUKAN */}
+          {memberStatus !== "free" && (
+            <Link
+              href="/member/produk"
+              className="bg-green-500/10 border border-green-500/20 hover:border-green-400 transition-all duration-300 rounded-[30px] p-5 md:p-6 shadow-[0_0_30px_rgba(0,255,120,0.08)]"
+            >
 
-            <ShoppingBag
-              size={34}
-              className="text-green-400"
-            />
+              <ShoppingBag
+                size={34}
+                className="text-green-400"
+              />
 
-            <h2 className="text-xl md:text-2xl font-black mt-6">
-              Beli Paket
-            </h2>
+              <h2 className="text-xl md:text-2xl font-black mt-6">
+                Beli Paket
+              </h2>
 
-            <p className="text-zinc-400 text-sm mt-2">
-              Belanja paket data digital
-            </p>
+              <p className="text-zinc-400 text-sm mt-2">
+                Belanja paket data digital
+              </p>
 
-          </Link>
+            </Link>
+          )}
 
           {/* PEMBERITAHUAN */}
           <Link
@@ -573,38 +591,46 @@ export default function Home() {
 
           </div>
 
-          <div className="space-y-4">
+          <div className="relative overflow-hidden h-[170px]">
 
             {activities.map((item, index) => (
 
               <div
                 key={index}
-                className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-white/[0.03] p-5"
+                className={`absolute inset-0 transition-all duration-700 ${
+                  index === activityIndex
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8 pointer-events-none"
+                }`}
               >
 
-                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
+                <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-white/[0.03] p-5 h-full">
 
-                <div className="relative z-10 flex items-start justify-between gap-4">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
 
-                  <div>
+                  <div className="relative z-10 flex items-start justify-between gap-4">
 
-                    <h3 className="text-lg md:text-2xl font-black">
-                      {item.name}
-                    </h3>
+                    <div>
 
-                    <p className="text-zinc-500 text-sm mt-1">
-                      {item.city}
-                    </p>
+                      <h3 className="text-lg md:text-2xl font-black">
+                        {item.name}
+                      </h3>
 
-                    <p className="text-sm md:text-base mt-4">
-                      {item.activity}
-                    </p>
+                      <p className="text-zinc-500 text-sm mt-1">
+                        {item.city}
+                      </p>
+
+                      <p className="text-sm md:text-base mt-4">
+                        {item.activity}
+                      </p>
+
+                    </div>
+
+                    <span className="text-zinc-500 text-xs md:text-sm whitespace-nowrap">
+                      {item.time}
+                    </span>
 
                   </div>
-
-                  <span className="text-zinc-500 text-xs md:text-sm whitespace-nowrap">
-                    {item.time}
-                  </span>
 
                 </div>
 
