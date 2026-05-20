@@ -12,11 +12,11 @@ import {
   ShieldCheck,
   CircleDollarSign,
   LogOut,
-  Megaphone,
   Bell,
   PackageSearch,
   TrendingUp,
   BarChart3,
+  MessageCircle,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -61,6 +61,58 @@ export default function AdminPage() {
       activity:
         "Bonus referral masuk",
       time: "12 menit lalu",
+    },
+  ];
+
+  const menus = [
+    {
+      href: "/admin/members",
+      icon: Users,
+      title: "Member",
+      desc: "Kelola seluruh member platform DAN",
+    },
+    {
+      href: "/admin/products",
+      icon: ShoppingBag,
+      title: "Produk",
+      desc: "Kelola produk & pencarian produk",
+    },
+    {
+      href: "/admin/transactions",
+      icon: Wallet,
+      title: "Transaksi",
+      desc: "Monitoring transaksi member",
+    },
+    {
+      href: "/admin/payment",
+      icon: CreditCard,
+      title: "Pembayaran",
+      desc: "Kelola bank & e-wallet",
+      active: true,
+    },
+    {
+      href: "/admin/messages",
+      icon: MessageCircle,
+      title: "Pesan",
+      desc: "Pesan pribadi ke member",
+    },
+    {
+      href: "/admin/activity",
+      icon: Activity,
+      title: "Aktivitas",
+      desc: "Aktivitas realtime platform",
+    },
+    {
+      href: "/admin/withdraw",
+      icon: CircleDollarSign,
+      title: "Withdraw",
+      desc: "Approval withdraw member",
+    },
+    {
+      href: "/admin/settings",
+      icon: Settings,
+      title: "Pengaturan",
+      desc: "Bonus & minimal withdraw",
     },
   ];
 
@@ -113,48 +165,33 @@ export default function AdminPage() {
 
         </div>
 
-        {/* QUICK ALERT */}
+        {/* SYSTEM NOTIFICATION */}
         <div className="relative overflow-hidden rounded-[30px] sm:rounded-[40px] border border-green-500/20 bg-gradient-to-br from-green-500/15 to-black mt-8 sm:mt-10 p-5 sm:p-7">
 
           <div className="absolute top-0 right-0 w-56 h-56 bg-green-500/10 blur-[120px] rounded-full"></div>
 
-          <div className="relative z-10 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-7">
+          <div className="relative z-10">
 
-            <div>
+            <div className="flex items-center gap-3 mb-4">
 
-              <div className="flex items-center gap-3 mb-4">
+              <Bell
+                size={22}
+                className="text-green-400"
+              />
 
-                <Bell
-                  size={22}
-                  className="text-green-400"
-                />
-
-                <span className="text-green-400 font-black tracking-widest text-xs sm:text-sm">
-                  SYSTEM NOTIFICATION
-                </span>
-
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight max-w-3xl">
-                Kelola pemberitahuan dan pesan massal untuk seluruh member DAN secara realtime.
-              </h2>
-
-              <p className="text-zinc-400 mt-5 text-sm sm:text-lg leading-relaxed max-w-2xl">
-                Kirim pengumuman maintenance, promo, motivasi referral, update sistem, dan informasi penting lainnya langsung ke dashboard member.
-              </p>
+              <span className="text-green-400 font-black tracking-widest text-xs sm:text-sm">
+                SYSTEM NOTIFICATION
+              </span>
 
             </div>
 
-            <Link
-              href="/admin/announcements"
-              className="w-full sm:w-auto h-14 sm:h-16 px-7 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-base sm:text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,255,120,0.30)] whitespace-nowrap"
-            >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight max-w-4xl">
+              Seluruh sistem DAN berjalan normal dan realtime.
+            </h2>
 
-              <Megaphone size={20} />
-
-              Pesan Massal
-
-            </Link>
+            <p className="text-zinc-400 mt-5 text-sm sm:text-lg leading-relaxed max-w-3xl">
+              Monitoring member, transaksi, bonus referral, withdraw, dan aktivitas platform berjalan stabil tanpa kendala.
+            </p>
 
           </div>
 
@@ -415,57 +452,7 @@ export default function AdminPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
 
-            {[
-              {
-                href: "/admin/members",
-                icon: Users,
-                title: "Member",
-                desc: "Kelola seluruh member platform DAN",
-              },
-              {
-                href: "/admin/products",
-                icon: ShoppingBag,
-                title: "Produk",
-                desc: "Kelola produk & pencarian produk",
-              },
-              {
-                href: "/admin/transactions",
-                icon: Wallet,
-                title: "Transaksi",
-                desc: "Monitoring transaksi member",
-              },
-              {
-                href: "/admin/payment",
-                icon: CreditCard,
-                title: "Pembayaran",
-                desc: "Kelola bank & e-wallet",
-                active: true,
-              },
-              {
-                href: "/admin/announcements",
-                icon: Megaphone,
-                title: "Pesan",
-                desc: "Broadcast seluruh member",
-              },
-              {
-                href: "/admin/activity",
-                icon: Activity,
-                title: "Aktivitas",
-                desc: "Aktivitas realtime platform",
-              },
-              {
-                href: "/admin/withdraw",
-                icon: CircleDollarSign,
-                title: "Withdraw",
-                desc: "Approval withdraw member",
-              },
-              {
-                href: "/admin/settings",
-                icon: Settings,
-                title: "Settings",
-                desc: "Pengaturan aplikasi DAN",
-              },
-            ].map((item, index) => {
+            {menus.map((item, index) => {
 
               const Icon = item.icon;
 
