@@ -39,20 +39,18 @@ export default function AdminPage() {
 
   /*
     =====================================================
-    ADMIN DASHBOARD FINAL PREMIUM CLEAN
+    DAN ADMIN DASHBOARD FINAL
     =====================================================
 
-    FIX FINAL:
-    - UI lebih simpel & premium
-    - Hapus tombol duplicate
-    - Suspend hanya di halaman member
-    - System notification dihapus
-    - Menu pesan gabung:
-      personal + mass broadcast
-    - Total penjualan diganti:
-      total produk terjual
-    - Live activity mini auto scroll
-    - Fokus approval transaksi
+    FINAL FIX:
+    ✅ UI lebih clean & premium
+    ✅ Notification badge transaksi
+    ✅ Notification badge withdraw
+    ✅ Live activity mini realtime
+    ✅ No duplicate button
+    ✅ Fokus approval transaksi
+    ✅ Suspend hanya di halaman member
+    ✅ Pesan pribadi + massal digabung
   */
 
   const [transactions] =
@@ -158,6 +156,20 @@ export default function AdminPage() {
 
   /*
     =====================================================
+    NOTIFICATION BADGE
+    =====================================================
+  */
+
+  const pendingTransactions =
+    transactions.filter(
+      (trx) =>
+        trx.status === "pending"
+    ).length;
+
+  const pendingWithdraw = 7;
+
+  /*
+    =====================================================
     LIVE ACTIVITY
     =====================================================
   */
@@ -197,7 +209,7 @@ export default function AdminPage() {
       icon: Users,
       title: "Member",
       desc:
-        "Status, suspend & histori transaksi",
+        "Status & histori transaksi",
     },
     {
       href: "/admin/products",
@@ -213,6 +225,7 @@ export default function AdminPage() {
       desc:
         "Approval aktivasi member",
       active: true,
+      badge: pendingTransactions,
     },
     {
       href: "/admin/payment",
@@ -226,7 +239,7 @@ export default function AdminPage() {
       icon: MessageCircle,
       title: "Pesan",
       desc:
-        "Pesan pribadi & massal",
+        "Pribadi & broadcast",
     },
     {
       href: "/admin/withdraw",
@@ -234,6 +247,7 @@ export default function AdminPage() {
       title: "Withdraw",
       desc:
         "Approval withdraw",
+      badge: pendingWithdraw,
     },
     {
       href: "/admin/settings",
@@ -312,6 +326,11 @@ export default function AdminPage() {
               active: true,
             },
             {
+              title: "Total Produk",
+              value: stats.totalProduk,
+              color: "text-white",
+            },
+            {
               title: "Total Transaksi",
               value: stats.totalTransaksi,
               color: "text-white",
@@ -320,11 +339,6 @@ export default function AdminPage() {
               title: "Total Withdraw",
               value: stats.totalWithdraw,
               color: "text-yellow-400",
-            },
-            {
-              title: "Total Produk",
-              value: stats.totalProduk,
-              color: "text-white",
             },
             {
               title: "Produk Terjual",
@@ -398,6 +412,17 @@ export default function AdminPage() {
                       : "border border-zinc-800 bg-zinc-950 hover:border-green-500"
                   }`}
                 >
+
+                  {/* BADGE */}
+                  {item.badge ? (
+
+                    <div className="absolute top-4 right-4 z-20 min-w-[28px] h-7 px-2 rounded-full bg-red-600 flex items-center justify-center text-xs font-black shadow-[0_0_20px_rgba(255,0,0,0.35)]">
+
+                      {item.badge}
+
+                    </div>
+
+                  ) : null}
 
                   <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full"></div>
 
