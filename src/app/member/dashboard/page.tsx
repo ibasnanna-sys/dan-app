@@ -77,7 +77,7 @@ export default function Home() {
 
     return () => clearInterval(interval);
 
-  }, [activities.length]);
+  }, []);
 
   function statusColor() {
 
@@ -170,10 +170,14 @@ export default function Home() {
 
             <Link
               href="/member/pemberitahuan"
-              className="w-12 h-12 rounded-2xl border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all duration-300 flex items-center justify-center"
+              className="relative w-12 h-12 rounded-2xl border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all duration-300 flex items-center justify-center"
             >
 
               <Bell size={20} />
+
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 text-[10px] text-black font-black flex items-center justify-center">
+                2
+              </div>
 
             </Link>
 
@@ -324,7 +328,10 @@ export default function Home() {
 
               <div className="flex flex-wrap gap-3 mt-5">
 
-                <button className="h-12 px-5 rounded-2xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm flex items-center gap-2">
+                <button
+                  type="button"
+                  className="h-12 px-5 rounded-2xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm flex items-center gap-2"
+                >
 
                   <Copy size={16} />
 
@@ -332,7 +339,10 @@ export default function Home() {
 
                 </button>
 
-                <button className="h-12 px-5 rounded-2xl border border-zinc-700 hover:border-green-500 transition-all duration-300 text-sm font-black flex items-center gap-2">
+                <button
+                  type="button"
+                  className="h-12 px-5 rounded-2xl border border-zinc-700 hover:border-green-500 transition-all duration-300 text-sm font-black flex items-center gap-2"
+                >
 
                   <Share2 size={16} />
 
