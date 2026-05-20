@@ -21,7 +21,7 @@ import {
 
 export default function Home() {
 
-  const memberStatus: "free" | "aktif" | "freeze" = "free";
+  const memberStatus: "free" | "aktif" | "di bekukan" = "free";
 
   const activities = [
     {
@@ -96,7 +96,7 @@ export default function Home() {
       );
     }
 
-    if (memberStatus === "freeze") {
+    if (memberStatus === "di bekukan") {
 
       return (
         <div className="relative overflow-hidden mt-6 rounded-[36px] border border-orange-500/20 bg-orange-500/10 p-7 shadow-[0_0_50px_rgba(255,120,0,0.12)]">
