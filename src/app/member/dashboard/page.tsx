@@ -10,7 +10,7 @@ import {
   Share2,
   Users,
   Wallet,
-  Gift,
+ Gift,
   BadgeDollarSign,
   ShoppingBag,
   CreditCard,
@@ -77,7 +77,7 @@ export default function Home() {
 
     return () => clearInterval(interval);
 
-  }, []);
+  }, [activities.length]);
 
   function statusColor() {
 
@@ -175,9 +175,7 @@ export default function Home() {
 
               <Bell size={20} />
 
-              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 text-[10px] text-black font-black flex items-center justify-center">
-                2
-              </div>
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-400"></div>
 
             </Link>
 
