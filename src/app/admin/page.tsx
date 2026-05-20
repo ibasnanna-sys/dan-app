@@ -8,16 +8,11 @@ import {
   ShoppingBag,
   Wallet,
   CreditCard,
-  Activity,
   Settings,
-  ArrowUpRight,
-  ShieldCheck,
   CircleDollarSign,
   LogOut,
   Bell,
-  PackageSearch,
   TrendingUp,
-  BarChart3,
   MessageCircle,
 } from "lucide-react";
 
@@ -46,11 +41,12 @@ export default function AdminPage() {
 
   /*
     =====================================================
-    DASHBOARD ADMIN FINAL
+    DASHBOARD ADMIN FINAL CLEAN
     =====================================================
 
     FIX:
     - Tombol aktivasi DIHAPUS
+    - Menu aktivitas DIHAPUS
     - Approval hanya di:
       /admin/transactions
     - Live Activity tetap ada
@@ -244,13 +240,6 @@ export default function AdminPage() {
       title: "Pesan",
       desc:
         "Pesan pribadi ke member",
-    },
-    {
-      href: "/admin/activity",
-      icon: Activity,
-      title: "Aktivitas",
-      desc:
-        "Aktivitas realtime platform",
     },
     {
       href: "/admin/withdraw",
@@ -620,4 +609,4 @@ export default function AdminPage() {
 
     </main>
   );
-        }
+}
