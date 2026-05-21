@@ -18,14 +18,20 @@ type TransactionStatus =
   | "approved"
   | "rejected";
 
+type MemberStatus =
+  | "free"
+  | "aktif"
+  | "dibekukan";
+
 type Transaction = {
-  id: number;
+  id: string;
   memberName: string;
   city: string;
   product: string;
   amount: number;
   status: TransactionStatus;
-  created_at: string;
+  memberStatus: MemberStatus;
+  createdAt: string;
 };
 
 export default function AdminTransactionsPage() {
@@ -34,16 +40,16 @@ export default function AdminTransactionsPage() {
     useState<Transaction[]>([]);
 
   /*
-    =========================================
-    LOAD TRANSACTIONS
-    =========================================
+    =====================================================
+    LOAD TRANSACTIONS REALTIME
+    =====================================================
   */
 
   useEffect(() => {
 
     async function loadTransactions() {
 
-      const { data, error } =
+      const { data, error }: any =
         await supabase
           .from("transactions")
           .select("*")
@@ -53,9 +59,30 @@ export default function AdminTransactionsPage() {
 
       if (!error && data) {
 
-        setTransactions(
-          data as Transaction[]
-        );
+        const formatted =
+          data.map((trx: any) => ({
+            id: String(trx.id),
+            memberName:
+              trx.member_name || "-",
+            city:
+              trx.city || "-",
+            product:
+              trx.product || "-",
+            amount:
+              trx.amount || 0,
+            status:
+              trx.status || "pending",
+            memberStatus:
+              trx.member_status || "free",
+            createdAt:
+              trx.created_at
+                ? new Date(
+                    trx.created_at
+                  ).toLocaleString("id-ID")
+                : "-",
+          }));
+
+        setTransactions(formatted);
 
       }
 
@@ -66,13 +93,13 @@ export default function AdminTransactionsPage() {
   }, []);
 
   /*
-    =========================================
+    =====================================================
     UPDATE STATUS
-    =========================================
+    =====================================================
   */
 
   async function updateStatus(
-    id: number,
+    id: string,
     status:
       | "approved"
       | "rejected"
@@ -81,7 +108,13 @@ export default function AdminTransactionsPage() {
     const { error } =
       await supabase
         .from("transactions")
-        .update({ status })
+        .update({
+          status,
+          member_status:
+            status === "approved"
+              ? "aktif"
+              : "free",
+        })
         .eq("id", id);
 
     if (!error) {
@@ -94,6 +127,10 @@ export default function AdminTransactionsPage() {
             return {
               ...trx,
               status,
+              memberStatus:
+                status === "approved"
+                  ? "aktif"
+                  : "free",
             };
 
           }
@@ -108,9 +145,9 @@ export default function AdminTransactionsPage() {
   }
 
   /*
-    =========================================
+    =====================================================
     COUNT
-    =========================================
+    =====================================================
   */
 
   const pendingCount =
@@ -158,7 +195,8 @@ export default function AdminTransactionsPage() {
             </h1>
 
             <p className="text-zinc-500 mt-5 max-w-2xl leading-relaxed">
-              Approval transaksi member DAN realtime.
+              Approval transaksi
+              member DAN realtime.
             </p>
 
           </div>
@@ -246,9 +284,9 @@ export default function AdminTransactionsPage() {
                       <Wallet size={16} />
 
                       Rp{" "}
-                      {Number(
-                        trx.amount
-                      ).toLocaleString("id-ID")}
+                      {trx.amount.toLocaleString(
+                        "id-ID"
+                      )}
 
                     </div>
 
@@ -256,7 +294,7 @@ export default function AdminTransactionsPage() {
 
                       <Clock3 size={16} />
 
-                      {trx.created_at}
+                      {trx.createdAt}
 
                     </div>
 
@@ -282,7 +320,7 @@ export default function AdminTransactionsPage() {
                       trx.status ===
                       "approved"
                     }
-                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black text-black"
+                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black text-black shadow-[0_0_30px_rgba(0,255,120,0.18)]"
                   >
 
                     <ShieldCheck
@@ -304,7 +342,7 @@ export default function AdminTransactionsPage() {
                       trx.status ===
                       "rejected"
                     }
-                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black"
+                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black shadow-[0_0_30px_rgba(255,0,0,0.15)]"
                   >
 
                     <XCircle
@@ -329,5 +367,4 @@ export default function AdminTransactionsPage() {
 
     </main>
   );
-
 }
