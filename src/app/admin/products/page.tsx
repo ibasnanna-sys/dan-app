@@ -40,10 +40,14 @@ export default function AdminProductsPage() {
     const { data } =
       await supabase
         .from("products")
-        .select("*")
-        .order("created_at", {
-          ascending: false,
-        });
+.select("*")
+.neq(
+  "name",
+  "OLD_AKTIVASI_MEMBER_DO_NOT_USE"
+)
+.order("created_at", {
+  ascending: false,
+});
 
     setProducts(data || []);
 
