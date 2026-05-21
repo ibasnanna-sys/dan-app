@@ -17,8 +17,13 @@ import {
   LoaderCircle,
   Clock3,
   Ban,
-  User2,
 } from "lucide-react";
+
+/*
+=====================================================
+TYPES
+=====================================================
+*/
 
 type TransactionStatus =
   | "pending"
@@ -48,20 +53,24 @@ type Member = {
 
 type Transaction = {
   id: number;
+
   member_id: string;
+
   product_id: number;
 
   nomor_tujuan: string;
+
   payment_method: string;
+
   amount: number;
 
   status: TransactionStatus;
 
   created_at: string;
 
-  members?: Member | null;
+  members?: Member[] | null;
 
-  products?: Product | Product[] | null;
+  products?: Product[] | null;
 };
 
 export default function TransaksiPage() {
@@ -75,9 +84,9 @@ export default function TransaksiPage() {
     useState(true);
 
   /*
-    =====================================================
-    NORMALIZE PRODUCT
-    =====================================================
+  =====================================================
+  NORMALIZE DATA
+  =====================================================
   */
 
   function getProduct(
@@ -86,19 +95,22 @@ export default function TransaksiPage() {
 
     if (!trx.products) return null;
 
-    if (Array.isArray(trx.products)) {
+    return trx.products[0] || null;
+  }
 
-      return trx.products[0] || null;
+  function getMember(
+    trx: Transaction
+  ): Member | null {
 
-    }
+    if (!trx.members) return null;
 
-    return trx.products;
+    return trx.members[0] || null;
   }
 
   /*
-    =====================================================
-    LOAD TRANSACTIONS
-    =====================================================
+  =====================================================
+  LOAD DATA
+  =====================================================
   */
 
   useEffect(() => {
@@ -125,21 +137,12 @@ export default function TransaksiPage() {
         await supabase
           .from("transactions")
           .select(`
-            id,
-            member_id,
-            product_id,
-            nomor_tujuan,
-            payment_method,
-            amount,
-            status,
-            created_at,
-
+            *,
             members (
               id,
               full_name,
               city
             ),
-
             products (
               id,
               name,
@@ -163,29 +166,37 @@ export default function TransaksiPage() {
       }
 
       const trxData =
-        (data || []) as Transaction[];
+        (data || []) as unknown as Transaction[];
 
       setTransactions(trxData);
 
       /*
-        =====================================================
-        MEMBER STATUS
-        =====================================================
+      =====================================================
+      MEMBER STATUS
+      =====================================================
       */
 
       const approvedCount =
         trxData.filter(
-          (trx) =>
-            trx.status?.toLowerCase() ===
-              "approved" ||
-            trx.status?.toLowerCase() ===
-              "selesai"
+          (trx) => {
+
+            const status =
+              trx.status?.toLowerCase();
+
+            return (
+              status === "approved" ||
+              status === "selesai"
+            );
+          }
         ).length;
 
-      const memberStatus: MemberStatus =
-        approvedCount > 0
-          ? "aktif"
-          : "free";
+      let memberStatus: MemberStatus =
+        "free";
+
+      if (approvedCount > 0) {
+
+        memberStatus = "aktif";
+      }
 
       localStorage.setItem(
         "dan-member-status",
@@ -193,9 +204,9 @@ export default function TransaksiPage() {
       );
 
       /*
-        =====================================================
-        LIVE ACTIVITY
-        =====================================================
+      =====================================================
+      LIVE ACTIVITY
+      =====================================================
       */
 
       const activities =
@@ -205,19 +216,20 @@ export default function TransaksiPage() {
             const product =
               getProduct(trx);
 
+            const status =
+              trx.status?.toLowerCase();
+
             return {
 
               text:
-                product?.name,
+                product?.name ||
+                "Produk Digital",
 
               sub:
-                trx.status?.toLowerCase() ===
-                  "approved" ||
-                trx.status?.toLowerCase() ===
-                  "selesai"
+                status === "approved" ||
+                status === "selesai"
                   ? "Transaksi berhasil"
-                  : trx.status?.toLowerCase() ===
-                      "pending"
+                  : status === "pending"
                   ? "Menunggu approval"
                   : "Transaksi gagal",
 
@@ -233,12 +245,12 @@ export default function TransaksiPage() {
       );
 
       /*
-        =====================================================
-        BADGE
-        =====================================================
+      =====================================================
+      BADGE
+      =====================================================
       */
 
-      const pendingCount =
+      const pendingTransactions =
         trxData.filter(
           (trx) =>
             trx.status?.toLowerCase() ===
@@ -247,13 +259,13 @@ export default function TransaksiPage() {
 
       localStorage.setItem(
         "dan-pending-transactions",
-        pendingCount.toString()
+        pendingTransactions.toString()
       );
 
       /*
-        =====================================================
-        HISTORY
-        =====================================================
+      =====================================================
+      HISTORY
+      =====================================================
       */
 
       const history =
@@ -267,7 +279,8 @@ export default function TransaksiPage() {
             id: trx.id,
 
             product:
-              product?.name,
+              product?.name ||
+              "Produk Digital",
 
             amount:
               trx.amount,
@@ -298,15 +311,13 @@ export default function TransaksiPage() {
     } finally {
 
       setLoading(false);
-
     }
-
   }
 
   /*
-    =====================================================
-    STATUS STYLE
-    =====================================================
+  =====================================================
+  STATUS STYLE
+  =====================================================
   */
 
   function statusStyle(
@@ -405,9 +416,9 @@ export default function TransaksiPage() {
   }
 
   /*
-    =====================================================
-    LOADING
-    =====================================================
+  =====================================================
+  LOADING
+  =====================================================
   */
 
   if (loading) {
@@ -427,7 +438,6 @@ export default function TransaksiPage() {
         </div>
 
       </div>
-
     );
   }
 
@@ -436,6 +446,7 @@ export default function TransaksiPage() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* BACKGROUND */}
+
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none"></div>
 
       <div className="fixed bottom-0 left-0 w-72 h-72 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
@@ -443,6 +454,7 @@ export default function TransaksiPage() {
       <div className="relative max-w-6xl mx-auto p-5 pb-32">
 
         {/* HEADER */}
+
         <div className="flex items-start justify-between gap-4 flex-wrap">
 
           <div>
@@ -480,9 +492,15 @@ export default function TransaksiPage() {
               Transaksi
             </h1>
 
+            <p className="text-zinc-400 mt-5 max-w-2xl leading-relaxed text-base md:text-lg">
+              Riwayat pembelian
+              produk digital dan
+              paket data member DAN.
+            </p>
+
           </div>
 
-          <div className="inline-flex items-center gap-3 px-5 py-4 rounded-full bg-green-500/10 border border-green-500/20">
+          <div className="inline-flex items-center gap-3 px-5 py-4 rounded-full bg-green-500/10 border border-green-500/20 shadow-[0_0_30px_rgba(0,255,100,0.15)]">
 
             <ReceiptText
               size={18}
@@ -498,41 +516,52 @@ export default function TransaksiPage() {
         </div>
 
         {/* EMPTY */}
+
         {transactions.length === 0 && (
 
           <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-12 mt-10 text-center">
 
-            <div className="w-24 h-24 mx-auto rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+            <div className="relative z-10">
 
-              <ShoppingBag
-                size={42}
-                className="text-green-400"
-              />
+              <div className="w-24 h-24 mx-auto rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+
+                <ShoppingBag
+                  size={42}
+                  className="text-green-400"
+                />
+
+              </div>
+
+              <h2 className="text-4xl font-black mt-8">
+                Belum Ada
+                Transaksi
+              </h2>
+
+              <p className="text-zinc-500 text-lg mt-5 leading-relaxed max-w-2xl mx-auto">
+                Mulai belanja
+                produk digital DAN.
+              </p>
+
+              <button
+                onClick={() =>
+                  router.push(
+                    "/member/produk"
+                  )
+                }
+                className="h-14 px-8 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm mt-8"
+              >
+
+                Belanja Sekarang
+
+              </button>
 
             </div>
 
-            <h2 className="text-4xl font-black mt-8">
-              Belum Ada Transaksi
-            </h2>
-
-            <button
-              onClick={() =>
-                router.push(
-                  "/member/produk"
-                )
-              }
-              className="h-14 px-8 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm mt-8"
-            >
-
-              Belanja Sekarang
-
-            </button>
-
           </div>
-
         )}
 
         {/* LIST */}
+
         <div className="space-y-5 mt-10">
 
           {transactions.map(
@@ -546,6 +575,9 @@ export default function TransaksiPage() {
               const product =
                 getProduct(item);
 
+              const member =
+                getMember(item);
+
               return (
 
                 <div
@@ -553,22 +585,27 @@ export default function TransaksiPage() {
                   className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6 md:p-7"
                 >
 
+                  <div className="absolute top-0 right-0 w-56 h-56 bg-green-500/5 blur-[120px] rounded-full"></div>
+
                   <div className="relative z-10">
 
                     {/* TOP */}
+
                     <div className="flex items-start justify-between gap-5 flex-wrap">
 
                       <div>
 
                         <h2 className="text-3xl md:text-4xl font-black">
 
-                          {product?.name}
+                          {product?.name ||
+                            "Produk Digital"}
 
                         </h2>
 
                         <p className="text-zinc-500 text-lg mt-3">
 
-                          {product?.provider}
+                          {member?.full_name ||
+                            "Member DAN"}
 
                         </p>
 
@@ -587,25 +624,8 @@ export default function TransaksiPage() {
                     </div>
 
                     {/* GRID */}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-
-                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
-
-                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
-
-                          <User2 size={16} />
-
-                          Member
-
-                        </div>
-
-                        <h3 className="text-xl font-black mt-4">
-
-                          {item.members?.full_name}
-
-                        </h3>
-
-                      </div>
 
                       <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
 
@@ -619,7 +639,7 @@ export default function TransaksiPage() {
 
                         <h3 className="text-xl font-black mt-4 break-words">
 
-                          {item.nomor_tujuan}
+                          {item.nomor_tujuan || "-"}
 
                         </h3>
 
@@ -637,7 +657,7 @@ export default function TransaksiPage() {
 
                         <h3 className="text-xl font-black mt-4 capitalize">
 
-                          {item.payment_method}
+                          {item.payment_method || "-"}
 
                         </h3>
 
@@ -651,9 +671,8 @@ export default function TransaksiPage() {
 
                         <h3 className="text-3xl font-black text-green-400 mt-4">
 
-                          Rp{" "}
-                          {Number(
-                            item.amount
+                          Rp {Number(
+                            item.amount || 0
                           ).toLocaleString(
                             "id-ID"
                           )}
@@ -674,18 +693,18 @@ export default function TransaksiPage() {
 
                         <h3 className="text-xl font-black mt-4">
 
-                          {new Date(
-                            item.created_at
-                          ).toLocaleDateString(
-                            "id-ID",
-                            {
-                              day: "numeric",
-                              month:
-                                "long",
-                              year:
-                                "numeric",
-                            }
-                          )}
+                          {item.created_at
+                            ? new Date(
+                                item.created_at
+                              ).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
 
                         </h3>
 
@@ -699,7 +718,7 @@ export default function TransaksiPage() {
 
                         <h3 className="text-xl font-black mt-4">
 
-                          {product?.kuota}
+                          {product?.kuota || "-"}
 
                         </h3>
 
@@ -713,7 +732,7 @@ export default function TransaksiPage() {
 
                         <h3 className="text-xl font-black mt-4">
 
-                          {product?.masa_aktif}
+                          {product?.masa_aktif || "-"}
 
                         </h3>
 
@@ -722,6 +741,7 @@ export default function TransaksiPage() {
                     </div>
 
                     {/* FOOTER */}
+
                     <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
 
                       <div className="flex items-center gap-2">
@@ -732,10 +752,10 @@ export default function TransaksiPage() {
 
                       </div>
 
-                      {(item.status?.toLowerCase() ===
+                      {item.status?.toLowerCase() ===
                         "rejected" ||
-                        item.status?.toLowerCase() ===
-                        "gagal") && (
+                      item.status?.toLowerCase() ===
+                        "gagal" ? (
 
                         <div className="flex items-center gap-2 text-red-400">
 
@@ -745,14 +765,13 @@ export default function TransaksiPage() {
 
                         </div>
 
-                      )}
+                      ) : null}
 
                     </div>
 
                   </div>
 
                 </div>
-
               );
             }
           )}
@@ -762,6 +781,5 @@ export default function TransaksiPage() {
       </div>
 
     </div>
-
   );
 }
