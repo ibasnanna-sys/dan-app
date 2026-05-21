@@ -480,6 +480,25 @@ export default function Home() {
         </div>
   )}
 
+{/* LOGOUT BUTTON */}
+<div className="mt-5">
+
+  <button
+    onClick={() => {
+
+      localStorage.removeItem("member_id");
+
+      window.location.href = "/login";
+
+    }}
+    className="w-full h-14 rounded-[28px] border border-red-500/20 bg-red-500/10 text-red-400 font-black hover:bg-red-500/20 transition-all duration-300"
+  >
+
+    Logout
+
+  </button>
+
+</div>
         {/* LIVE ACTIVITY */}
         <div className="mt-12">
 
