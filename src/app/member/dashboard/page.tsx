@@ -415,7 +415,7 @@ export default function Home() {
 
       </div>
 
-      <div>
+    </div>
 
         <p className="text-zinc-500 text-sm">
           Referral Network
