@@ -1,5 +1,7 @@
 "use client";
 
+import { supabase }
+from "@/lib/supabase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -38,62 +40,31 @@ export default function AdminTransactionsPage() {
   const [transactions, setTransactions] =
     useState<Transaction[]>([]);
 
-  useEffect(() => {
+useEffect(() => {
 
-    const stored =
-      localStorage.getItem(
-        "dan-transactions"
-      );
+  async function loadTransactions() {
 
-    if (stored) {
+    const { data, error } =
+      await supabase
+        .from("transactions")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
-      const parsed: Transaction[] =
-        JSON.parse(stored);
+    if (!error && data) {
 
-      setTransactions(parsed);
-
-    } else {
-
-      /*
-        DUMMY DATA
-        SUDAH TANPA PRODUK AKTIVASI
-      */
-
-      const dummy: Transaction[] = [
-        {
-          id: 1001,
-          memberName: "Akbar",
-          city: "Makassar",
-          product:
-            "Paket Data Unlimited",
-          amount: 350000,
-          status: "pending",
-          memberStatus: "free",
-          createdAt: "2 menit lalu",
-        },
-        {
-          id: 1002,
-          memberName: "Dewi",
-          city: "Bandung",
-          product:
-            "Paket Data Bulanan",
-          amount: 500000,
-          status: "approved",
-          memberStatus: "aktif",
-          createdAt: "8 menit lalu",
-        },
-      ];
-
-      localStorage.setItem(
-        "dan-transactions",
-        JSON.stringify(dummy)
-      );
-
-      setTransactions(dummy);
+      setTransactions(data);
 
     }
 
-  }, []);
+  }
+
+  loadTransactions();
+
+}, []);
+
+      
 
   /*
     =====================================================
@@ -101,22 +72,41 @@ export default function AdminTransactionsPage() {
     =====================================================
   */
 
-  function updateStatus(
-    id: number,
-    status:
-      | "approved"
-      | "rejected"
-  ) {
+  async function updateStatus(
+  id: string,
+  status:
+    | "approved"
+    | "rejected"
+) {
 
-    const updated: Transaction[] =
-      transactions.map((trx) => {
+  const { error } =
+    await supabase
+      .from("transactions")
+      .update({ status })
+      .eq("id", id);
+
+  if (!error) {
+
+    setTransactions((prev) =>
+      prev.map((trx) => {
 
         if (trx.id === id) {
 
           return {
             ...trx,
             status,
+          };
 
+        }
+
+        return trx;
+
+      })
+    );
+
+  }
+
+}
             /*
               APPROVED
               MEMBER AUTO AKTIF
