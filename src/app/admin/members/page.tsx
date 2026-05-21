@@ -48,12 +48,6 @@ export default function AdminMembersPage() {
   const [filter, setFilter] =
     useState("all");
 
-  /*
-    =========================================
-    LOAD DATA
-    =========================================
-  */
-
   useEffect(() => {
 
     loadData();
@@ -95,12 +89,6 @@ export default function AdminMembersPage() {
     setLoading(false);
   }
 
-  /*
-    =========================================
-    MEMBER ACTION
-    =========================================
-  */
-
   async function updateStatus(
     id: string,
     status:
@@ -141,12 +129,6 @@ export default function AdminMembersPage() {
         : "Member berhasil dibekukan"
     );
   }
-
-  /*
-    =========================================
-    FILTER
-    =========================================
-  */
 
   const filteredMembers =
     useMemo(() => {
@@ -190,12 +172,6 @@ export default function AdminMembersPage() {
       filter,
     ]);
 
-  /*
-    =========================================
-    STATS
-    =========================================
-  */
-
   const stats = useMemo(() => {
 
     return {
@@ -228,12 +204,6 @@ export default function AdminMembersPage() {
 
   }, [members]);
 
-  /*
-    =========================================
-    HELPER
-    =========================================
-  */
-
   function getTransactionCount(
     memberId: string
   ) {
@@ -244,12 +214,6 @@ export default function AdminMembersPage() {
         memberId
     ).length;
   }
-
-  /*
-    =========================================
-    LOADING
-    =========================================
-  */
 
   if (loading) {
 
@@ -427,8 +391,7 @@ export default function AdminMembersPage() {
         </div>
 
         {/* EMPTY */}
-        {filteredMembers.length ===
-          0 && (
+        {filteredMembers.length === 0 && (
 
           <div className="rounded-[35px] border border-zinc-800 bg-zinc-950 p-10 text-center">
 
@@ -496,9 +459,7 @@ export default function AdminMembersPage() {
                         </p>
 
                         <h3 className="font-bold mt-2">
-                          {
-                            member.city
-                          }
+                          {member.city}
                         </h3>
 
                       </div>
@@ -510,9 +471,7 @@ export default function AdminMembersPage() {
                         </p>
 
                         <h3 className="font-bold mt-2 break-all">
-                          {
-                            member.phone
-                          }
+                          {member.phone}
                         </h3>
 
                       </div>
@@ -526,8 +485,7 @@ export default function AdminMembersPage() {
                         <h3 className="font-bold mt-2 text-green-400 break-words">
                           Rp{" "}
                           {Number(
-                            member.balance ||
-                              0
+                            member.balance || 0
                           ).toLocaleString(
                             "id-ID"
                           )}
@@ -541,4 +499,85 @@ export default function AdminMembersPage() {
                           Transaksi
                         </p>
 
-                        <h
+                        <h3 className="font-bold mt-2">
+                          {getTransactionCount(
+                            member.id
+                          )}
+                        </h3>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* RIGHT */}
+                  <div className="flex flex-wrap gap-3">
+
+                    <button
+                      className="h-14 px-5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-all flex items-center gap-2 font-black"
+                    >
+
+                      <Eye size={18} />
+
+                      Detail
+
+                    </button>
+
+                    {member.status !==
+                    "aktif" ? (
+
+                      <button
+                        onClick={() =>
+                          updateStatus(
+                            member.id,
+                            "aktif"
+                          )
+                        }
+                        className="h-14 px-5 rounded-2xl bg-green-500 hover:bg-green-400 transition-all flex items-center gap-2 font-black text-black"
+                      >
+
+                        <ShieldCheck
+                          size={18}
+                        />
+
+                        Aktifkan
+
+                      </button>
+
+                    ) : (
+
+                      <button
+                        onClick={() =>
+                          updateStatus(
+                            member.id,
+                            "dibekukan"
+                          )
+                        }
+                        className="h-14 px-5 rounded-2xl bg-red-600 hover:bg-red-500 transition-all flex items-center gap-2 font-black"
+                      >
+
+                        <Ban size={18} />
+
+                        Bekukan
+
+                      </button>
+
+                    )}
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      </div>
+
+    </main>
+  );
+}
