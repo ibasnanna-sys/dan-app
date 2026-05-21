@@ -6,12 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   User,
-  Copy,
-  Share2,
   Users,
-  Wallet,
-  Gift,
-  BadgeDollarSign,
   ShoppingBag,
   CreditCard,
   ReceiptText,
@@ -30,29 +25,9 @@ type MemberData = {
   name: string;
   city: string;
   status: MemberStatus;
-  transactionStatus?: string;
 };
 
 export default function Home() {
-
-  /*
-    =====================================================
-    MEMBER DASHBOARD FINAL SYNC
-    =====================================================
-
-    SINKRON:
-    - Status member otomatis ambil dari localStorage
-    - Jika admin approve transaksi:
-      member => aktif
-    - Jika admin reject:
-      tetap free
-    - Jika dibekukan:
-      tampil warning
-    - Aktivasi sekarang:
-      langsung ke produk digital
-    - Live activity mini realtime
-    =====================================================
-  */
 
   const [memberStatus, setMemberStatus] =
     useState<MemberStatus>("free");
@@ -65,7 +40,7 @@ export default function Home() {
 
   /*
     =====================================================
-    LOAD MEMBER STATUS
+    LOAD MEMBER
     =====================================================
   */
 
@@ -97,21 +72,13 @@ export default function Home() {
           currentMember.status
         );
 
-        if (currentMember.name) {
+        setMemberName(
+          currentMember.name
+        );
 
-          setMemberName(
-            currentMember.name
-          );
-
-        }
-
-        if (currentMember.city) {
-
-          setMemberCity(
-            currentMember.city
-          );
-
-        }
+        setMemberCity(
+          currentMember.city
+        );
 
       }
 
@@ -184,7 +151,7 @@ export default function Home() {
 
   /*
     =====================================================
-    STATUS STYLE
+    STATUS
     =====================================================
   */
 
@@ -240,7 +207,6 @@ export default function Home() {
 
           <div className="flex items-start gap-4">
 
-            {/* LOGO */}
             <div className="w-14 h-14 rounded-3xl bg-green-500/10 border border-green-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(0,255,120,0.12)]">
 
               <span className="text-green-400 font-black text-xl">
@@ -249,7 +215,6 @@ export default function Home() {
 
             </div>
 
-            {/* NAME */}
             <div>
 
               <p className="text-zinc-500 text-xs tracking-[0.25em] uppercase">
@@ -282,7 +247,6 @@ export default function Home() {
 
           </div>
 
-          {/* ACTION */}
           <div className="flex items-center gap-3">
 
             <Link
@@ -395,53 +359,58 @@ export default function Home() {
             </div>
 
             {/* REFERRAL BUTTON */}
-<div className="mt-5">
+            <div className="mt-5">
 
-  <Link
-    href="/member/referral"
-    className="group relative overflow-hidden flex items-center justify-between rounded-[28px] border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all duration-300 p-5"
-  >
+              <Link
+                href="/member/referral"
+                className="group relative overflow-hidden flex items-center justify-between rounded-[28px] border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all duration-300 p-5"
+              >
 
-    <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
 
-    <div className="relative z-10 flex items-center gap-4">
+                <div className="relative z-10 flex items-center gap-4">
 
-      <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
 
-        <Users
-          size={26}
-          className="text-green-400"
-        />
+                    <Users
+                      size={26}
+                      className="text-green-400"
+                    />
 
-      </div>
+                  </div>
 
-    </div>
+                  <div>
 
-        <p className="text-zinc-500 text-sm">
-          Referral Network
-        </p>
+                    <p className="text-zinc-500 text-sm">
+                      Referral Network
+                    </p>
 
-        <h3 className="text-xl sm:text-2xl font-black mt-1">
-          Referral
-        </h3>
+                    <h3 className="text-xl sm:text-2xl font-black mt-1">
+                      Referral
+                    </h3>
 
-      </div>
+                  </div>
 
-    </div>
+                </div>
 
-    <div className="relative z-10">
+                <div className="relative z-10">
 
-      <div className="h-11 px-5 rounded-2xl bg-green-500 text-black font-black flex items-center justify-center text-sm shadow-[0_0_25px_rgba(0,255,120,0.20)]">
+                  <div className="h-11 px-5 rounded-2xl bg-green-500 text-black font-black flex items-center justify-center text-sm shadow-[0_0_25px_rgba(0,255,120,0.20)]">
 
-        Buka
+                    Buka
 
-      </div>
+                  </div>
 
-    </div>
+                </div>
 
-  </Link>
+              </Link>
 
-</div>
+            </div>
+
+          </div>
+
+        </div>
+
         {/* MEMBER DIBEKUKAN */}
         {memberStatus ===
           "dibekukan" && (
@@ -467,14 +436,6 @@ export default function Home() {
                 Akun sedang dibekukan sementara.
               </h2>
 
-              <p className="text-orange-100/70 mt-5 leading-relaxed max-w-3xl">
-                Pembekuan dapat terjadi karena tidak ada transaksi selama 60 hari atau terdeteksi aktivitas yang memerlukan pemeriksaan admin.
-              </p>
-
-              <p className="text-orange-100/70 mt-3 leading-relaxed max-w-3xl">
-                Status akan aktif kembali otomatis setelah melakukan transaksi pembelian produk.
-              </p>
-
             </div>
 
           </div>
@@ -496,174 +457,4 @@ export default function Home() {
                 />
 
                 <span className="text-yellow-400 text-xs font-black tracking-[0.2em]">
-                  AKTIVASI MEMBER
-                </span>
-
-              </div>
-
-              <h2 className="text-3xl sm:text-5xl font-black leading-tight mt-6 max-w-4xl">
-                Aktifkan akunmu untuk membuka seluruh fitur premium DAN.
-              </h2>
-
-              <p className="text-yellow-100/70 text-sm sm:text-base leading-relaxed mt-5 max-w-3xl">
-                Setelah aktivasi kamu dapat belanja paket data, menerima bonus referral, dan melakukan withdraw.
-              </p>
-
-              <Link
-                href="/member/produk"
-                className="inline-flex h-14 px-7 mt-8 rounded-3xl bg-yellow-400 hover:bg-yellow-300 transition-all duration-300 text-black font-black text-sm items-center justify-center gap-3 shadow-[0_0_35px_rgba(250,204,21,0.25)]"
-              >
-
-                <Sparkles size={20} />
-
-                Aktivasi Sekarang
-
-              </Link>
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* MEMBER MENU */}
-        {memberStatus !== "free" && (
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-
-            <Link
-              href="/member/produk"
-              className="relative overflow-hidden rounded-[30px] border border-green-500/20 bg-green-500/10 p-6 shadow-[0_0_35px_rgba(0,255,120,0.08)]"
-            >
-
-              <ShoppingBag
-                size={34}
-                className="text-green-400"
-              />
-
-              <h2 className="text-2xl font-black mt-6">
-                Beli Paket Data
-              </h2>
-
-              <p className="text-green-100/70 text-sm mt-2">
-                Belanja produk digital
-              </p>
-
-            </Link>
-
-            <Link
-              href="/member/transaksi"
-              className="relative overflow-hidden rounded-[30px] border border-zinc-800 bg-zinc-950 p-6 hover:border-green-500 transition-all duration-300"
-            >
-
-              <ReceiptText size={34} />
-
-              <h2 className="text-2xl font-black mt-6">
-                Histori Transaksi
-              </h2>
-
-              <p className="text-zinc-500 text-sm mt-2">
-                Riwayat transaksi member
-              </p>
-
-            </Link>
-
-            <Link
-              href="/member/withdraw"
-              className="relative overflow-hidden rounded-[30px] border border-zinc-800 bg-zinc-950 p-6 hover:border-green-500 transition-all duration-300"
-            >
-
-              <CreditCard size={34} />
-
-              <h2 className="text-2xl font-black mt-6">
-                Withdraw
-              </h2>
-
-              <p className="text-zinc-500 text-sm mt-2">
-                Tarik bonus referral
-              </p>
-
-            </Link>
-
-          </div>
-
-        )}
-
-        {/* LIVE ACTIVITY */}
-        <div className="mt-12">
-
-          <div className="flex items-center justify-between mb-5">
-
-            <h2 className="text-2xl sm:text-4xl font-black">
-              Live Activity
-            </h2>
-
-            <div className="flex items-center gap-2">
-
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-
-              <span className="text-green-400 text-xs font-black tracking-[0.2em]">
-                REALTIME
-              </span>
-
-            </div>
-
-          </div>
-
-          <div className="relative overflow-hidden h-[170px]">
-
-            {activities.map(
-              (item, index) => (
-
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-all duration-700 ${
-                    index ===
-                    activityIndex
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-8 pointer-events-none"
-                  }`}
-                >
-
-                  <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950 p-5 h-full">
-
-                    <div className="relative z-10 flex items-start justify-between gap-4">
-
-                      <div>
-
-                        <h3 className="text-xl sm:text-2xl font-black">
-                          {item.name}
-                        </h3>
-
-                        <p className="text-zinc-500 text-sm mt-1">
-                          {item.city}
-                        </p>
-
-                        <p className="text-sm sm:text-base mt-4">
-                          {item.activity}
-                        </p>
-
-                      </div>
-
-                      <span className="text-zinc-500 text-xs sm:text-sm whitespace-nowrap">
-                        {item.time}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </main>
-  );
-}
+                  AK
