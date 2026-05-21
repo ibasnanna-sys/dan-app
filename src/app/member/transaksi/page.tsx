@@ -19,6 +19,12 @@ import {
   Ban,
 } from "lucide-react";
 
+/*
+=====================================================
+TYPE
+=====================================================
+*/
+
 type TransactionStatus =
   | "pending"
   | "approved"
@@ -31,20 +37,26 @@ type MemberStatus =
   | "aktif"
   | "dibekukan";
 
+type Product = {
+  id: number;
+  name: string;
+  provider: string;
+  kuota: string;
+  masa_aktif: string;
+};
+
 type Transaction = {
   id: number;
   member_id: string;
-  nomor_tujuan: string;
-  payment_method: string;
-  amount: number;
-  status: TransactionStatus;
-  created_at: string;
-  products?: {
-    name: string;
-    provider: string;
-    kuota: string;
-    masa_aktif: string;
-  };
+  nomor_tujuan: string | null;
+  payment_method: string | null;
+  amount: number | null;
+  status: TransactionStatus | string | null;
+  created_at: string | null;
+
+  product_id?: number | null;
+
+  products?: Product | Product[] | null;
 };
 
 export default function TransaksiPage() {
@@ -58,9 +70,47 @@ export default function TransaksiPage() {
     useState(true);
 
   /*
-    =====================================================
-    LOAD TRANSACTIONS + SYNC MEMBER
-    =====================================================
+  =====================================================
+  NORMALIZE PRODUCT
+  =====================================================
+  */
+
+  function getProduct(
+    trx: Transaction
+  ): Product | null {
+
+    if (!trx.products) return null;
+
+    if (Array.isArray(trx.products)) {
+
+      return trx.products[0] || null;
+    }
+
+    return trx.products;
+  }
+
+  /*
+  =====================================================
+  NORMALIZE STATUS
+  =====================================================
+  */
+
+  function normalizeStatus(
+    status?: string | null
+  ) {
+
+    return (
+      status
+        ?.toString()
+        .trim()
+        .toLowerCase() || "pending"
+    );
+  }
+
+  /*
+  =====================================================
+  LOAD TRANSACTIONS
+  =====================================================
   */
 
   useEffect(() => {
@@ -74,12 +124,13 @@ export default function TransaksiPage() {
     try {
 
       const memberId =
-        localStorage.getItem("member_id");
+        localStorage.getItem(
+          "member_id"
+        );
 
       if (!memberId) {
 
-        window.location.href =
-          "/login";
+        router.replace("/login");
 
         return;
       }
@@ -88,8 +139,16 @@ export default function TransaksiPage() {
         await supabase
           .from("transactions")
           .select(`
-            *,
+            id,
+            member_id,
+            nomor_tujuan,
+            payment_method,
+            amount,
+            status,
+            created_at,
+            product_id,
             products (
+              id,
               name,
               provider,
               kuota,
@@ -103,68 +162,51 @@ export default function TransaksiPage() {
 
       if (error) {
 
+        console.error(
+          "TRANSACTION ERROR:",
+          error
+        );
+
         alert(error.message);
 
         return;
       }
 
       const trxData =
-        data || [];
+        (data || []) as Transaction[];
 
       setTransactions(trxData);
 
       /*
-        =====================================================
-        SYNC MEMBER STATUS
-        =====================================================
+      =====================================================
+      MEMBER STATUS
+      =====================================================
       */
 
       const approvedCount =
-        trxData.filter(
-          (trx: any) =>
-            trx.status ===
-              "approved" ||
-            trx.status ===
-              "selesai"
-        ).length;
+        trxData.filter((trx) => {
 
-      const failedCount =
-        trxData.filter(
-          (trx: any) =>
-            trx.status ===
-              "rejected" ||
-            trx.status ===
-              "gagal"
-        ).length;
+          const status =
+            normalizeStatus(
+              trx.status
+            );
+
+          return (
+            status ===
+              "approved" ||
+            status ===
+              "selesai"
+          );
+
+        }).length;
 
       let memberStatus: MemberStatus =
         "free";
 
       if (approvedCount > 0) {
 
-        memberStatus = "aktif";
-
-      }
-
-      /*
-        =====================================================
-        AUTO AKTIF KEMBALI
-        Jika member sebelumnya dibekukan
-        lalu belanja lagi
-      */
-
-      const storedMember =
-        localStorage.getItem(
-          "dan-member-status"
-        );
-
-      if (
-        storedMember ===
-          "dibekukan" &&
-        approvedCount > 0
-      ) {
-
-        memberStatus = "aktif";
+        memberStatus =
+          "aktif";
       }
 
       localStorage.setItem(
@@ -173,32 +215,43 @@ export default function TransaksiPage() {
       );
 
       /*
-        =====================================================
-        LIVE ACTIVITY
-        =====================================================
+      =====================================================
+      LIVE ACTIVITY
+      =====================================================
       */
 
       const activities =
-        trxData.slice(0, 10).map(
-          (trx: any) => ({
+        trxData
+          .slice(0, 10)
+          .map((trx) => {
 
-            text:
-              trx.products?.name ||
-              "Produk Digital",
+            const product =
+              getProduct(trx);
 
-            sub:
-              trx.status ===
-                "approved" ||
-              trx.status ===
-                "selesai"
-                ? "Transaksi berhasil"
-                : trx.status ===
+            const status =
+              normalizeStatus(
+                trx.status
+              );
+
+            return {
+
+              text:
+                product?.name ||
+                "Produk Digital",
+
+              sub:
+                status ===
+                  "approved" ||
+                status ===
+                  "selesai"
+                  ? "Transaksi berhasil"
+                  : status ===
                     "pending"
-                ? "Menunggu approval"
-                : "Transaksi gagal",
+                  ? "Menunggu approval"
+                  : "Transaksi gagal",
 
-          })
-        );
+            };
+          });
 
       localStorage.setItem(
         "dan-live-activity",
@@ -208,16 +261,17 @@ export default function TransaksiPage() {
       );
 
       /*
-        =====================================================
-        BADGE NOTIFICATION
-        =====================================================
+      =====================================================
+      BADGE
+      =====================================================
       */
 
       const pendingTransactions =
         trxData.filter(
-          (trx: any) =>
-            trx.status ===
-            "pending"
+          (trx) =>
+            normalizeStatus(
+              trx.status
+            ) === "pending"
         ).length;
 
       localStorage.setItem(
@@ -226,21 +280,36 @@ export default function TransaksiPage() {
       );
 
       /*
-        =====================================================
-        MEMBER HISTORY
-        =====================================================
+      =====================================================
+      HISTORY
+      =====================================================
       */
 
       const history =
-        trxData.map((trx: any) => ({
-          id: trx.id,
-          product:
-            trx.products?.name,
-          amount: trx.amount,
-          status: trx.status,
-          created_at:
-            trx.created_at,
-        }));
+        trxData.map((trx) => {
+
+          const product =
+            getProduct(trx);
+
+          return {
+
+            id: trx.id,
+
+            product:
+              product?.name ||
+              "Produk Digital",
+
+            amount:
+              trx.amount || 0,
+
+            status:
+              trx.status || "-",
+
+            created_at:
+              trx.created_at || "",
+
+          };
+        });
 
       localStorage.setItem(
         "dan-history",
@@ -249,26 +318,38 @@ export default function TransaksiPage() {
 
     } catch (err: any) {
 
-      alert(err.message);
+      console.error(
+        "LOAD TRANSACTION ERROR:",
+        err
+      );
 
+      alert(
+        err?.message ||
+        "Terjadi kesalahan"
+      );
+
+    } finally {
+
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   /*
-    =====================================================
-    STATUS STYLE
-    =====================================================
+  =====================================================
+  STATUS STYLE
+  =====================================================
   */
 
   function statusStyle(
-    status: string
+    status?: string | null
   ) {
 
+    const normalized =
+      normalizeStatus(status);
+
     if (
-      status === "approved" ||
-      status === "selesai"
+      normalized === "approved" ||
+      normalized === "selesai"
     ) {
 
       return {
@@ -289,17 +370,19 @@ export default function TransaksiPage() {
           "BERHASIL",
 
         icon:
-          <ShieldCheck
-            size={16}
-            className="text-green-400"
-          />,
+          (
+            <ShieldCheck
+              size={16}
+              className="text-green-400"
+            />
+          ),
 
       };
     }
 
     if (
-      status === "rejected" ||
-      status === "gagal"
+      normalized === "rejected" ||
+      normalized === "gagal"
     ) {
 
       return {
@@ -320,10 +403,12 @@ export default function TransaksiPage() {
           "GAGAL",
 
         icon:
-          <AlertTriangle
-            size={16}
-            className="text-red-400"
-          />,
+          (
+            <AlertTriangle
+              size={16}
+              className="text-red-400"
+            />
+          ),
 
       };
     }
@@ -346,18 +431,20 @@ export default function TransaksiPage() {
         "PENDING",
 
       icon:
-        <LoaderCircle
-          size={16}
-          className="text-yellow-300 animate-spin"
-        />,
+        (
+          <LoaderCircle
+            size={16}
+            className="text-yellow-300 animate-spin"
+          />
+        ),
 
     };
   }
 
   /*
-    =====================================================
-    LOADING
-    =====================================================
+  =====================================================
+  LOADING
+  =====================================================
   */
 
   if (loading) {
@@ -386,6 +473,7 @@ export default function TransaksiPage() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* BACKGROUND */}
+
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none"></div>
 
       <div className="fixed bottom-0 left-0 w-72 h-72 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
@@ -393,6 +481,7 @@ export default function TransaksiPage() {
       <div className="relative max-w-6xl mx-auto p-5 pb-32">
 
         {/* HEADER */}
+
         <div className="flex items-start justify-between gap-4 flex-wrap">
 
           <div>
@@ -446,9 +535,7 @@ export default function TransaksiPage() {
             />
 
             <span className="text-green-400 font-black tracking-wide">
-              {
-                transactions.length
-              }{" "}
+              {transactions.length}{" "}
               TRANSAKSI
             </span>
 
@@ -457,8 +544,8 @@ export default function TransaksiPage() {
         </div>
 
         {/* EMPTY */}
-        {transactions.length ===
-          0 && (
+
+        {transactions.length === 0 && (
 
           <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-12 mt-10 text-center">
 
@@ -503,6 +590,7 @@ export default function TransaksiPage() {
         )}
 
         {/* LIST */}
+
         <div className="space-y-5 mt-10">
 
           {transactions.map(
@@ -510,6 +598,14 @@ export default function TransaksiPage() {
 
               const style =
                 statusStyle(
+                  item.status
+                );
+
+              const product =
+                getProduct(item);
+
+              const normalizedStatus =
+                normalizeStatus(
                   item.status
                 );
 
@@ -525,22 +621,23 @@ export default function TransaksiPage() {
                   <div className="relative z-10">
 
                     {/* TOP */}
+
                     <div className="flex items-start justify-between gap-5 flex-wrap">
 
                       <div>
 
                         <h2 className="text-3xl md:text-4xl font-black">
-                          {
-                            item.products
-                              ?.name
-                          }
+
+                          {product?.name ||
+                            "Produk Digital"}
+
                         </h2>
 
                         <p className="text-zinc-500 text-lg mt-3">
-                          {
-                            item.products
-                              ?.provider
-                          }
+
+                          {product?.provider ||
+                            "Provider"}
+
                         </p>
 
                       </div>
@@ -551,15 +648,14 @@ export default function TransaksiPage() {
 
                         {style.icon}
 
-                        {
-                          style.label
-                        }
+                        {style.label}
 
                       </div>
 
                     </div>
 
                     {/* GRID */}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
 
                       <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
@@ -568,15 +664,15 @@ export default function TransaksiPage() {
 
                           <Smartphone size={16} />
 
-                          Nomor
-                          Tujuan
+                          Nomor Tujuan
 
                         </div>
 
                         <h3 className="text-xl font-black mt-4 break-words">
-                          {
-                            item.nomor_tujuan
-                          }
+
+                          {item.nomor_tujuan ||
+                            "-"}
+
                         </h3>
 
                       </div>
@@ -592,9 +688,10 @@ export default function TransaksiPage() {
                         </div>
 
                         <h3 className="text-xl font-black mt-4 capitalize">
-                          {
-                            item.payment_method
-                          }
+
+                          {item.payment_method ||
+                            "-"}
+
                         </h3>
 
                       </div>
@@ -606,12 +703,15 @@ export default function TransaksiPage() {
                         </p>
 
                         <h3 className="text-3xl font-black text-green-400 mt-4">
+
                           Rp{" "}
+
                           {Number(
-                            item.amount
+                            item.amount || 0
                           ).toLocaleString(
                             "id-ID"
                           )}
+
                         </h3>
 
                       </div>
@@ -627,18 +727,22 @@ export default function TransaksiPage() {
                         </div>
 
                         <h3 className="text-xl font-black mt-4">
-                          {new Date(
-                            item.created_at
-                          ).toLocaleDateString(
-                            "id-ID",
-                            {
-                              day: "numeric",
-                              month:
-                                "long",
-                              year:
-                                "numeric",
-                            }
-                          )}
+
+                          {item.created_at
+                            ? new Date(
+                                item.created_at
+                              ).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month:
+                                    "long",
+                                  year:
+                                    "numeric",
+                                }
+                              )
+                            : "-"}
+
                         </h3>
 
                       </div>
@@ -650,10 +754,10 @@ export default function TransaksiPage() {
                         </p>
 
                         <h3 className="text-xl font-black mt-4">
-                          {
-                            item.products
-                              ?.kuota
-                          }
+
+                          {product?.kuota ||
+                            "-"}
+
                         </h3>
 
                       </div>
@@ -665,17 +769,18 @@ export default function TransaksiPage() {
                         </p>
 
                         <h3 className="text-xl font-black mt-4">
-                          {
-                            item.products
-                              ?.masa_aktif
-                          }
+
+                          {product?.masa_aktif ||
+                            "-"}
+
                         </h3>
 
                       </div>
 
                     </div>
 
-                    {/* FOOTER STATUS */}
+                    {/* FOOTER */}
+
                     <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
 
                       <div className="flex items-center gap-2">
@@ -687,10 +792,10 @@ export default function TransaksiPage() {
 
                       </div>
 
-                      {item.status ===
+                      {(normalizedStatus ===
                         "rejected" ||
-                      item.status ===
-                        "gagal" ? (
+                        normalizedStatus ===
+                          "gagal") && (
 
                         <div className="flex items-center gap-2 text-red-400">
 
@@ -698,12 +803,10 @@ export default function TransaksiPage() {
 
                           Silahkan
                           hubungi admin
-                          jika terjadi
-                          kendala
 
                         </div>
 
-                      ) : null}
+                      )}
 
                     </div>
 
@@ -720,5 +823,6 @@ export default function TransaksiPage() {
       </div>
 
     </div>
+
   );
 }
