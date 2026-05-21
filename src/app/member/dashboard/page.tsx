@@ -394,60 +394,54 @@ export default function Home() {
 
             </div>
 
-            {/* REF CODE */}
-            <div className="mt-5 rounded-[28px] border border-zinc-800 bg-black/40 p-5">
+            {/* REFERRAL BUTTON */}
+<div className="mt-5">
 
-              <p className="text-zinc-500 text-sm">
-                Kode Referral
-              </p>
+  <Link
+    href="/member/referral"
+    className="group relative overflow-hidden flex items-center justify-between rounded-[28px] border border-zinc-800 bg-zinc-950 hover:border-green-500 transition-all duration-300 p-5"
+  >
 
-              <h3 className="text-xl sm:text-3xl font-black tracking-[0.15em] mt-3">
-                BASRI001
-              </h3>
+    <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
 
-              <div className="flex flex-wrap gap-3 mt-5">
+    <div className="relative z-10 flex items-center gap-4">
 
-                <button
-                  type="button"
-                  className="h-12 px-5 rounded-2xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm flex items-center gap-2"
-                >
+      <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
 
-                  <Copy size={16} />
+        <Users
+          size={26}
+          className="text-green-400"
+        />
 
-                  Copy Link
+      </div>
 
-                </button>
+      <div>
 
-                <button
-                  type="button"
-                  className="h-12 px-5 rounded-2xl border border-zinc-700 hover:border-green-500 transition-all duration-300 text-sm font-black flex items-center gap-2"
-                >
+        <p className="text-zinc-500 text-sm">
+          Referral Network
+        </p>
 
-                  <Share2 size={16} />
+        <h3 className="text-xl sm:text-2xl font-black mt-1">
+          Referral
+        </h3>
 
-                  Share Link
+      </div>
 
-                </button>
+    </div>
 
-                <Link
-                  href="/member/referral"
-                  className="h-12 px-5 rounded-2xl border border-zinc-700 hover:border-green-500 transition-all duration-300 text-sm font-black flex items-center gap-2"
-                >
+    <div className="relative z-10">
 
-                  <Users size={16} />
+      <div className="h-11 px-5 rounded-2xl bg-green-500 text-black font-black flex items-center justify-center text-sm shadow-[0_0_25px_rgba(0,255,120,0.20)]">
 
-                  Referral
+        Buka
 
-                </Link>
+      </div>
 
-              </div>
+    </div>
 
-            </div>
+  </Link>
 
-          </div>
-
-        </div>
-
+</div>
         {/* MEMBER DIBEKUKAN */}
         {memberStatus ===
           "dibekukan" && (
