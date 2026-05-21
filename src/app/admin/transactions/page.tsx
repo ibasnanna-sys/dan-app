@@ -1,7 +1,6 @@
 "use client";
 
-import { supabase }
-from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -73,7 +72,7 @@ useEffect(() => {
   */
 
   async function updateStatus(
-  id: string,
+  id: number,
   status:
     | "approved"
     | "rejected"
@@ -108,49 +107,7 @@ useEffect(() => {
 
 }
   
-            /*
-              APPROVED
-              MEMBER AUTO AKTIF
-            */
-
-            memberStatus:
-              status === "approved"
-                ? "aktif"
-                : "free",
-          };
-        }
-
-        return trx;
-
-      });
-
-    setTransactions(updated);
-
-    localStorage.setItem(
-      "dan-transactions",
-      JSON.stringify(updated)
-    );
-
-    /*
-      SYNC MEMBER
-    */
-
-    const members =
-      updated.map((trx) => ({
-        id: trx.id,
-        name: trx.memberName,
-        city: trx.city,
-        status: trx.memberStatus,
-        transactionStatus:
-          trx.status,
-      }));
-
-    localStorage.setItem(
-      "dan-members",
-      JSON.stringify(members)
-    );
-  }
-
+            
   /*
     =====================================================
     COUNT
