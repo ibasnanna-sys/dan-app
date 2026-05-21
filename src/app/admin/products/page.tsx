@@ -39,15 +39,13 @@ export default function AdminProductsPage() {
 
     const { data } =
       await supabase
-        .from("products")
-.select("*")
-.neq(
-  "name",
-  "OLD_AKTIVASI_MEMBER_DO_NOT_USE"
-)
-.order("created_at", {
-  ascending: false,
-});
+        const { data, error } = await supabase
+  .from("products")
+  .select("*")
+  .not("name", "ilike", "OLD_AKTIVASI_MEMBER%")
+  .order("created_at", {
+    ascending: false,
+  });
 
     setProducts(data || []);
 
