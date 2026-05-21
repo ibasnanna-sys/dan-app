@@ -38,66 +38,70 @@ export default function Home() {
   const [memberCity, setMemberCity] =
     useState("Makassar");
 
+  
   /*
-    ============================================
-    LOAD MEMBER
-    ============================================
-  */
+============================================
+LOAD MEMBER REALTIME SUPABASE
+============================================
+*/
 
-  useEffect(() => {
+useEffect(() => {
 
-    const memberId =
-      localStorage.getItem("member_id");
-
-    const members =
-      localStorage.getItem("dan-members");
-
-    if (!members) return;
+  async function loadMember() {
 
     try {
 
-      const parsed: MemberData[] =
-        JSON.parse(members);
+      const memberId =
+        localStorage.getItem("member_id");
 
-      const currentMember =
-        parsed.find(
-          (m) =>
-            String(m.id) ===
-            String(memberId)
-        );
+      if (!memberId) {
 
-      if (currentMember) {
+        window.location.href =
+          "/login";
 
-        setMemberStatus(
-          currentMember.status
-        );
-
-        if (currentMember.name) {
-
-          setMemberName(
-            currentMember.name
-          );
-
-        }
-
-        if (currentMember.city) {
-
-          setMemberCity(
-            currentMember.city
-          );
-
-        }
-
+        return;
       }
+
+      const { supabase } =
+        await import("@/lib/supabase");
+
+      const { data, error } =
+        await supabase
+          .from("members")
+          .select("*")
+          .eq("id", memberId)
+          .single();
+
+      if (error || !data) {
+
+        console.log(error);
+
+        return;
+      }
+
+      setMemberStatus(
+        data.status || "free"
+      );
+
+      setMemberName(
+        data.name || "Member"
+      );
+
+      setMemberCity(
+        data.city || "-"
+      );
 
     } catch (err) {
 
-      console.error(err);
+      console.log(err);
 
     }
 
-  }, []);
+  }
 
+  loadMember();
+
+}, []);
   /*
     ============================================
     LIVE ACTIVITY
