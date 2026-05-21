@@ -12,14 +12,24 @@ import {
   Users,
 } from "lucide-react";
 
+type TransactionStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
+
+type MemberStatus =
+  | "free"
+  | "aktif"
+  | "dibekukan";
+
 type Transaction = {
   id: number;
   memberName: string;
   city: string;
   product: string;
   amount: number;
-  status: "pending" | "approved" | "rejected";
-  memberStatus: "free" | "aktif" | "dibekukan";
+  status: TransactionStatus;
+  memberStatus: MemberStatus;
   createdAt: string;
 };
 
@@ -44,13 +54,18 @@ export default function AdminTransactionsPage() {
 
     } else {
 
+      /*
+        DUMMY DATA
+        SUDAH TANPA PRODUK AKTIVASI
+      */
+
       const dummy: Transaction[] = [
         {
           id: 1001,
           memberName: "Akbar",
           city: "Makassar",
           product:
-            "Paket Aktivasi DAN",
+            "Paket Data Unlimited",
           amount: 350000,
           status: "pending",
           memberStatus: "free",
@@ -61,7 +76,7 @@ export default function AdminTransactionsPage() {
           memberName: "Dewi",
           city: "Bandung",
           product:
-            "Paket Unlimited",
+            "Paket Data Bulanan",
           amount: 500000,
           status: "approved",
           memberStatus: "aktif",
@@ -80,6 +95,12 @@ export default function AdminTransactionsPage() {
 
   }, []);
 
+  /*
+    =====================================================
+    UPDATE STATUS
+    =====================================================
+  */
+
   function updateStatus(
     id: number,
     status:
@@ -95,6 +116,12 @@ export default function AdminTransactionsPage() {
           return {
             ...trx,
             status,
+
+            /*
+              APPROVED
+              MEMBER AUTO AKTIF
+            */
+
             memberStatus:
               status === "approved"
                 ? "aktif"
@@ -113,6 +140,10 @@ export default function AdminTransactionsPage() {
       JSON.stringify(updated)
     );
 
+    /*
+      SYNC MEMBER
+    */
+
     const members =
       updated.map((trx) => ({
         id: trx.id,
@@ -129,8 +160,20 @@ export default function AdminTransactionsPage() {
     );
   }
 
+  /*
+    =====================================================
+    COUNT
+    =====================================================
+  */
+
+  const pendingCount =
+    transactions.filter(
+      (trx) =>
+        trx.status === "pending"
+    ).length;
+
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none">
@@ -168,9 +211,9 @@ export default function AdminTransactionsPage() {
             </h1>
 
             <p className="text-zinc-500 mt-5 max-w-2xl leading-relaxed">
-              Approval aktivasi member
-              dan transaksi realtime
-              platform DAN.
+              Approval transaksi
+              member DAN secara
+              realtime.
             </p>
 
           </div>
@@ -180,14 +223,7 @@ export default function AdminTransactionsPage() {
             <Wallet className="text-green-400" />
 
             <span className="font-black text-green-400 text-lg">
-              {
-                transactions.filter(
-                  (trx) =>
-                    trx.status ===
-                    "pending"
-                ).length
-              }{" "}
-              Pending
+              {pendingCount} Pending
             </span>
 
           </div>
@@ -229,9 +265,7 @@ export default function AdminTransactionsPage() {
                   <div className="flex flex-wrap items-center gap-3">
 
                     <h2 className="text-2xl md:text-3xl font-black">
-                      {
-                        trx.memberName
-                      }
+                      {trx.memberName}
                     </h2>
 
                     <div
@@ -277,9 +311,7 @@ export default function AdminTransactionsPage() {
 
                       <Clock3 size={16} />
 
-                      {
-                        trx.createdAt
-                      }
+                      {trx.createdAt}
 
                     </div>
 
@@ -301,7 +333,11 @@ export default function AdminTransactionsPage() {
                         "approved"
                       )
                     }
-                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 transition-all flex items-center gap-2 font-black text-black shadow-[0_0_30px_rgba(0,255,120,0.18)]"
+                    disabled={
+                      trx.status ===
+                      "approved"
+                    }
+                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black text-black shadow-[0_0_30px_rgba(0,255,120,0.18)]"
                   >
 
                     <ShieldCheck
@@ -319,7 +355,11 @@ export default function AdminTransactionsPage() {
                         "rejected"
                       )
                     }
-                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 transition-all flex items-center gap-2 font-black shadow-[0_0_30px_rgba(255,0,0,0.15)]"
+                    disabled={
+                      trx.status ===
+                      "rejected"
+                    }
+                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black shadow-[0_0_30px_rgba(255,0,0,0.15)]"
                   >
 
                     <XCircle
