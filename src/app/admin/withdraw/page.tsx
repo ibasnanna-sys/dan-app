@@ -29,7 +29,7 @@ type Withdraw = {
     name: string;
     city: string;
     balance: number;
-  };
+  } | null;
 };
 
 export default function AdminWithdrawPage() {
@@ -88,8 +88,7 @@ export default function AdminWithdrawPage() {
         "Approve withdraw ini?"
       );
 
-    if (!confirmApprove)
-      return;
+    if (!confirmApprove) return;
 
     if (!withdraw.members) {
       alert(
@@ -100,8 +99,7 @@ export default function AdminWithdrawPage() {
 
     const memberBalance =
       Number(
-        withdraw.members.balance ||
-          0
+        withdraw.members.balance || 0
       );
 
     if (
@@ -127,17 +125,23 @@ export default function AdminWithdrawPage() {
       return;
     }
 
-    await supabase
-      .from("members")
-      .update({
-        balance:
-          memberBalance -
-          withdraw.amount,
-      })
-      .eq(
-        "id",
-        withdraw.member_id
-      );
+    const { error: balanceError } =
+      await supabase
+        .from("members")
+        .update({
+          balance:
+            memberBalance -
+            withdraw.amount,
+        })
+        .eq(
+          "id",
+          withdraw.member_id
+        );
+
+    if (balanceError) {
+      alert(balanceError.message);
+      return;
+    }
 
     await supabase
       .from("activity_logs")
@@ -195,12 +199,13 @@ export default function AdminWithdrawPage() {
       return withdraws.filter(
         (item) => {
           const memberName =
-            item.members?.name ||
-            "";
+            item.members?.name || "";
 
           const memberCity =
-            item.members?.city ||
-            "";
+            item.members?.city || "";
+
+          const bankName =
+            item.bank_name || "";
 
           const matchSearch =
             memberName
@@ -213,7 +218,7 @@ export default function AdminWithdrawPage() {
               .includes(
                 search.toLowerCase()
               ) ||
-            item.bank_name
+            bankName
               .toLowerCase()
               .includes(
                 search.toLowerCase()
@@ -222,8 +227,7 @@ export default function AdminWithdrawPage() {
           const matchFilter =
             filter === "all"
               ? true
-              : item.status ===
-                filter;
+              : item.status === filter;
 
           return (
             matchSearch &&
@@ -497,7 +501,9 @@ export default function AdminWithdrawPage() {
                       <Wallet size={16} />
 
                       Rp{" "}
-                      {Number(item.amount).toLocaleString("id-ID")}
+                      {Number(
+                        item.amount
+                      ).toLocaleString("id-ID")}
 
                     </div>
 
@@ -505,7 +511,9 @@ export default function AdminWithdrawPage() {
 
                       <Clock3 size={16} />
 
-                      {new Date(item.created_at).toLocaleString("id-ID")}
+                      {new Date(
+                        item.created_at
+                      ).toLocaleString("id-ID")}
 
                     </div>
 
@@ -525,12 +533,19 @@ export default function AdminWithdrawPage() {
                       Rekening: {item.account_number}
                     </p>
 
+                    {item.note && (
+                      <p className="text-red-400">
+                        Note: {item.note}
+                      </p>
+                    )}
+
                   </div>
 
                 </div>
 
                 {/* RIGHT */}
-                {item.status === "pending" && (
+                {item.status ===
+                  "pending" && (
 
                   <div className="flex flex-wrap gap-3">
 
