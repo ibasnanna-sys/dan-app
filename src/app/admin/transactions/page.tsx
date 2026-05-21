@@ -1,614 +1,334 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
 import { supabase } from "@/lib/supabase";
 
 import {
   Wallet,
+  Users,
   Clock3,
   ShieldCheck,
   XCircle,
-  Users,
-  Package2,
-  RefreshCcw,
+  LoaderCircle,
 } from "lucide-react";
 
-/*
-=====================================================
-TYPES
-=====================================================
-*/
-
-type Member = {
+interface TransactionItem {
   id: string;
-  full_name: string | null;
-  city: string | null;
-};
+  amount: number;
+  status: string;
+  created_at: string;
+  member_id: string;
+  product_id: string;
 
-type Product = {
-  id: string;
-  name: string | null;
-  provider: string | null;
-  kuota: string | null;
-  masa_aktif: string | null;
-};
+  user_name: string;
+  user_phone: string;
+  user_city: string;
 
-type Transaction = {
-  id: number;
-
-  member_id: string | null;
-
-  product_id: string | null;
-
-  nomor_tujuan: string | null;
-
-  payment_method: string | null;
-
-  amount: number | null;
-
-  status: string | null;
-
-  created_at: string | null;
-
-  members?: Member | Member[] | null;
-
-  products?: Product | Product[] | null;
-};
+  product_name: string;
+}
 
 export default function AdminTransactionsPage() {
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const router = useRouter();
-
-  const [transactions, setTransactions] =
-    useState<Transaction[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [processingId, setProcessingId] =
-    useState<number | null>(null);
-
-  /*
-  =====================================================
-  NORMALIZER
-  =====================================================
-  */
-
-  function getMember(
-    item: Transaction
-  ): Member | null {
-
-    if (!item.members) return null;
-
-    if (Array.isArray(item.members)) {
-
-      return item.members[0] || null;
-    }
-
-    return item.members;
-  }
-
-  function getProduct(
-    item: Transaction
-  ): Product | null {
-
-    if (!item.products) return null;
-
-    if (Array.isArray(item.products)) {
-
-      return item.products[0] || null;
-    }
-
-    return item.products;
-  }
-
-  function normalizeStatus(
-    status?: string | null
-  ) {
-
-    return (
-      status
-        ?.toString()
-        .trim()
-        .toLowerCase() || "pending"
-    );
-  }
-
-  /*
-  =====================================================
-  LOAD TRANSACTIONS
-  =====================================================
-  */
-
-  useEffect(() => {
-
-    loadTransactions();
-
-  }, []);
-
-  async function loadTransactions() {
+  async function fetchTransactions() {
+    setLoading(true);
 
     try {
+      /*
+      ==========================================
+      FETCH TRANSACTIONS
+      ==========================================
+      */
 
-      setLoading(true);
+      const { data: trxData, error: trxError } = await supabase
+        .from("transactions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      const { data, error } =
-        await supabase
-          .from("transactions")
-          .select(`
-            id,
-            member_id,
-            product_id,
-            nomor_tujuan,
-            payment_method,
-            amount,
-            status,
-            created_at,
+      if (trxError) {
+        console.error(trxError);
+        setLoading(false);
+        return;
+      }
 
-            members:member_id (
-              id,
-              full_name,
-              city
-            ),
+      /*
+      ==========================================
+      FETCH USERS
+      ==========================================
+      */
 
-            products:product_id (
-              id,
-              name,
-              provider,
-              kuota,
-              masa_aktif
-            )
-          `)
-          .order("created_at", {
-            ascending: false,
-          });
+      const memberIds = [
+        ...new Set(trxData.map((item) => item.member_id).filter(Boolean)),
+      ];
 
-      if (error) {
+      const { data: usersData } = await supabase
+        .from("users")
+        .select("id,name,phone")
+        .in("id", memberIds);
 
-        console.error(
-          "LOAD ERROR:",
-          error
+      /*
+      ==========================================
+      FETCH MEMBERS
+      ==========================================
+      */
+
+      const { data: membersData } = await supabase
+        .from("members")
+        .select("user_id,city")
+        .in("user_id", memberIds);
+
+      /*
+      ==========================================
+      FETCH PRODUCTS
+      ==========================================
+      */
+
+      const productIds = [
+        ...new Set(trxData.map((item) => item.product_id).filter(Boolean)),
+      ];
+
+      const { data: productsData } = await supabase
+        .from("products")
+        .select("id,name")
+        .in("id", productIds);
+
+      /*
+      ==========================================
+      MERGE DATA
+      ==========================================
+      */
+
+      const merged: TransactionItem[] = trxData.map((trx) => {
+        const user = usersData?.find((u) => u.id === trx.member_id);
+
+        const member = membersData?.find(
+          (m) => m.user_id === trx.member_id
         );
 
-        alert(error.message);
+        const product = productsData?.find(
+          (p) => p.id === trx.product_id
+        );
 
-        return;
-      }
+        return {
+          id: trx.id,
+          amount: trx.amount || 0,
+          status: trx.status || "pending",
+          created_at: trx.created_at,
+          member_id: trx.member_id,
+          product_id: trx.product_id,
 
-      setTransactions(
-        (data || []) as Transaction[]
-      );
+          user_name: user?.name || "Member DAN",
+          user_phone: user?.phone || "-",
+          user_city: member?.city || "Indonesia",
 
-    } catch (err: any) {
+          product_name: product?.name || "Paket Data",
+        };
+      });
 
+      setTransactions(merged);
+    } catch (err) {
       console.error(err);
-
-      alert(
-        err?.message ||
-        "Terjadi kesalahan"
-      );
-
-    } finally {
-
-      setLoading(false);
     }
+
+    setLoading(false);
   }
 
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
   /*
-  =====================================================
+  ==========================================
   APPROVE
-  =====================================================
+  ==========================================
   */
 
-  async function approveTransaction(
-    id: number
-  ) {
-
+  async function approveTransaction(id: string) {
     try {
-
       setProcessingId(id);
 
-      const { error } =
-        await supabase
-          .from("transactions")
-          .update({
-            status: "approved",
-          })
-          .eq("id", id);
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          status: "approved",
+        })
+        .eq("id", id);
 
       if (error) {
-
-        alert(error.message);
-
+        console.error(error);
         return;
       }
 
-      await loadTransactions();
-
-    } catch (err: any) {
-
-      alert(
-        err?.message ||
-        "Gagal approve transaksi"
-      );
-
-    } finally {
-
-      setProcessingId(null);
+      await fetchTransactions();
+    } catch (err) {
+      console.error(err);
     }
+
+    setProcessingId(null);
   }
 
   /*
-  =====================================================
+  ==========================================
   REJECT
-  =====================================================
+  ==========================================
   */
 
-  async function rejectTransaction(
-    id: number
-  ) {
-
+  async function rejectTransaction(id: string) {
     try {
-
       setProcessingId(id);
 
-      const { error } =
-        await supabase
-          .from("transactions")
-          .update({
-            status: "rejected",
-          })
-          .eq("id", id);
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          status: "rejected",
+        })
+        .eq("id", id);
 
       if (error) {
-
-        alert(error.message);
-
+        console.error(error);
         return;
       }
 
-      await loadTransactions();
-
-    } catch (err: any) {
-
-      alert(
-        err?.message ||
-        "Gagal reject transaksi"
-      );
-
-    } finally {
-
-      setProcessingId(null);
+      await fetchTransactions();
+    } catch (err) {
+      console.error(err);
     }
+
+    setProcessingId(null);
   }
 
   /*
-  =====================================================
-  COUNTER
-  =====================================================
+  ==========================================
+  FORMAT RUPIAH
+  ==========================================
   */
 
-  const pendingCount =
-    transactions.filter(
-      (item) =>
-        normalizeStatus(
-          item.status
-        ) === "pending"
-    ).length;
+  function formatRupiah(amount: number) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  }
 
   /*
-  =====================================================
-  LOADING
-  =====================================================
+  ==========================================
+  FORMAT DATE
+  ==========================================
   */
 
-  if (loading) {
-
-    return (
-
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-
-        <div className="flex flex-col items-center gap-5">
-
-          <div className="w-16 h-16 rounded-full border-4 border-green-500/20 border-t-green-400 animate-spin"></div>
-
-          <p className="text-zinc-400">
-            Memuat transaksi...
-          </p>
-
-        </div>
-
-      </div>
-    );
+  function formatDate(date: string) {
+    return new Date(date).toLocaleString("id-ID");
   }
+
+  /*
+  ==========================================
+  PENDING COUNT
+  ==========================================
+  */
+
+  const pendingCount = transactions.filter(
+    (item) => item.status === "pending"
+  ).length;
 
   return (
+    <div className="min-h-screen bg-black text-white px-4 py-6">
+      <div className="max-w-md mx-auto">
+        <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-5 mb-6">
+          <div className="flex items-center gap-3">
+            <Wallet className="w-8 h-8 text-green-400" />
 
-    <div className="min-h-screen bg-black text-white">
-
-      {/* BACKGROUND */}
-
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.08),transparent_35%)] pointer-events-none"></div>
-
-      <div className="relative max-w-6xl mx-auto p-5 pb-32">
-
-        {/* HEADER */}
-
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-10">
-
-          <div>
-
-            <p className="text-green-400 text-sm font-black tracking-[0.25em] uppercase">
-              Admin Panel
-            </p>
-
-            <h1 className="text-5xl md:text-6xl font-black mt-3">
-              Transactions
-            </h1>
-
-            <p className="text-zinc-500 mt-4">
-              Approval transaksi member DAN
-            </p>
-
+            <div>
+              <h1 className="text-3xl font-bold text-green-400">
+                {pendingCount} Pending
+              </h1>
+            </div>
           </div>
-
-          <button
-            onClick={loadTransactions}
-            className="h-14 px-6 rounded-3xl bg-green-500 text-black font-black flex items-center gap-3"
-          >
-
-            <RefreshCcw size={18} />
-
-            Refresh
-
-          </button>
-
         </div>
 
-        {/* PENDING */}
-
-        <div className="rounded-[35px] border border-green-500/20 bg-green-500/10 p-6 mb-10">
-
-          <div className="flex items-center gap-4">
-
-            <Wallet
-              size={30}
-              className="text-green-400"
-            />
-
-            <h2 className="text-4xl font-black text-green-400">
-
-              {pendingCount} Pending
-
-            </h2>
-
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <LoaderCircle className="w-10 h-10 animate-spin text-green-400" />
           </div>
-
-        </div>
-
-        {/* EMPTY */}
-
-        {transactions.length === 0 && (
-
-          <div className="rounded-[40px] border border-zinc-800 bg-white/[0.03] p-10 text-center">
-
-            <h2 className="text-3xl font-black">
-              Belum ada transaksi
-            </h2>
-
+        ) : transactions.length === 0 ? (
+          <div className="text-center text-zinc-400 py-20">
+            Tidak ada transaksi
           </div>
-        )}
-
-        {/* LIST */}
-
-        <div className="space-y-6">
-
-          {transactions.map((item) => {
-
-            const member =
-              getMember(item);
-
-            const product =
-              getProduct(item);
-
-            const status =
-              normalizeStatus(
-                item.status
-              );
-
-            const approved =
-              status === "approved";
-
-            const rejected =
-              status === "rejected";
-
-            return (
-
+        ) : (
+          <div className="space-y-6">
+            {transactions.map((item) => (
               <div
                 key={item.id}
-                className="rounded-[40px] border border-zinc-800 bg-black/70 backdrop-blur-xl p-6"
+                className="bg-zinc-950 border border-zinc-800 rounded-[32px] p-6 shadow-2xl"
               >
-
-                {/* TOP */}
-
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-
-                  <div>
-
-                    <h2 className="text-4xl font-black">
-
-                      {member?.full_name ||
-                        "Member DAN"}
-
-                    </h2>
-
-                    <p className="text-zinc-500 mt-3 text-lg">
-
-                      {member?.city ||
-                        "Indonesia"}
-
-                    </p>
-
-                  </div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-4xl font-black leading-none">
+                    {item.user_name}
+                  </h2>
 
                   <div
-                    className={`px-5 py-3 rounded-full font-black uppercase tracking-[0.2em]
+                    className={`px-5 py-2 rounded-full text-sm font-bold uppercase tracking-[3px]
                     ${
-                      approved
-                        ? "bg-green-500/15 text-green-400"
-                        : rejected
-                        ? "bg-red-500/15 text-red-400"
-                        : "bg-yellow-500/15 text-yellow-300"
+                      item.status === "approved"
+                        ? "bg-green-500/20 text-green-400"
+                        : item.status === "rejected"
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-yellow-500/20 text-yellow-400"
                     }`}
                   >
-
-                    {approved
-                      ? "APPROVED"
-                      : rejected
-                      ? "REJECTED"
-                      : "PENDING"}
-
+                    {item.status}
                   </div>
-
                 </div>
 
-                {/* INFO */}
-
-                <div className="flex flex-wrap items-center gap-6 mt-8 text-zinc-300">
-
-                  <div className="flex items-center gap-2">
-
-                    <Users size={18} />
-
-                    <span>
-                      {member?.city ||
-                        "-"}
-                    </span>
-
+                <div className="space-y-4 text-zinc-300">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5" />
+                    <span>{item.user_city}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-
-                    <Wallet size={18} />
-
-                    <span>
-
-                      Rp{" "}
-
-                      {Number(
-                        item.amount || 0
-                      ).toLocaleString(
-                        "id-ID"
-                      )}
-
-                    </span>
-
+                  <div className="flex items-center gap-3">
+                    <Wallet className="w-5 h-5" />
+                    <span>{formatRupiah(item.amount)}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-
-                    <Clock3 size={18} />
-
-                    <span>
-
-                      {item.created_at
-                        ? new Date(
-                            item.created_at
-                          ).toLocaleString(
-                            "id-ID"
-                          )
-                        : "-"}
-
-                    </span>
-
+                  <div className="flex items-center gap-3">
+                    <Clock3 className="w-5 h-5" />
+                    <span>{formatDate(item.created_at)}</span>
                   </div>
 
+                  <div className="pt-3 text-2xl text-white font-semibold">
+                    {item.product_name}
+                  </div>
                 </div>
 
-                {/* PRODUCT */}
-
-                <div className="mt-8">
-
-                  <div className="flex items-center gap-3 text-zinc-400">
-
-                    <Package2 size={18} />
-
-                    <span className="uppercase tracking-[0.2em] text-sm">
-                      Produk
-                    </span>
-
-                  </div>
-
-                  <h3 className="text-3xl font-black mt-4">
-
-                    {product?.name ||
-                      "Produk Digital"}
-
-                  </h3>
-
-                  <p className="text-zinc-500 mt-3">
-
-                    {product?.provider ||
-                      "-"}
-
-                  </p>
-
-                </div>
-
-                {/* ACTION */}
-
-                <div className="grid grid-cols-2 gap-5 mt-10">
-
+                <div className="grid grid-cols-2 gap-4 mt-8">
                   <button
-                    onClick={() =>
-                      approveTransaction(
-                        item.id
-                      )
-                    }
-                    disabled={
-                      processingId ===
-                      item.id
-                    }
-                    className="h-20 rounded-[28px] bg-green-600 hover:bg-green-500 transition-all text-black font-black text-2xl flex items-center justify-center gap-3 disabled:opacity-50"
+                    onClick={() => approveTransaction(item.id)}
+                    disabled={processingId === item.id}
+                    className="bg-green-600 active:scale-95 transition rounded-3xl h-20 font-bold text-2xl flex items-center justify-center gap-3"
                   >
+                    <ShieldCheck className="w-7 h-7" />
 
-                    <ShieldCheck size={28} />
-
-                    Approve
-
+                    {processingId === item.id ? "..." : "Approve"}
                   </button>
 
                   <button
-                    onClick={() =>
-                      rejectTransaction(
-                        item.id
-                      )
-                    }
-                    disabled={
-                      processingId ===
-                      item.id
-                    }
-                    className="h-20 rounded-[28px] bg-red-600 hover:bg-red-500 transition-all text-white font-black text-2xl flex items-center justify-center gap-3 disabled:opacity-50"
+                    onClick={() => rejectTransaction(item.id)}
+                    disabled={processingId === item.id}
+                    className="bg-red-600 active:scale-95 transition rounded-3xl h-20 font-bold text-2xl flex items-center justify-center gap-3"
                   >
+                    <XCircle className="w-7 h-7" />
 
-                    <XCircle size={28} />
-
-                    Reject
-
+                    {processingId === item.id ? "..." : "Reject"}
                   </button>
-
                 </div>
-
               </div>
-            );
-          })}
-
-        </div>
-
+            ))}
+          </div>
+        )}
       </div>
-
     </div>
   );
 }
