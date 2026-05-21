@@ -18,11 +18,6 @@ type TransactionStatus =
   | "approved"
   | "rejected";
 
-type MemberStatus =
-  | "free"
-  | "aktif"
-  | "dibekukan";
-
 type Transaction = {
   id: number;
   memberName: string;
@@ -30,8 +25,7 @@ type Transaction = {
   product: string;
   amount: number;
   status: TransactionStatus;
-  memberStatus: MemberStatus;
-  createdAt: string;
+  created_at: string;
 };
 
 export default function AdminTransactionsPage() {
@@ -39,79 +33,84 @@ export default function AdminTransactionsPage() {
   const [transactions, setTransactions] =
     useState<Transaction[]>([]);
 
-useEffect(() => {
+  /*
+    =========================================
+    LOAD TRANSACTIONS
+    =========================================
+  */
 
-  async function loadTransactions() {
+  useEffect(() => {
 
-    const { data, error } =
+    async function loadTransactions() {
+
+      const { data, error } =
+        await supabase
+          .from("transactions")
+          .select("*")
+          .order("created_at", {
+            ascending: false,
+          });
+
+      if (!error && data) {
+
+        setTransactions(
+          data as Transaction[]
+        );
+
+      }
+
+    }
+
+    loadTransactions();
+
+  }, []);
+
+  /*
+    =========================================
+    UPDATE STATUS
+    =========================================
+  */
+
+  async function updateStatus(
+    id: number,
+    status:
+      | "approved"
+      | "rejected"
+  ) {
+
+    const { error } =
       await supabase
         .from("transactions")
-        .select("*")
-        .order("created_at", {
-          ascending: false,
-        });
+        .update({ status })
+        .eq("id", id);
 
-    if (!error && data) {
+    if (!error) {
 
-      setTransactions(data);
+      setTransactions((prev) =>
+        prev.map((trx) => {
+
+          if (trx.id === id) {
+
+            return {
+              ...trx,
+              status,
+            };
+
+          }
+
+          return trx;
+
+        })
+      );
 
     }
 
   }
 
-  loadTransactions();
-
-}, []);
-
-      
-
   /*
-    =====================================================
-    UPDATE STATUS
-    =====================================================
-  */
-
-  async function updateStatus(
-  id: number,
-  status:
-    | "approved"
-    | "rejected"
-) {
-
-  const { error } =
-    await supabase
-      .from("transactions")
-      .update({ status })
-      .eq("id", id);
-
-  if (!error) {
-
-    setTransactions((prev) =>
-      prev.map((trx) => {
-
-        if (trx.id === id) {
-
-          return {
-            ...trx,
-            status,
-          };
-
-        }
-
-        return trx;
-
-      })
-    );
-
-  }
-
-}
-  
-            
-  /*
-    =====================================================
+    =========================================
     COUNT
-    =====================================================
+    =========================================
   */
 
   const pendingCount =
@@ -159,9 +158,7 @@ useEffect(() => {
             </h1>
 
             <p className="text-zinc-500 mt-5 max-w-2xl leading-relaxed">
-              Approval transaksi
-              member DAN secara
-              realtime.
+              Approval transaksi member DAN realtime.
             </p>
 
           </div>
@@ -249,9 +246,9 @@ useEffect(() => {
                       <Wallet size={16} />
 
                       Rp{" "}
-                      {trx.amount.toLocaleString(
-                        "id-ID"
-                      )}
+                      {Number(
+                        trx.amount
+                      ).toLocaleString("id-ID")}
 
                     </div>
 
@@ -259,7 +256,7 @@ useEffect(() => {
 
                       <Clock3 size={16} />
 
-                      {trx.createdAt}
+                      {trx.created_at}
 
                     </div>
 
@@ -285,7 +282,7 @@ useEffect(() => {
                       trx.status ===
                       "approved"
                     }
-                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black text-black shadow-[0_0_30px_rgba(0,255,120,0.18)]"
+                    className="h-14 px-6 rounded-2xl bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black text-black"
                   >
 
                     <ShieldCheck
@@ -307,7 +304,7 @@ useEffect(() => {
                       trx.status ===
                       "rejected"
                     }
-                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black shadow-[0_0_30px_rgba(255,0,0,0.15)]"
+                    className="h-14 px-6 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-black"
                   >
 
                     <XCircle
@@ -332,4 +329,5 @@ useEffect(() => {
 
     </main>
   );
+
 }
