@@ -18,6 +18,9 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] =
     useState<string | null>(null);
 
+  const [selectedProvider, setSelectedProvider] =
+    useState("ALL");
+
   const [form, setForm] =
     useState({
       name: "",
@@ -27,27 +30,73 @@ export default function AdminProductsPage() {
       price: "",
     });
 
+  const providers = [
+    "ALL",
+    "Telkomsel",
+    "XL",
+    "Indosat",
+    "Tri",
+    "Axis",
+    "Smartfren",
+  ];
+
   useEffect(() => {
 
     loadProducts();
 
-  }, []);
+  }, [selectedProvider]);
 
   async function loadProducts() {
 
     setLoading(true);
 
-    const { data } =
-      await supabase
-        const { data, error } = await supabase
-  .from("products")
-  .select("*")
-  .not("name", "ilike", "OLD_AKTIVASI_MEMBER%")
-  .order("created_at", {
-    ascending: false,
-  });
+    let query = supabase
+      .from("products")
+      .select("*")
+      .not(
+        "name",
+        "ilike",
+        "%AKTIVASI_MEMBER%"
+      )
+      .not(
+        "name",
+        "ilike",
+        "%OLD_AKTIVASI%"
+      )
+      .not(
+        "name",
+        "ilike",
+        "%DELETED_OLD_AKTIVASI%"
+      );
 
-    setProducts(data || []);
+    if (
+      selectedProvider !== "ALL"
+    ) {
+
+      query = query.eq(
+        "provider",
+        selectedProvider
+      );
+    }
+
+    const { data, error } =
+      await query.order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
+
+    if (error) {
+
+      console.log(error);
+
+      setProducts([]);
+
+    } else {
+
+      setProducts(data || []);
+    }
 
     setLoading(false);
   }
@@ -132,7 +181,6 @@ export default function AdminProductsPage() {
       alert(
         "Produk berhasil ditambahkan"
       );
-
     }
 
     resetForm();
@@ -183,10 +231,18 @@ export default function AdminProductsPage() {
 
     if (!confirmDelete) return;
 
-    await supabase
-      .from("products")
-      .delete()
-      .eq("id", id);
+    const { error } =
+      await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+
+      alert(error.message);
+
+      return;
+    }
 
     loadProducts();
   }
@@ -335,9 +391,7 @@ export default function AdminProductsPage() {
               className="h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none focus:border-green-500"
             />
 
-            <input
-              type="text"
-              placeholder="Provider"
+            <select
               value={form.provider}
               onChange={(e) =>
                 setForm({
@@ -347,7 +401,36 @@ export default function AdminProductsPage() {
                 })
               }
               className="h-16 rounded-2xl bg-black border border-zinc-800 px-5 outline-none focus:border-green-500"
-            />
+            >
+              <option value="">
+                Pilih Provider
+              </option>
+
+              <option value="Telkomsel">
+                Telkomsel
+              </option>
+
+              <option value="XL">
+                XL
+              </option>
+
+              <option value="Indosat">
+                Indosat
+              </option>
+
+              <option value="Tri">
+                Tri
+              </option>
+
+              <option value="Axis">
+                Axis
+              </option>
+
+              <option value="Smartfren">
+                Smartfren
+              </option>
+
+            </select>
 
             <input
               type="text"
@@ -421,6 +504,37 @@ export default function AdminProductsPage() {
             )}
 
           </div>
+
+        </div>
+
+        {/* FILTER PROVIDER */}
+        <div className="flex gap-3 overflow-x-auto pb-3 mb-8">
+
+          {providers.map(
+            (provider) => (
+
+              <button
+                key={provider}
+                onClick={() =>
+                  setSelectedProvider(
+                    provider
+                  )
+                }
+                className={`h-12 px-5 rounded-2xl whitespace-nowrap font-black transition-all ${
+                  selectedProvider ===
+                  provider
+                    ? "bg-green-500 text-black"
+                    : "bg-zinc-900 border border-zinc-800 text-white"
+                }`}
+              >
+                {provider ===
+                "ALL"
+                  ? "Semua"
+                  : provider}
+              </button>
+
+            )
+          )}
 
         </div>
 
@@ -570,4 +684,4 @@ export default function AdminProductsPage() {
 
     </main>
   );
-            }
+}
