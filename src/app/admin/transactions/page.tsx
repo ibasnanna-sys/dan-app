@@ -17,6 +17,7 @@ import {
   LoaderCircle,
   Clock3,
   Ban,
+  User2,
 } from "lucide-react";
 
 type TransactionStatus =
@@ -39,14 +40,26 @@ type Product = {
   masa_aktif: string;
 };
 
+type Member = {
+  id: string;
+  full_name: string;
+  city: string;
+};
+
 type Transaction = {
   id: number;
   member_id: string;
-  nomor_tujuan?: string | null;
-  payment_method?: string | null;
-  amount?: number | null;
-  status?: TransactionStatus | string | null;
-  created_at?: string | null;
+  product_id: number;
+
+  nomor_tujuan: string;
+  payment_method: string;
+  amount: number;
+
+  status: TransactionStatus;
+
+  created_at: string;
+
+  members?: Member | null;
 
   products?: Product | Product[] | null;
 };
@@ -76,56 +89,10 @@ export default function TransaksiPage() {
     if (Array.isArray(trx.products)) {
 
       return trx.products[0] || null;
+
     }
 
     return trx.products;
-  }
-
-  /*
-    =====================================================
-    NORMALIZE STATUS
-    =====================================================
-  */
-
-  function normalizeStatus(
-    status?: string | null
-  ) {
-
-    return (
-      status?.toLowerCase() ||
-      "pending"
-    );
-  }
-
-  /*
-    =====================================================
-    FORMAT DATE
-    =====================================================
-  */
-
-  function formatDate(
-    date?: string | null
-  ) {
-
-    if (!date) return "-";
-
-    try {
-
-      return new Date(
-        date
-      ).toLocaleDateString(
-        "id-ID",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
-
-    } catch {
-
-      return "-";
-    }
   }
 
   /*
@@ -145,9 +112,7 @@ export default function TransaksiPage() {
     try {
 
       const memberId =
-        localStorage.getItem(
-          "member_id"
-        );
+        localStorage.getItem("member_id");
 
       if (!memberId) {
 
@@ -160,7 +125,21 @@ export default function TransaksiPage() {
         await supabase
           .from("transactions")
           .select(`
-            *,
+            id,
+            member_id,
+            product_id,
+            nomor_tujuan,
+            payment_method,
+            amount,
+            status,
+            created_at,
+
+            members (
+              id,
+              full_name,
+              city
+            ),
+
             products (
               id,
               name,
@@ -169,16 +148,10 @@ export default function TransaksiPage() {
               masa_aktif
             )
           `)
-          .eq(
-            "member_id",
-            memberId
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false,
-            }
-          );
+          .eq("member_id", memberId)
+          .order("created_at", {
+            ascending: false,
+          });
 
       if (error) {
 
@@ -202,29 +175,17 @@ export default function TransaksiPage() {
 
       const approvedCount =
         trxData.filter(
-          (trx) => {
-
-            const status =
-              normalizeStatus(
-                trx.status
-              );
-
-            return (
-              status ===
-                "approved" ||
-              status ===
-                "selesai"
-            );
-          }
+          (trx) =>
+            trx.status?.toLowerCase() ===
+              "approved" ||
+            trx.status?.toLowerCase() ===
+              "selesai"
         ).length;
 
-      let memberStatus: MemberStatus =
-        "free";
-
-      if (approvedCount > 0) {
-
-        memberStatus = "aktif";
-      }
+      const memberStatus: MemberStatus =
+        approvedCount > 0
+          ? "aktif"
+          : "free";
 
       localStorage.setItem(
         "dan-member-status",
@@ -238,36 +199,31 @@ export default function TransaksiPage() {
       */
 
       const activities =
-        trxData
-          .slice(0, 10)
-          .map((trx) => {
+        trxData.slice(0, 10).map(
+          (trx) => {
 
             const product =
               getProduct(trx);
 
-            const status =
-              normalizeStatus(
-                trx.status
-              );
-
             return {
 
               text:
-                product?.name ||
-                "Paket Data",
+                product?.name,
 
               sub:
-                status ===
+                trx.status?.toLowerCase() ===
                   "approved" ||
-                status ===
+                trx.status?.toLowerCase() ===
                   "selesai"
                   ? "Transaksi berhasil"
-                  : status ===
-                    "pending"
+                  : trx.status?.toLowerCase() ===
+                      "pending"
                   ? "Menunggu approval"
                   : "Transaksi gagal",
+
             };
-          });
+          }
+        );
 
       localStorage.setItem(
         "dan-live-activity",
@@ -282,17 +238,16 @@ export default function TransaksiPage() {
         =====================================================
       */
 
-      const pendingTransactions =
+      const pendingCount =
         trxData.filter(
           (trx) =>
-            normalizeStatus(
-              trx.status
-            ) === "pending"
+            trx.status?.toLowerCase() ===
+            "pending"
         ).length;
 
       localStorage.setItem(
         "dan-pending-transactions",
-        pendingTransactions.toString()
+        pendingCount.toString()
       );
 
       /*
@@ -312,26 +267,23 @@ export default function TransaksiPage() {
             id: trx.id,
 
             product:
-              product?.name ||
-              "Paket Data",
+              product?.name,
 
             amount:
-              trx.amount || 0,
+              trx.amount,
 
             status:
-              trx.status ||
-              "pending",
+              trx.status,
 
             created_at:
               trx.created_at,
+
           };
         });
 
       localStorage.setItem(
         "dan-history",
-        JSON.stringify(
-          history
-        )
+        JSON.stringify(history)
       );
 
     } catch (err: any) {
@@ -346,7 +298,9 @@ export default function TransaksiPage() {
     } finally {
 
       setLoading(false);
+
     }
+
   }
 
   /*
@@ -356,17 +310,15 @@ export default function TransaksiPage() {
   */
 
   function statusStyle(
-    status?: string | null
+    status: string
   ) {
 
     const normalized =
-      normalizeStatus(status);
+      status?.toLowerCase();
 
     if (
-      normalized ===
-        "approved" ||
-      normalized ===
-        "selesai"
+      normalized === "approved" ||
+      normalized === "selesai"
     ) {
 
       return {
@@ -391,14 +343,13 @@ export default function TransaksiPage() {
             size={16}
             className="text-green-400"
           />,
+
       };
     }
 
     if (
-      normalized ===
-        "rejected" ||
-      normalized ===
-        "gagal"
+      normalized === "rejected" ||
+      normalized === "gagal"
     ) {
 
       return {
@@ -423,6 +374,7 @@ export default function TransaksiPage() {
             size={16}
             className="text-red-400"
           />,
+
       };
     }
 
@@ -448,6 +400,7 @@ export default function TransaksiPage() {
           size={16}
           className="text-yellow-300 animate-spin"
         />,
+
     };
   }
 
@@ -474,6 +427,7 @@ export default function TransaksiPage() {
         </div>
 
       </div>
+
     );
   }
 
@@ -481,12 +435,14 @@ export default function TransaksiPage() {
 
     <div className="min-h-screen bg-black text-white overflow-hidden">
 
+      {/* BACKGROUND */}
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.10),transparent_35%)] pointer-events-none"></div>
+
+      <div className="fixed bottom-0 left-0 w-72 h-72 bg-green-500/5 blur-3xl rounded-full pointer-events-none"></div>
 
       <div className="relative max-w-6xl mx-auto p-5 pb-32">
 
         {/* HEADER */}
-
         <div className="flex items-start justify-between gap-4 flex-wrap">
 
           <div>
@@ -506,7 +462,21 @@ export default function TransaksiPage() {
 
             </button>
 
-            <h1 className="text-5xl md:text-7xl font-black">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-5">
+
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+
+              <span className="text-green-400 text-sm font-black tracking-[0.2em]">
+                LIVE TRANSACTION
+              </span>
+
+            </div>
+
+            <p className="text-zinc-500 text-sm tracking-[0.2em] uppercase">
+              Digital Affiliate Network
+            </p>
+
+            <h1 className="text-5xl md:text-7xl font-black mt-3 tracking-tight leading-none">
               Transaksi
             </h1>
 
@@ -520,9 +490,7 @@ export default function TransaksiPage() {
             />
 
             <span className="text-green-400 font-black tracking-wide">
-
               {transactions.length} TRANSAKSI
-
             </span>
 
           </div>
@@ -530,158 +498,261 @@ export default function TransaksiPage() {
         </div>
 
         {/* EMPTY */}
-
         {transactions.length === 0 && (
 
-          <div className="rounded-[40px] border border-zinc-800 bg-white/[0.03] p-12 mt-10 text-center">
+          <div className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-12 mt-10 text-center">
 
-            <ShoppingBag
-              size={50}
-              className="mx-auto text-green-400"
-            />
+            <div className="w-24 h-24 mx-auto rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
 
-            <h2 className="text-4xl font-black mt-6">
+              <ShoppingBag
+                size={42}
+                className="text-green-400"
+              />
 
+            </div>
+
+            <h2 className="text-4xl font-black mt-8">
               Belum Ada Transaksi
-
             </h2>
 
+            <button
+              onClick={() =>
+                router.push(
+                  "/member/produk"
+                )
+              }
+              className="h-14 px-8 rounded-3xl bg-green-500 hover:bg-green-400 transition-all duration-300 text-black font-black text-sm mt-8"
+            >
+
+              Belanja Sekarang
+
+            </button>
+
           </div>
+
         )}
 
         {/* LIST */}
-
         <div className="space-y-5 mt-10">
 
           {transactions.map(
             (item) => {
-
-              const product =
-                getProduct(item);
 
               const style =
                 statusStyle(
                   item.status
                 );
 
+              const product =
+                getProduct(item);
+
               return (
 
                 <div
                   key={item.id}
-                  className="rounded-[40px] border border-zinc-800 bg-white/[0.03] p-6"
+                  className="relative overflow-hidden rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-6 md:p-7"
                 >
 
-                  <div className="flex items-start justify-between gap-5 flex-wrap">
+                  <div className="relative z-10">
 
-                    <div>
+                    {/* TOP */}
+                    <div className="flex items-start justify-between gap-5 flex-wrap">
 
-                      <h2 className="text-3xl font-black">
+                      <div>
 
-                        {product?.name ||
-                          "Paket Data"}
+                        <h2 className="text-3xl md:text-4xl font-black">
 
-                      </h2>
+                          {product?.name}
 
-                      <p className="text-zinc-500 mt-2">
+                        </h2>
 
-                        {product?.provider ||
-                          "Digital Affiliate Network"}
+                        <p className="text-zinc-500 text-lg mt-3">
 
-                      </p>
+                          {product?.provider}
 
-                    </div>
+                        </p>
 
-                    <div
-                      className={`inline-flex items-center gap-3 px-5 py-3 rounded-full border font-black uppercase tracking-wide ${style.text} ${style.bg} ${style.border}`}
-                    >
+                      </div>
 
-                      {style.icon}
+                      <div
+                        className={`inline-flex items-center gap-3 px-5 py-3 rounded-full border font-black uppercase tracking-wide ${style.text} ${style.bg} ${style.border} ${style.glow}`}
+                      >
 
-                      {style.label}
+                        {style.icon}
 
-                    </div>
+                        {style.label}
 
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-
-                    <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
-
-                      <p className="text-zinc-500 text-sm">
-
-                        Nomor Tujuan
-
-                      </p>
-
-                      <h3 className="text-xl font-black mt-4">
-
-                        {item.nomor_tujuan ||
-                          "-"}
-
-                      </h3>
+                      </div>
 
                     </div>
 
-                    <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+                    {/* GRID */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
 
-                      <p className="text-zinc-500 text-sm">
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
 
-                        Pembayaran
+                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
 
-                      </p>
+                          <User2 size={16} />
 
-                      <h3 className="text-xl font-black mt-4">
+                          Member
 
-                        {item.payment_method ||
-                          "-"}
+                        </div>
 
-                      </h3>
+                        <h3 className="text-xl font-black mt-4">
+
+                          {item.members?.full_name}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
+
+                          <Smartphone size={16} />
+
+                          Nomor Tujuan
+
+                        </div>
+
+                        <h3 className="text-xl font-black mt-4 break-words">
+
+                          {item.nomor_tujuan}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
+
+                          <Wallet size={16} />
+
+                          Pembayaran
+
+                        </div>
+
+                        <h3 className="text-xl font-black mt-4 capitalize">
+
+                          {item.payment_method}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <p className="text-zinc-500 text-sm">
+                          Harga
+                        </p>
+
+                        <h3 className="text-3xl font-black text-green-400 mt-4">
+
+                          Rp{" "}
+                          {Number(
+                            item.amount
+                          ).toLocaleString(
+                            "id-ID"
+                          )}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
+
+                          <CalendarDays size={16} />
+
+                          Tanggal
+
+                        </div>
+
+                        <h3 className="text-xl font-black mt-4">
+
+                          {new Date(
+                            item.created_at
+                          ).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month:
+                                "long",
+                              year:
+                                "numeric",
+                            }
+                          )}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <p className="text-zinc-500 text-sm">
+                          Kuota
+                        </p>
+
+                        <h3 className="text-xl font-black mt-4">
+
+                          {product?.kuota}
+
+                        </h3>
+
+                      </div>
+
+                      <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+
+                        <p className="text-zinc-500 text-sm">
+                          Masa Aktif
+                        </p>
+
+                        <h3 className="text-xl font-black mt-4">
+
+                          {product?.masa_aktif}
+
+                        </h3>
+
+                      </div>
 
                     </div>
 
-                    <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+                    {/* FOOTER */}
+                    <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
 
-                      <p className="text-zinc-500 text-sm">
+                      <div className="flex items-center gap-2">
 
-                        Harga
+                        <Clock3 size={15} />
 
-                      </p>
+                        Realtime transaction synced
 
-                      <h3 className="text-3xl font-black text-green-400 mt-4">
+                      </div>
 
-                        Rp{" "}
+                      {(item.status?.toLowerCase() ===
+                        "rejected" ||
+                        item.status?.toLowerCase() ===
+                        "gagal") && (
 
-                        {Number(
-                          item.amount || 0
-                        ).toLocaleString(
-                          "id-ID"
-                        )}
+                        <div className="flex items-center gap-2 text-red-400">
 
-                      </h3>
+                          <Ban size={15} />
 
-                    </div>
+                          Silahkan hubungi admin
 
-                    <div className="rounded-[28px] bg-black/30 border border-zinc-800 p-5">
+                        </div>
 
-                      <p className="text-zinc-500 text-sm">
-
-                        Tanggal
-
-                      </p>
-
-                      <h3 className="text-xl font-black mt-4">
-
-                        {formatDate(
-                          item.created_at
-                        )}
-
-                      </h3>
+                      )}
 
                     </div>
 
                   </div>
 
                 </div>
+
               );
             }
           )}
@@ -691,5 +762,6 @@ export default function TransaksiPage() {
       </div>
 
     </div>
+
   );
 }
