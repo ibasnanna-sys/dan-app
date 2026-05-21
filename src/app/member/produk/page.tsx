@@ -5,12 +5,8 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function ProdukPage() {
-
-  const [products, setProducts] =
-    useState<any[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedProduct, setSelectedProduct] =
     useState<any>(null);
@@ -28,24 +24,17 @@ export default function ProdukPage() {
     useState(false);
 
   useEffect(() => {
-
     loadMember();
     loadProducts();
-
   }, []);
 
   async function loadMember() {
-
     try {
-
       const memberId =
         localStorage.getItem("member_id");
 
       if (!memberId) {
-
-        window.location.href =
-          "/login";
-
+        window.location.href = "/login";
         return;
       }
 
@@ -57,42 +46,21 @@ export default function ProdukPage() {
           .single();
 
       if (error || !data) {
-
-        window.location.href =
-          "/login";
-
+        window.location.href = "/login";
         return;
       }
 
       setMember(data);
-
     } catch {
-
-      window.location.href =
-        "/login";
+      window.location.href = "/login";
     }
   }
 
-  /*
-    FIX TOTAL:
-    - produk muncul
-    - support kolom status=true
-    - support kolom is_active=true
-    - auto activation
-    - live activity
-  */
-
   async function loadProducts() {
-
     try {
-
       setLoading(true);
 
-      /*
-        CEK PRODUK STATUS=true
-      */
-
-      let { data, error } =
+      const { data, error } =
         await supabase
           .from("products")
           .select("*")
@@ -101,70 +69,37 @@ export default function ProdukPage() {
             ascending: true,
           });
 
-      /*
-        FALLBACK
-        JIKA TABEL MASIH PAKAI is_active
-      */
-
-      if (
-        error ||
-        !data ||
-        data.length === 0
-      ) {
-
-        const fallback =
-          await supabase
-            .from("products")
-            .select("*")
-            .eq("is_active", true)
-            .order("price", {
-              ascending: true,
-            });
-
-        data = fallback.data;
+      if (error) {
+        console.log(error);
+        setProducts([]);
+      } else {
+        setProducts(data || []);
       }
-
-      setProducts(data || []);
-
     } catch (err) {
-
       console.log(err);
-
       setProducts([]);
-
     } finally {
-
       setLoading(false);
     }
   }
 
   async function handleBuy() {
-
     if (!selectedProduct) {
-
       alert("Pilih produk");
-
       return;
     }
 
     if (!nomorTujuan.trim()) {
-
       alert("Masukkan nomor tujuan");
-
       return;
     }
 
     if (!member) {
-
       alert("Member tidak ditemukan");
-
       return;
     }
 
-    if (buyLoading) return;
-
     try {
-
       setBuyLoading(true);
 
       /*
@@ -176,11 +111,8 @@ export default function ProdukPage() {
         Number(member.balance || 0) <
           Number(selectedProduct.price)
       ) {
-
         alert("Saldo tidak cukup");
-
         setBuyLoading(false);
-
         return;
       }
 
@@ -189,7 +121,6 @@ export default function ProdukPage() {
       */
 
       if (paymentMethod === "saldo") {
-
         const newBalance =
           Number(member.balance || 0) -
           Number(selectedProduct.price);
@@ -203,11 +134,8 @@ export default function ProdukPage() {
             .eq("id", member.id);
 
         if (balanceError) {
-
           alert(balanceError.message);
-
           setBuyLoading(false);
-
           return;
         }
 
@@ -218,10 +146,10 @@ export default function ProdukPage() {
       }
 
       /*
-        BUAT TRANSAKSI
+        TRANSAKSI
       */
 
-      const { error: transactionError } =
+      const { error: trxError } =
         await supabase
           .from("transactions")
           .insert([
@@ -230,7 +158,7 @@ export default function ProdukPage() {
               product_id:
                 selectedProduct.id,
               nomor_tujuan:
-                nomorTujuan.trim(),
+                nomorTujuan,
               amount:
                 selectedProduct.price,
               payment_method:
@@ -239,23 +167,17 @@ export default function ProdukPage() {
             },
           ]);
 
-      if (transactionError) {
-
-        alert(transactionError.message);
-
+      if (trxError) {
+        alert(trxError.message);
         setBuyLoading(false);
-
         return;
       }
 
       /*
-        AUTO AKTIVASI
+        AKTIVASI OTOMATIS
       */
 
-      if (
-        member.status !== "aktif"
-      ) {
-
+      if (member.status !== "aktif") {
         await supabase
           .from("members")
           .update({
@@ -263,10 +185,10 @@ export default function ProdukPage() {
           })
           .eq("id", member.id);
 
-        setMember((prev: any) => ({
-          ...prev,
+        setMember({
+          ...member,
           status: "aktif",
-        }));
+        });
       }
 
       /*
@@ -287,287 +209,273 @@ export default function ProdukPage() {
           },
         ]);
 
-      alert(
-        "Transaksi berhasil dibuat"
-      );
+      alert("Transaksi berhasil");
 
       setSelectedProduct(null);
-
       setNomorTujuan("");
-
       setPaymentMethod("saldo");
-
     } catch (err: any) {
-
       alert(
         err?.message ||
           "Terjadi kesalahan"
       );
-
     } finally {
-
       setBuyLoading(false);
     }
   }
 
   if (loading) {
-
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center text-lg sm:text-xl font-bold">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white pb-40">
+      <div className="max-w-6xl mx-auto px-4 py-6">
 
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,100,0.12),transparent_35%)] pointer-events-none"></div>
-
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-5 py-5 sm:py-6 pb-44">
-
-        <div className="flex items-center justify-between mb-5 gap-3">
-
+        {/* TOP */}
+        <div className="flex items-center justify-between mb-6">
           <Link
             href="/member/dashboard"
-            className="min-w-11 w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:border-green-500 transition text-lg"
+            className="w-11 h-11 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center"
           >
             ←
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 rounded-full bg-green-500/10 border border-green-500/20">
-
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-
-            <span className="text-green-400 text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase whitespace-nowrap">
-              Produk Digital
-            </span>
-
+          <div className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold">
+            PRODUK DIGITAL
           </div>
-
         </div>
 
-        <div className="relative overflow-hidden rounded-[32px] sm:rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-5 sm:p-7 shadow-[0_0_60px_rgba(0,255,100,0.08)]">
+        {/* HEADER */}
+        <div className="rounded-[32px] border border-zinc-800 bg-zinc-900/40 p-6 mb-8">
+          <h1 className="text-5xl font-black">
+            Paket Data
+          </h1>
 
-          <div className="absolute top-0 right-0 w-56 sm:w-72 h-56 sm:h-72 bg-green-500/10 blur-3xl rounded-full"></div>
+          <p className="text-zinc-400 mt-4">
+            Belanja paket data premium langsung dari dashboard DAN.
+          </p>
 
-          <div className="relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1] tracking-tight">
-              Paket Data
-              <br />
-              Premium
-            </h1>
+            <div className="rounded-3xl border border-zinc-800 bg-black/30 p-5">
+              <p className="text-zinc-500 text-sm">
+                Status
+              </p>
 
-            <p className="text-zinc-400 mt-5 sm:mt-7 max-w-2xl text-sm sm:text-lg leading-relaxed">
-              Belanja paket data digital langsung dari dashboard premium DAN.
-            </p>
-
-            <div className="mt-6 sm:mt-8 rounded-[24px] sm:rounded-[32px] border border-green-500/20 bg-green-500/10 p-4 sm:p-5 shadow-[0_0_40px_rgba(0,255,100,0.10)]">
-
-              <div className="flex items-start gap-3 sm:gap-4">
-
-                <div className="min-w-12 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-green-500 flex items-center justify-center text-black text-xl sm:text-2xl font-black">
-                  ⚡
-                </div>
-
-                <div>
-
-                  <h2 className="text-xl sm:text-3xl font-black">
-                    Aktivasi Otomatis
-                  </h2>
-
-                  <p className="text-zinc-300 mt-2 sm:mt-3 leading-relaxed text-sm sm:text-lg">
-                    Pembelian pertama otomatis mengaktifkan akun member DAN.
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 sm:mt-7">
-
-              <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
-
-                <p className="text-zinc-500 text-sm">
-                  Status
-                </p>
-
-                <h2
-                  className={`text-2xl sm:text-3xl font-black mt-3 ${
-                    member?.status ===
-                    "aktif"
-                      ? "text-green-400"
-                      : "text-yellow-300"
-                  }`}
-                >
-                  {member?.status ===
+              <h2
+                className={`text-3xl font-black mt-3 ${
+                  member?.status ===
                   "aktif"
-                    ? "AKTIF"
-                    : "FREE"}
-                </h2>
-
-              </div>
-
-              <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
-
-                <p className="text-zinc-500 text-sm">
-                  Saldo
-                </p>
-
-                <h2 className="text-2xl sm:text-3xl font-black text-green-400 mt-3 break-words">
-                  Rp{" "}
-                  {Number(
-                    member?.balance || 0
-                  ).toLocaleString(
-                    "id-ID"
-                  )}
-                </h2>
-
-              </div>
-
-              <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
-
-                <p className="text-zinc-500 text-sm">
-                  Produk
-                </p>
-
-                <h2 className="text-2xl sm:text-3xl font-black mt-3">
-                  {products.length}
-                </h2>
-
-              </div>
-
+                    ? "text-green-400"
+                    : "text-yellow-400"
+                }`}
+              >
+                {member?.status ===
+                "aktif"
+                  ? "AKTIF"
+                  : "FREE"}
+              </h2>
             </div>
 
-          </div>
+            <div className="rounded-3xl border border-zinc-800 bg-black/30 p-5">
+              <p className="text-zinc-500 text-sm">
+                Saldo
+              </p>
 
+              <h2 className="text-3xl font-black text-green-400 mt-3">
+                Rp{" "}
+                {Number(
+                  member?.balance || 0
+                ).toLocaleString("id-ID")}
+              </h2>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800 bg-black/30 p-5">
+              <p className="text-zinc-500 text-sm">
+                Produk
+              </p>
+
+              <h2 className="text-3xl font-black mt-3">
+                {products.length}
+              </h2>
+            </div>
+          </div>
         </div>
 
+        {/* EMPTY */}
         {products.length === 0 && (
-
-          <div className="mt-10 rounded-[30px] sm:rounded-[36px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-8 sm:p-10 text-center">
-
-            <h2 className="text-3xl sm:text-4xl font-black">
-              Produk Belum Tersedia
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-10 text-center">
+            <h2 className="text-3xl font-black">
+              Produk Belum Ada
             </h2>
 
-            <p className="text-zinc-500 text-base sm:text-lg mt-4">
-              Admin belum menambahkan produk digital.
+            <p className="text-zinc-500 mt-4">
+              Admin belum menambahkan produk.
             </p>
-
           </div>
-
         )}
 
-        <div className="space-y-5 sm:space-y-6 mt-10">
-
+        {/* LIST PRODUK */}
+        <div className="space-y-6">
           {products.map((item) => (
-
             <div
               key={item.id}
-              className={`relative overflow-hidden rounded-[30px] sm:rounded-[40px] border transition-all duration-300 backdrop-blur-xl p-5 sm:p-7 ${
+              className={`rounded-[40px] border p-7 transition ${
                 selectedProduct?.id ===
                 item.id
                   ? "border-green-500 bg-green-500/5"
-                  : "border-zinc-800 bg-white/[0.03]"
+                  : "border-zinc-800 bg-zinc-900/30"
               }`}
             >
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
 
-              <div className="relative z-10">
+                <div>
+                  <h2 className="text-5xl font-black">
+                    {item.name}
+                  </h2>
 
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-
-                  <div>
-
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight break-words">
-                      {item.name}
-                    </h2>
-
-                    <p className="text-zinc-500 text-base sm:text-xl mt-3 sm:mt-4">
-                      Provider {item.provider}
-                    </p>
-
-                  </div>
-
-                  <div className="lg:text-right">
-
-                    <p className="text-zinc-500 text-sm">
-                      Harga
-                    </p>
-
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-400 mt-2 sm:mt-3 break-words">
-                      Rp{" "}
-                      {Number(
-                        item.price
-                      ).toLocaleString(
-                        "id-ID"
-                      )}
-                    </h2>
-
-                  </div>
-
+                  <p className="text-zinc-500 text-xl mt-4">
+                    Provider {item.provider}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 sm:mt-7">
+                <div className="lg:text-right">
+                  <p className="text-zinc-500">
+                    Harga
+                  </p>
 
-                  <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
-
-                    <p className="text-zinc-500 text-sm">
-                      ⚡ Kuota
-                    </p>
-
-                    <h3 className="text-2xl sm:text-3xl font-black mt-3">
-                      {item.kuota}
-                    </h3>
-
-                  </div>
-
-                  <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
-
-                    <p className="text-zinc-500 text-sm">
-                      🗓 Masa Aktif
-                    </p>
-
-                    <h3 className="text-2xl sm:text-3xl font-black mt-3">
-                      {item.masa_aktif}
-                    </h3>
-
-                  </div>
-
+                  <h2 className="text-5xl font-black text-green-400 mt-3">
+                    Rp{" "}
+                    {Number(
+                      item.price
+                    ).toLocaleString("id-ID")}
+                  </h2>
                 </div>
-
-                <button
-                  onClick={() =>
-                    setSelectedProduct(
-                      item
-                    )
-                  }
-                  className={`w-full h-14 sm:h-16 mt-6 sm:mt-7 rounded-[20px] sm:rounded-[24px] text-base sm:text-xl font-black transition ${
-                    selectedProduct?.id ===
-                    item.id
-                      ? "bg-green-500 text-black"
-                      : "bg-zinc-900 border border-zinc-700 hover:border-green-500"
-                  }`}
-                >
-                  {selectedProduct?.id ===
-                  item.id
-                    ? "Produk Dipilih"
-                    : "Pilih Produk"}
-                </button>
-
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7">
+
+                <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
+                  <p className="text-zinc-500">
+                    ⚡ Kuota
+                  </p>
+
+                  <h3 className="text-4xl font-black mt-3">
+                    {item.kuota}
+                  </h3>
+                </div>
+
+                <div className="rounded-[28px] border border-zinc-800 bg-black/30 p-5">
+                  <p className="text-zinc-500">
+                    🗓 Masa Aktif
+                  </p>
+
+                  <h3 className="text-4xl font-black mt-3">
+                    {item.masa_aktif}
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  setSelectedProduct(item)
+                }
+                className={`w-full h-16 rounded-[24px] mt-7 text-2xl font-black transition ${
+                  selectedProduct?.id ===
+                  item.id
+                    ? "bg-green-500 text-black"
+                    : "bg-zinc-900 border border-zinc-700"
+                }`}
+              >
+                {selectedProduct?.id ===
+                item.id
+                  ? "Produk Dipilih"
+                  : "Pilih Produk"}
+              </button>
             </div>
-
           ))}
-
         </div>
-
       </div>
 
+      {/* CHECKOUT */}
+      {selectedProduct && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-2xl border-t border-zinc-800 p-5">
+
+          <div className="max-w-6xl mx-auto">
+
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <p className="text-zinc-500 text-sm">
+                  Produk Dipilih
+                </p>
+
+                <h2 className="text-3xl font-black mt-2">
+                  {selectedProduct.name}
+                </h2>
+              </div>
+
+              <div className="text-right">
+                <p className="text-zinc-500 text-sm">
+                  Total
+                </p>
+
+                <h2 className="text-3xl font-black text-green-400 mt-2">
+                  Rp{" "}
+                  {Number(
+                    selectedProduct.price
+                  ).toLocaleString("id-ID")}
+                </h2>
+              </div>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Masukkan nomor tujuan"
+              value={nomorTujuan}
+              onChange={(e) =>
+                setNomorTujuan(
+                  e.target.value
+                )
+              }
+              className="w-full h-14 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 outline-none"
+            />
+
+            <select
+              value={paymentMethod}
+              onChange={(e) =>
+                setPaymentMethod(
+                  e.target.value
+                )
+              }
+              className="w-full h-14 rounded-2xl bg-zinc-900 border border-zinc-800 px-5 mt-4 outline-none"
+            >
+              <option value="saldo">
+                Saldo
+              </option>
+
+              <option value="transfer manual">
+                Transfer Manual
+              </option>
+            </select>
+
+            <button
+              onClick={handleBuy}
+              disabled={buyLoading}
+              className="w-full h-14 rounded-2xl mt-5 bg-gradient-to-r from-green-500 to-lime-400 text-black text-xl font-black"
+            >
+              {buyLoading
+                ? "Memproses..."
+                : "Beli Sekarang"}
+            </button>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
