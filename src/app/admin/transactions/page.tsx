@@ -28,14 +28,7 @@ TYPES
 type TransactionStatus =
   | "pending"
   | "approved"
-  | "rejected"
-  | "selesai"
-  | "gagal";
-
-type MemberStatus =
-  | "free"
-  | "aktif"
-  | "dibekukan";
+  | "rejected";
 
 type Product = {
   id: number;
@@ -68,9 +61,9 @@ type Transaction = {
 
   created_at: string;
 
-  members?: Member[] | null;
+  members?: Member | null;
 
-  products?: Product[] | null;
+  products?: Product | null;
 };
 
 export default function TransaksiPage() {
@@ -82,30 +75,6 @@ export default function TransaksiPage() {
 
   const [loading, setLoading] =
     useState(true);
-
-  /*
-  =====================================================
-  NORMALIZE DATA
-  =====================================================
-  */
-
-  function getProduct(
-    trx: Transaction
-  ): Product | null {
-
-    if (!trx.products) return null;
-
-    return trx.products[0] || null;
-  }
-
-  function getMember(
-    trx: Transaction
-  ): Member | null {
-
-    if (!trx.members) return null;
-
-    return trx.members[0] || null;
-  }
 
   /*
   =====================================================
@@ -160,153 +129,17 @@ export default function TransaksiPage() {
 
         console.error(error);
 
-        alert(error.message);
-
         return;
       }
 
       const trxData =
-        (data || []) as unknown as Transaction[];
+        (data || []) as Transaction[];
 
       setTransactions(trxData);
 
-      /*
-      =====================================================
-      MEMBER STATUS
-      =====================================================
-      */
-
-      const approvedCount =
-        trxData.filter(
-          (trx) => {
-
-            const status =
-              trx.status?.toLowerCase();
-
-            return (
-              status === "approved" ||
-              status === "selesai"
-            );
-          }
-        ).length;
-
-      let memberStatus: MemberStatus =
-        "free";
-
-      if (approvedCount > 0) {
-
-        memberStatus = "aktif";
-      }
-
-      localStorage.setItem(
-        "dan-member-status",
-        memberStatus
-      );
-
-      /*
-      =====================================================
-      LIVE ACTIVITY
-      =====================================================
-      */
-
-      const activities =
-        trxData.slice(0, 10).map(
-          (trx) => {
-
-            const product =
-              getProduct(trx);
-
-            const status =
-              trx.status?.toLowerCase();
-
-            return {
-
-              text:
-                product?.name ||
-                "Produk Digital",
-
-              sub:
-                status === "approved" ||
-                status === "selesai"
-                  ? "Transaksi berhasil"
-                  : status === "pending"
-                  ? "Menunggu approval"
-                  : "Transaksi gagal",
-
-            };
-          }
-        );
-
-      localStorage.setItem(
-        "dan-live-activity",
-        JSON.stringify(
-          activities
-        )
-      );
-
-      /*
-      =====================================================
-      BADGE
-      =====================================================
-      */
-
-      const pendingTransactions =
-        trxData.filter(
-          (trx) =>
-            trx.status?.toLowerCase() ===
-            "pending"
-        ).length;
-
-      localStorage.setItem(
-        "dan-pending-transactions",
-        pendingTransactions.toString()
-      );
-
-      /*
-      =====================================================
-      HISTORY
-      =====================================================
-      */
-
-      const history =
-        trxData.map((trx) => {
-
-          const product =
-            getProduct(trx);
-
-          return {
-
-            id: trx.id,
-
-            product:
-              product?.name ||
-              "Produk Digital",
-
-            amount:
-              trx.amount,
-
-            status:
-              trx.status,
-
-            created_at:
-              trx.created_at,
-
-          };
-        });
-
-      localStorage.setItem(
-        "dan-history",
-        JSON.stringify(history)
-      );
-
-    } catch (err: any) {
+    } catch (err) {
 
       console.error(err);
-
-      alert(
-        err.message ||
-        "Terjadi kesalahan"
-      );
 
     } finally {
 
@@ -328,8 +161,7 @@ export default function TransaksiPage() {
       status?.toLowerCase();
 
     if (
-      normalized === "approved" ||
-      normalized === "selesai"
+      normalized === "approved"
     ) {
 
       return {
@@ -359,8 +191,7 @@ export default function TransaksiPage() {
     }
 
     if (
-      normalized === "rejected" ||
-      normalized === "gagal"
+      normalized === "rejected"
     ) {
 
       return {
@@ -573,10 +404,10 @@ export default function TransaksiPage() {
                 );
 
               const product =
-                getProduct(item);
+                item.products;
 
               const member =
-                getMember(item);
+                item.members;
 
               return (
 
@@ -752,10 +583,8 @@ export default function TransaksiPage() {
 
                       </div>
 
-                      {item.status?.toLowerCase() ===
-                        "rejected" ||
-                      item.status?.toLowerCase() ===
-                        "gagal" ? (
+                      {item.status ===
+                        "rejected" ? (
 
                         <div className="flex items-center gap-2 text-red-400">
 
