@@ -36,59 +36,79 @@ export default function ProdukPage() {
 
   async function loadMember() {
 
-    const memberId =
-      localStorage.getItem("member_id");
+    try {
 
-    if (!memberId) {
+      const memberId =
+        localStorage.getItem("member_id");
+
+      if (!memberId) {
+
+        window.location.href =
+          "/login";
+
+        return;
+      }
+
+      const { data, error } =
+        await supabase
+          .from("members")
+          .select("*")
+          .eq("id", memberId)
+          .single();
+
+      if (error || !data) {
+
+        window.location.href =
+          "/login";
+
+        return;
+      }
+
+      setMember(data);
+
+    } catch {
 
       window.location.href =
         "/login";
-
-      return;
     }
-
-    const { data } =
-      await supabase
-        .from("members")
-        .select("*")
-        .eq("id", memberId)
-        .single();
-
-    if (!data) {
-
-      window.location.href =
-        "/login";
-
-      return;
-    }
-
-    setMember(data);
   }
 
   async function loadProducts() {
 
-    setLoading(true);
+    try {
 
-    const { data, error } =
-      await supabase
-        .from("products")
-        .select("*")
-        .order("price", {
-          ascending: true,
-        });
+      setLoading(true);
 
-    if (error) {
+      const { data, error } =
+        await supabase
+          .from("products")
+          .select("*")
+          .eq("is_active", true)
+          .order("price", {
+            ascending: true,
+          });
 
-      console.log(error);
+      if (error) {
+
+        console.log(error);
+
+        setProducts([]);
+
+      } else {
+
+        setProducts(data || []);
+      }
+
+    } catch (err) {
+
+      console.log(err);
 
       setProducts([]);
 
-    } else {
+    } finally {
 
-      setProducts(data || []);
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   async function handleBuy() {
@@ -100,7 +120,7 @@ export default function ProdukPage() {
       return;
     }
 
-    if (!nomorTujuan) {
+    if (!nomorTujuan.trim()) {
 
       alert("Masukkan nomor tujuan");
 
@@ -114,81 +134,154 @@ export default function ProdukPage() {
       return;
     }
 
-    setBuyLoading(true);
+    if (buyLoading) return;
 
-    const { error } =
+    try {
+
+      setBuyLoading(true);
+
+      /*
+        VALIDASI SALDO
+      */
+
+      if (
+        paymentMethod === "saldo" &&
+        Number(member.balance || 0) <
+          Number(selectedProduct.price)
+      ) {
+
+        alert("Saldo tidak cukup");
+
+        setBuyLoading(false);
+
+        return;
+      }
+
+      /*
+        KURANGI SALDO
+      */
+
+      if (paymentMethod === "saldo") {
+
+        const newBalance =
+          Number(member.balance || 0) -
+          Number(selectedProduct.price);
+
+        const { error: balanceError } =
+          await supabase
+            .from("members")
+            .update({
+              balance: newBalance,
+            })
+            .eq("id", member.id);
+
+        if (balanceError) {
+
+          alert(balanceError.message);
+
+          setBuyLoading(false);
+
+          return;
+        }
+
+        setMember({
+          ...member,
+          balance: newBalance,
+        });
+      }
+
+      /*
+        BUAT TRANSAKSI
+      */
+
+      const { error: transactionError } =
+        await supabase
+          .from("transactions")
+          .insert([
+            {
+              member_id: member.id,
+              product_id:
+                selectedProduct.id,
+              nomor_tujuan:
+                nomorTujuan.trim(),
+              amount:
+                selectedProduct.price,
+              payment_method:
+                paymentMethod,
+              status: "proses",
+            },
+          ]);
+
+      if (transactionError) {
+
+        alert(transactionError.message);
+
+        setBuyLoading(false);
+
+        return;
+      }
+
+      /*
+        AKTIVASI OTOMATIS
+        PEMBELIAN PERTAMA
+      */
+
+      if (
+        member.status !== "aktif"
+      ) {
+
+        await supabase
+          .from("members")
+          .update({
+            status: "aktif",
+          })
+          .eq("id", member.id);
+
+        setMember((prev: any) => ({
+          ...prev,
+          status: "aktif",
+        }));
+      }
+
+      /*
+        LIVE ACTIVITY
+      */
+
       await supabase
-        .from("transactions")
+        .from("activity_logs")
         .insert([
           {
-            member_id: member.id,
-            product_id:
-              selectedProduct.id,
-            nomor_tujuan:
-              nomorTujuan,
-            amount:
-              selectedProduct.price,
-            payment_method:
-              paymentMethod,
-            status: "proses",
+            member_name:
+              member.name || "Member",
+            city:
+              member.city || "-",
+            activity:
+              "Membeli " +
+              selectedProduct.name,
           },
         ]);
 
-    if (error) {
+      alert(
+        "Transaksi berhasil dibuat"
+      );
 
-      alert(error.message);
+      setSelectedProduct(null);
+
+      setNomorTujuan("");
+
+      setPaymentMethod("saldo");
+
+    } catch (err: any) {
+
+      alert(
+        err?.message ||
+          "Terjadi kesalahan"
+      );
+
+    } finally {
 
       setBuyLoading(false);
-
-      return;
     }
-
-    /*
-      AKTIVASI OTOMATIS
-      transaksi pertama produk apapun
-    */
-
-    if (
-      member.status !== "aktif"
-    ) {
-
-      await supabase
-        .from("members")
-        .update({
-          status: "aktif",
-        })
-        .eq("id", member.id);
-
-      setMember({
-        ...member,
-        status: "aktif",
-      });
-    }
-
-    await supabase
-      .from("activity_logs")
-      .insert([
-        {
-          member_name:
-            member.name,
-          city: member.city,
-          activity:
-            "Membeli " +
-            selectedProduct.name,
-        },
-      ]);
-
-    alert(
-      "Transaksi berhasil dibuat & akun member otomatis aktif"
-    );
-
-    setSelectedProduct(null);
-
-    setNomorTujuan("");
-
-    setPaymentMethod("saldo");
-
-    setBuyLoading(false);
   }
 
   if (loading) {
@@ -233,7 +326,6 @@ export default function ProdukPage() {
         {/* HERO */}
         <div className="relative overflow-hidden rounded-[32px] sm:rounded-[40px] border border-zinc-800 bg-white/[0.03] backdrop-blur-xl p-5 sm:p-7 shadow-[0_0_60px_rgba(0,255,100,0.08)]">
 
-          {/* GLOW */}
           <div className="absolute top-0 right-0 w-56 sm:w-72 h-56 sm:h-72 bg-green-500/10 blur-3xl rounded-full"></div>
 
           <div className="relative z-10">
@@ -264,7 +356,7 @@ export default function ProdukPage() {
                   </h2>
 
                   <p className="text-zinc-300 mt-2 sm:mt-3 leading-relaxed text-sm sm:text-lg">
-                    Transaksi pertama otomatis mengaktifkan akun member DAN tanpa produk aktivasi khusus.
+                    Pembelian pertama otomatis mengaktifkan akun member DAN.
                   </p>
 
                 </div>
@@ -365,12 +457,10 @@ export default function ProdukPage() {
               }`}
             >
 
-              {/* GLOW */}
               <div className="absolute top-0 right-0 w-44 sm:w-56 h-44 sm:h-56 bg-green-500/5 blur-3xl rounded-full"></div>
 
               <div className="relative z-10">
 
-                {/* TOP */}
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
 
                   <div className="min-w-0">
@@ -404,7 +494,6 @@ export default function ProdukPage() {
 
                 </div>
 
-                {/* DETAIL */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 sm:mt-7">
 
                   <div className="rounded-[24px] sm:rounded-[28px] border border-zinc-800 bg-black/30 p-4 sm:p-5">
@@ -433,7 +522,6 @@ export default function ProdukPage() {
 
                 </div>
 
-                {/* BUTTON */}
                 <button
                   onClick={() =>
                     setSelectedProduct(
@@ -474,7 +562,6 @@ export default function ProdukPage() {
 
             <div className="max-w-6xl mx-auto">
 
-              {/* HEADER */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
 
                 <div className="min-w-0">
@@ -508,7 +595,6 @@ export default function ProdukPage() {
 
               </div>
 
-              {/* INPUT */}
               <input
                 type="text"
                 placeholder="Masukkan nomor tujuan"
@@ -521,7 +607,6 @@ export default function ProdukPage() {
                 className="w-full h-14 sm:h-16 rounded-[20px] sm:rounded-[24px] bg-zinc-900 border border-zinc-800 px-5 outline-none focus:border-green-500 transition text-sm sm:text-base"
               />
 
-              {/* PAYMENT */}
               <select
                 value={paymentMethod}
                 onChange={(e) =>
@@ -542,11 +627,10 @@ export default function ProdukPage() {
 
               </select>
 
-              {/* BUTTON */}
               <button
                 onClick={handleBuy}
                 disabled={buyLoading}
-                className="w-full h-14 sm:h-16 mt-5 rounded-[20px] sm:rounded-[24px] bg-gradient-to-r from-green-500 to-lime-400 text-black text-lg sm:text-2xl font-black shadow-[0_0_50px_rgba(0,255,100,0.35)] hover:scale-[1.01] transition"
+                className="w-full h-14 sm:h-16 mt-5 rounded-[20px] sm:rounded-[24px] bg-gradient-to-r from-green-500 to-lime-400 text-black text-lg sm:text-2xl font-black shadow-[0_0_50px_rgba(0,255,100,0.35)] hover:scale-[1.01] transition disabled:opacity-60"
               >
                 {buyLoading
                   ? "Memproses..."
